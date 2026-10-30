@@ -320,7 +320,8 @@ pub fn self_signed(dir: &Path) -> io::Result<(PathBuf, PathBuf)> {
     let (cert, key) = (dir.join("probe.crt"), dir.join("probe.key"));
     // As PEM by hand: rcgen writes PEM only with a feature this crate does not turn on.
     std::fs::write(&cert, pem("CERTIFICATE", made.cert.der()))?;
-    write_private(&key, pem("PRIVATE KEY", &made.signing_key.serialize_der()).as_bytes())?;
+    let private = pem("PRIVATE KEY", &made.signing_key.serialize_der());
+    write_private(&key, private.as_bytes())?;
     Ok((cert, key))
 }
 
