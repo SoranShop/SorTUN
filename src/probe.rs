@@ -318,9 +318,23 @@ pub fn self_signed(dir: &Path) -> io::Result<(PathBuf, PathBuf)> {
     let made = rcgen::generate_simple_self_signed(vec!["probe.invalid".to_owned()])
         .map_err(io::Error::other)?;
     let (cert, key) = (dir.join("probe.crt"), dir.join("probe.key"));
-    std::fs::write(&cert, made.cert.pem())?;
-    write_private(&key, made.signing_key.serialize_pem().as_bytes())?;
+    // As PEM by hand: rcgen writes PEM only with a feature this crate does not turn on.
+    std::fs::write(&cert, pem("CERTIFICATE", made.cert.der()))?;
+    write_private(&key, pem("PRIVATE KEY", &made.signing_key.serialize_der()).as_bytes())?;
     Ok((cert, key))
+}
+
+/// `der` in a PEM block with `label`, 64 characters to a line.
+#[cfg(feature = "quic")]
+fn pem(label: &str, der: &[u8]) -> String {
+    let text = base64::engine::general_purpose::STANDARD.encode(der);
+    let mut out = format!("-----BEGIN {label}-----\n");
+    for line in text.as_bytes().chunks(64) {
+        out.push_str(std::str::from_utf8(line).expect("base64 is ASCII"));
+        out.push('\n');
+    }
+    out.push_str(&format!("-----END {label}-----\n"));
+    out
 }
 
 #[cfg(not(feature = "quic"))]
