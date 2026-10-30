@@ -16,7 +16,7 @@
   .art { position: relative; width: 1280px; height: 420px; overflow: hidden; border-radius: 28px;
          background: linear-gradient(135deg, #12365e, #081a2e); font-family: "Space Grotesk", "Estedad", sans-serif; }
   body.card .art { height: 640px; }
-  .stars i { position: absolute; border-radius: 50%; background: #e9c46a; }
+  .net { position: absolute; right: 0; top: 0; width: 560px; height: 100%; opacity: .95; }
   .brand { position: absolute; left: 76px; top: 44px; display: flex; align-items: center; gap: 28px; }
   .brand svg { width: 112px; height: 112px; filter: drop-shadow(0 10px 24px rgba(0,0,0,.35)); }
   .name { display: flex; align-items: baseline; gap: 22px; }
@@ -28,72 +28,64 @@
   .say .sub { font-size: 20px; color: #7fa3c4; margin-top: 18px; letter-spacing: .2px; }
   body.card .brand { top: 150px; }
   body.card .say { top: 290px; }
-  .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 92px; background: linear-gradient(#22384f, #0b1f34); border-top: 4px solid #e9c46a; }
-  .ground svg { position: absolute; left: 0; top: -4px; width: 1280px; height: 96px; }
-  body.card .ground { height: 130px; }
 </style>
 </head>
 <body>
 <div class="art">
-  <div class="stars">
-    <i style="left:930px;top:44px;width:4px;height:4px;opacity:.8"></i>
-    <i style="left:1040px;top:96px;width:3px;height:3px;opacity:.6"></i>
-    <i style="left:1168px;top:40px;width:4px;height:4px;opacity:.7"></i>
-    <i style="left:846px;top:120px;width:3px;height:3px;opacity:.5"></i>
-    <i style="left:1216px;top:134px;width:3px;height:3px;opacity:.5"></i>
-    <i style="left:760px;top:60px;width:3px;height:3px;opacity:.5"></i>
-  </div>
+  <!-- a small network of servers on the right: nodes and the links between them -->
+  <svg class="net" viewBox="0 0 560 640" preserveAspectRatio="xMaxYMin slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="ln" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#1fb5a8"/><stop offset="1" stop-color="#7ef0e4"/></linearGradient>
+      <radialGradient id="ng" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#7ef0e4" stop-opacity=".35"/><stop offset="1" stop-color="#7ef0e4" stop-opacity="0"/></radialGradient>
+    </defs>
+    <g stroke="#5f7d9c" stroke-width="1.5" opacity=".45" fill="none">
+      <path d="M120 300 L250 190 L400 250 L500 120"/><path d="M250 190 L330 70"/><path d="M400 250 L470 380 L330 470"/>
+      <path d="M120 300 L210 430 L330 470"/><path d="M500 120 L540 260 L470 380"/>
+    </g>
+    <path d="M120 300 C 160 240, 210 220, 250 190 S 360 240, 400 250" fill="none" stroke="url(#ln)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M400 250 C 430 300, 450 340, 470 380" fill="none" stroke="url(#ln)" stroke-width="5" stroke-linecap="round"/>
+    <g fill="#7ef0e4"><circle cx="186" cy="238" r="3.5"/><circle cx="330" cy="222" r="3.5"/><circle cx="446" cy="330" r="3.5"/></g>
+    <g>
+      <circle cx="250" cy="190" r="30" fill="url(#ng)"/>
+      <circle cx="120" cy="300" r="13" fill="#0d2238" stroke="#e9c46a" stroke-width="5"/>
+      <circle cx="250" cy="190" r="15" fill="#0d2238" stroke="#34d0c3" stroke-width="5"/>
+      <circle cx="400" cy="250" r="13" fill="#0d2238" stroke="#34d0c3" stroke-width="5"/>
+      <circle cx="470" cy="380" r="13" fill="#0d2238" stroke="#e9c46a" stroke-width="5"/>
+      <circle cx="500" cy="120" r="9" fill="#0d2238" stroke="#5f7d9c" stroke-width="4"/>
+      <circle cx="330" cy="70" r="8" fill="#0d2238" stroke="#5f7d9c" stroke-width="4"/>
+      <circle cx="330" cy="470" r="9" fill="#0d2238" stroke="#5f7d9c" stroke-width="4"/>
+      <circle cx="210" cy="430" r="8" fill="#0d2238" stroke="#5f7d9c" stroke-width="4"/>
+      <circle cx="540" cy="260" r="8" fill="#0d2238" stroke="#5f7d9c" stroke-width="4"/>
+    </g>
+  </svg>
 
   <div class="brand">
     <svg viewBox="0 0 256 256" aria-hidden="true">
       <defs>
         <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#12365e"/><stop offset="1" stop-color="#081a2e"/></linearGradient>
-        <linearGradient id="water" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1fb5a8"/><stop offset=".6" stop-color="#34d0c3"/><stop offset="1" stop-color="#7ef0e4"/></linearGradient>
-        <linearGradient id="earth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a3f57"/><stop offset="1" stop-color="#0d2238"/></linearGradient>
-        <radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#7ef0e4" stop-opacity=".55"/><stop offset="1" stop-color="#7ef0e4" stop-opacity="0"/></radialGradient>
+        <linearGradient id="link" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#1fb5a8"/><stop offset=".6" stop-color="#34d0c3"/><stop offset="1" stop-color="#7ef0e4"/></linearGradient>
+        <radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#7ef0e4" stop-opacity=".45"/><stop offset="1" stop-color="#7ef0e4" stop-opacity="0"/></radialGradient>
         <clipPath id="badge"><rect width="256" height="256" rx="56"/></clipPath>
       </defs>
       <g clip-path="url(#badge)">
         <rect width="256" height="256" fill="url(#bg)"/>
-        <circle cx="44" cy="44" r="2" fill="#e9c46a" opacity=".8"/><circle cx="198" cy="34" r="1.6" fill="#e9c46a" opacity=".6"/><circle cx="150" cy="58" r="1.2" fill="#e9c46a" opacity=".5"/>
-        <path d="M0 96 H256 V256 H0 Z" fill="url(#earth)"/>
-        <path d="M0 96 H256" stroke="#e9c46a" stroke-width="4"/>
-        <g stroke="#e9c46a" stroke-linecap="round"><path d="M58 96 V146" stroke-width="5" opacity=".55"/><path d="M104 96 V154" stroke-width="5" opacity=".55"/><path d="M150 96 V162" stroke-width="5" opacity=".55"/></g>
-        <g fill="#e9c46a"><path d="M46 96 a12 9 0 0 1 24 0 Z"/><path d="M92 96 a12 9 0 0 1 24 0 Z"/><path d="M138 96 a12 9 0 0 1 24 0 Z"/></g>
-        <path d="M26 142 L186 172" stroke="#06121f" stroke-width="26" stroke-linecap="round"/>
-        <path d="M26 142 L186 172" stroke="url(#water)" stroke-width="16" stroke-linecap="round"/>
-        <path d="M40 144 L176 170" stroke="#e8fffc" stroke-width="3" stroke-linecap="round" stroke-dasharray="14 18" opacity=".8"/>
-        <circle cx="206" cy="176" r="34" fill="url(#glow)"/>
-        <path d="M190 154 L226 176 L190 198 Z" fill="#7ef0e4" stroke="#7ef0e4" stroke-width="6" stroke-linejoin="round"/>
+        <path d="M76 184 C 76 108, 180 148, 180 72" fill="none" stroke="#06121f" stroke-width="34" stroke-linecap="round"/>
+        <path d="M76 184 C 76 108, 180 148, 180 72" fill="none" stroke="url(#link)" stroke-width="18" stroke-linecap="round"/>
+        <path d="M76 184 C 76 108, 180 148, 180 72" fill="none" stroke="#081a2e" stroke-width="3" stroke-linecap="round" stroke-dasharray="10 16" opacity=".55"/>
+        <circle cx="180" cy="72" r="46" fill="url(#glow)"/>
+        <circle cx="76" cy="184" r="27" fill="#0d2238" stroke="#e9c46a" stroke-width="9"/>
+        <circle cx="180" cy="72" r="27" fill="#0d2238" stroke="#e9c46a" stroke-width="9"/>
+        <circle cx="76" cy="184" r="8" fill="#34d0c3"/>
+        <circle cx="180" cy="72" r="8" fill="#7ef0e4"/>
       </g>
     </svg>
-    <div class="name"><b>SorTUN</b><span>SorTUN</span></div>
+    <div class="name"><b>SorTUN</b></div>
   </div>
 
   <div class="say">
-    <div class="en">Water finds its way underground.</div>
-    <div class="fa">آب، راهش را از زیر زمین پیدا می‌کند.</div>
+    <div class="en">Your servers, linked. Your traffic, through.</div>
+    <div class="fa">سرورهایتان به هم وصل، ترافیکتان در جریان.</div>
     <div class="sub">A fast, light tunnel between two servers, in Rust.</div>
-  </div>
-
-  <div class="ground">
-    <svg viewBox="0 0 1280 96" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="w2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1a9e93"/><stop offset=".7" stop-color="#34d0c3"/><stop offset="1" stop-color="#7ef0e4"/></linearGradient>
-        <radialGradient id="g2" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#7ef0e4" stop-opacity=".5"/><stop offset="1" stop-color="#7ef0e4" stop-opacity="0"/></radialGradient>
-      </defs>
-      <g stroke="#e9c46a" stroke-width="5" stroke-linecap="round" opacity=".55">
-        <path d="M180 4 V40"/><path d="M340 4 V44"/><path d="M500 4 V48"/><path d="M660 4 V52"/><path d="M820 4 V56"/><path d="M980 4 V60"/><path d="M1140 4 V64"/>
-      </g>
-      <g fill="#e9c46a">
-        <path d="M166 4 a14 10 0 0 1 28 0 Z"/><path d="M326 4 a14 10 0 0 1 28 0 Z"/><path d="M486 4 a14 10 0 0 1 28 0 Z"/><path d="M646 4 a14 10 0 0 1 28 0 Z"/><path d="M806 4 a14 10 0 0 1 28 0 Z"/><path d="M966 4 a14 10 0 0 1 28 0 Z"/><path d="M1126 4 a14 10 0 0 1 28 0 Z"/>
-      </g>
-      <path d="M46 40 L1190 70" stroke="#06121f" stroke-width="22" stroke-linecap="round"/>
-      <path d="M46 40 L1190 70" stroke="url(#w2)" stroke-width="13" stroke-linecap="round"/>
-      <path d="M62 41 L1176 69" stroke="#e8fffc" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="14 18" opacity=".8"/>
-      <circle cx="1214" cy="74" r="30" fill="url(#g2)"/>
-      <path d="M1198 54 L1234 74 L1198 94 Z" fill="#7ef0e4" stroke="#7ef0e4" stroke-width="6" stroke-linejoin="round"/>
-    </svg>
   </div>
 </div>
 <script>if (location.search.includes("card")) document.body.classList.add("card");</script>

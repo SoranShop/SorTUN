@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" alt="SorTUN. آب، راهش را از زیر زمین پیدا می‌کند." width="100%">
+  <img src="assets/banner.png" alt="SorTUN. سرورهایتان به هم وصل، ترافیکتان در جریان." width="100%">
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@
 
 <div dir="rtl">
 
-**SorTUN** مثل قنات‌های ایران کار می‌کند: کانال‌هایی که زیر کویر کنده‌اند و آب را از دل کوه، از میان ردیفی از چاه‌ها، بی‌آن‌که به سطح زمین بیاید به آبادی می‌رسانند. این برنامه همین کار را برای ترافیک می‌کند. دو سرور را با یک تانل سریع و رمزنگاری‌شده به هم وصل می‌کند؛ کاربرها به **ورودی** (entry) وصل می‌شوند و SorTUN ترافیک TCP و UDP‌شان را به **خروجی** (exit) می‌رساند، همان سروری که به مقصدهای واقعی دسترسی دارد.
+**SorTUN** دو سرور را با یک تانل سریع و رمزنگاری‌شده به هم وصل می‌کند؛ کاربرها به **ورودی** (entry) وصل می‌شوند و SorTUN ترافیک TCP و UDP‌شان را به **خروجی** (exit) می‌رساند، همان سروری که به مقصدهای واقعی دسترسی دارد.
 
 </div>
 
@@ -39,7 +39,7 @@ flowchart LR
 </div>
 
 <p align="center">
-  <img src="assets/screens/map-night-fa.png" alt="نقشهٔ پنل: سرورها چاه‌اند و تانل‌ها کانال، با ترافیک زنده" width="92%">
+  <img src="assets/screens/map-night-fa.png" alt="نقشهٔ پنل: سرورها گره‌اند و تانل‌ها پیوند بینشان، با ترافیک زنده" width="92%">
 </p>
 
 <table align="center">
@@ -84,7 +84,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/script
 | | |
 |---|---|
 | [شروع کار](https://soranshop.github.io/SorTUN/fa/docs/getting-started/) | نصب، اولین تانل، systemd |
-| [کار با پنل](https://soranshop.github.io/SorTUN/fa/docs/using-the-panel/) · [تور راهنما](https://soranshop.github.io/SorTUN/fa/docs/tour/) · [ویدیوی آموزشی](https://soranshop.github.io/SorTUN/fa/docs/video/) | پنل، صفحه به صفحه، و در دو دقیقه ویدیو |
+| [کار با پنل](https://soranshop.github.io/SorTUN/fa/docs/using-the-panel/) · [تور راهنما](https://soranshop.github.io/SorTUN/fa/docs/tour/) | پنل، صفحه به صفحه |
 | [اسکریپت مدیر](https://soranshop.github.io/SorTUN/fa/docs/manager/) | نصب، به‌روزرسانی، منو |
 | [ترنسپورت‌ها](https://soranshop.github.io/SorTUN/fa/docs/transports/) · [کدام یکی؟](https://soranshop.github.io/SorTUN/fa/docs/how-it-works/) | انتخاب و تنظیم |
 | [مرجع پیکربندی](https://soranshop.github.io/SorTUN/fa/docs/configuration/) | همهٔ تنظیم‌ها با مقدار پیش‌فرض و محدوده |

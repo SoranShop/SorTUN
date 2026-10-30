@@ -20,6 +20,7 @@ import { BenchPanel, benchLabel, isV6 } from "./Benchmark";
 import type { BenchChoice } from "./Benchmark";
 import { MUX_OPTIONAL, TRANSPORTS, joinTransport, transportLabel } from "./transport";
 import { FIRST_TUNNEL_PORT, freeTunnelPort, hostOf, portOf, portsInUse } from "./ports";
+import { fallbackList } from "./fallback";
 
 export const PROFILES = ["balanced", "ultraspeed", "gaming"] as const;
 const NAME = /^[a-z0-9][a-z0-9-]{0,31}$/;
@@ -113,6 +114,7 @@ export function Wizard({ servers, onClose }: { servers: ServerInfo[]; onClose: (
   const [protocol, setProtocol] = useState("tcp");
   const [target, setTarget] = useState("127.0.0.1");
   const [perIp, setPerIp] = useState("");
+  const [fallback, setFallback] = useState("");
   const [udpFlows, setUdpFlows] = useState("");
   const [proxy, setProxy] = useState<ProxyChoice>("off");
   const [pool, setPool] = useState<number | undefined>();
@@ -170,6 +172,8 @@ export function Wizard({ servers, onClose }: { servers: ServerInfo[]; onClose: (
   const greAddr = greLink ? (greLink.a === acceptor ? greLink.addr_a : greLink.addr_b) : "";
   const udp = transport === "quic" || transport === "kcp";
   const isWs = transport === "ws" || transport === "wss";
+  // Fallback addresses need sessions to renew: mux, or quic.
+  const canFallback = transport === "quic" || muxOn || !MUX_OPTIONAL.includes(transport);
 
   // The accepting server's address, as the other one reaches it. A new tunnel starts from
   // the best guess (the address set for it, else the one the panel sees) until one is typed.
@@ -200,6 +204,7 @@ export function Wizard({ servers, onClose }: { servers: ServerInfo[]; onClose: (
     listen: `${listenHost}:${listenPort}`,
     dial: `${dialHost.includes(":") && !dialHost.startsWith("[") ? `[${dialHost}]` : dialHost}:${listenPort}`,
     network: netId || undefined,
+    fallback: canFallback && !netId ? fallbackList(fallback, listenPort).list : undefined,
     pool,
     ws_path: isWs ? wsPath : undefined,
     ws_host: isWs && wsHost.trim() ? wsHost.trim() : undefined,
@@ -229,6 +234,7 @@ export function Wizard({ servers, onClose }: { servers: ServerInfo[]; onClose: (
     if (s === 2) {
       if (!/^\d{1,5}$/.test(listenPort) || +listenPort < 1 || +listenPort > 65535) return t("wz.port", { server: serverName(acceptor) });
       if (!dialHost.trim() && !netId) return t("wz.dial", { server: serverName(acceptor), other: serverName(dialer) });
+      if (canFallback && !netId && fallbackList(fallback, listenPort).bad) return t("fb.bad", { addr: fallbackList(fallback, listenPort).bad ?? "" });
       if (isWs && !wsPath.startsWith("/")) return t("wz.wsPath");
       if (transport === "wss" && !tlsReady(tls)) return t(tls.mode === "own" ? "tls.needOwn" : "tls.needCert");
     }
@@ -310,6 +316,7 @@ export function Wizard({ servers, onClose }: { servers: ServerInfo[]; onClose: (
       isWs && wsHost && pairOf("Host", wsHost),
       selfSigned && sni && pairOf("SNI", sni),
       plainTcp && pool !== undefined && pairOf(t("wz.pool"), num(pool)),
+      canFallback && !netId && fallbackList(fallback, listenPort).list.length > 0 && pairOf(t("fb.title"), num(fallbackList(fallback, listenPort).list.length)),
     ],
     [isWs && t("wz.wsPath"), isWs && t("wz.wsHost"), selfSigned && t("wz.sni"), plainTcp && t("wz.pool")],
   );
@@ -498,6 +505,20 @@ export function Wizard({ servers, onClose }: { servers: ServerInfo[]; onClose: (
                     )}
                     {mode === "direct" && <span className="help">{t("wz.directHelp", { server: serverName(acceptor), port: listenPort })}</span>}
                   </div>
+                  {canFallback && !netId && (
+                    <div className="field">
+                      <label htmlFor="wz-fallback">{t("fb.title")}</label>
+                      <input
+                        className="text mono"
+                        id="wz-fallback"
+                        dir="ltr"
+                        value={fallback}
+                        placeholder="203.0.113.6, [2001:db8::6]"
+                        onChange={(e) => setFallback(e.target.value)}
+                      />
+                      <span className="help">{t("fb.help", { other: serverName(dialer), port: listenPort })}</span>
+                    </div>
+                  )}
                 </div>
                 {transport === "wss" && (
                   <TlsChoice

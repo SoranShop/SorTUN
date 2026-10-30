@@ -10,7 +10,7 @@
       "theme.toDawn": "سحر",
       "theme.toNight": "شب",
       "login.title": "SorTUN",
-      "login.sub": "آب، راهش را از زیر زمین پیدا می‌کند.",
+      "login.sub": "سرورهایتان به هم وصل، ترافیکتان در جریان.",
       "login.password": "رمز مدیر",
       "login.enter": "ورود",
       "login.or": "یا",
@@ -43,12 +43,12 @@
       "m.connsNote": "استریم TCP و جریان UDP",
       "m.tunnels": "تانل‌های جاری",
       "m.servers": "سرورهای آنلاین",
-      "m.serversNote": "همه روی SorTUN 0.6.1",
+      "m.serversNote": "همه روی SorTUN 3.0.0",
       "m.of": "از",
       "m.rateNote": "۱۲٪ بیشتر از یک ساعت پیش",
       "m.broken": "قطع:",
       "t.title": "تانل‌ها",
-      "t.hint": "یکی را خاموش کنید تا خالی شدن کانالش را ببینید",
+      "t.hint": "یکی را خاموش کنید تا آرام شدن پیوندش را ببینید",
       "t.name": "نام",
       "t.route": "مسیر",
       "t.transport": "ترنسپورت",
@@ -93,7 +93,7 @@
       "theme.toDawn": "Dawn",
       "theme.toNight": "Night",
       "login.title": "SorTUN",
-      "login.sub": "Water finds its way underground.",
+      "login.sub": "Your servers, linked. Your traffic, through.",
       "login.password": "Admin password",
       "login.enter": "Enter",
       "login.or": "or",
@@ -126,12 +126,12 @@
       "m.connsNote": "TCP streams and UDP flows",
       "m.tunnels": "Tunnels flowing",
       "m.servers": "Servers online",
-      "m.serversNote": "all on SorTUN 0.6.1",
+      "m.serversNote": "all on SorTUN 3.0.0",
       "m.of": "of",
       "m.rateNote": "12% more than an hour ago",
       "m.broken": "Broken:",
       "t.title": "Tunnels",
-      "t.hint": "switch one off to watch its channel drain",
+      "t.hint": "switch one off to watch its link go quiet",
       "t.name": "Name",
       "t.route": "Route",
       "t.transport": "Transport",
@@ -347,16 +347,13 @@
     if (announce) toast(t(on ? "toast.low.on" : "toast.low.off"));
   }
 
-  // ------------------------------------------------------------------ the qanat loader
+  // ------------------------------------------------------------------ the link loader
 
   const LOADER = `
-    <path class="bed" d="M30 58 L158 76"/>
-    <path class="flow" pathLength="1" d="M30 58 L158 76"/>
-    <path class="shaft" d="M38 26 V58 M84 26 V64 M130 26 V70"/>
-    <path class="ground" d="M8 26 H172"/>
-    <path class="mound" d="M30 26 a8 6 0 0 1 16 0Z M76 26 a8 6 0 0 1 16 0Z M122 26 a8 6 0 0 1 16 0Z"/>
-    <circle class="drop" cx="38" cy="26" r="4"/>
-    <path class="out" d="M164 68 L178 77 L164 86 Z"/>`;
+    <path class="bed" d="M32 45 C 70 15, 110 75, 148 45"/>
+    <path class="flow" pathLength="1" d="M32 45 C 70 15, 110 75, 148 45"/>
+    <circle class="node" cx="32" cy="45" r="11"/>
+    <circle class="node far" cx="148" cy="45" r="11"/>`;
   for (const s of $$("svg.qloader")) s.innerHTML = LOADER;
 
   // ------------------------------------------------------------------ screens
@@ -384,13 +381,12 @@
   const login = {
     canvas: $("#login-scene"),
     running: false,
-    descent: -1, // start time of the descent, or -1
+    descent: -1, // start time of the zoom in, or -1
     ripple: -1,
     mx: 0.5,
     my: 0.5,
-    stars: [],
-    parts: [],
-    shoot: null,
+    nodes: [],
+    links: [],
   };
 
   function openLogin() {
@@ -408,12 +404,31 @@
     setTimeout(() => $("#pw").focus({ preventScroll: true }), 400);
   }
 
+  // The login scene: a quiet network of servers, drifting slowly, with light moving along the
+  // links between them. A wrong password sends a ring out from the middle; a right one zooms
+  // into the network (the panel's own scene-login.ts).
   function seedLogin(W, H) {
     const r = rng(7);
-    login.stars = Array.from({ length: Math.round((W * H) / 5200) }, () => ({
-      x: r(), y: r(), z: 0.3 + r() * 0.7, ph: r() * 6.28, sp: 0.6 + r() * 1.8, gold: r() < 0.18,
+    const count = clamp(Math.round((W * H) / 52000), 12, 34);
+    login.nodes = Array.from({ length: count }, () => ({
+      x: 0.04 + r() * 0.92, y: 0.06 + r() * 0.88, ax: 6 + r() * 14, ay: 6 + r() * 14,
+      ph: r() * 6.28, r: 1.8 + r() * 2.6, z: 0.3 + r() * 0.7,
     }));
-    login.parts = Array.from({ length: 34 }, (_, i) => ({ k: i / 34, sp: 0.07 + r() * 0.05, s: 0.6 + r() * 0.7 }));
+    const seen = new Set();
+    login.links = [];
+    login.nodes.forEach((n, i) => {
+      const near = login.nodes
+        .map((m, j) => ({ j, d: Math.hypot((m.x - n.x) * W, (m.y - n.y) * H) }))
+        .filter((o) => o.j !== i)
+        .sort((p, q) => p.d - q.d)
+        .slice(0, 2);
+      for (const { j } of near) {
+        const k = i < j ? `${i}-${j}` : `${j}-${i}`;
+        if (seen.has(k)) continue;
+        seen.add(k);
+        login.links.push({ a: i, b: j, sparks: r() < 0.55 ? [{ k: r(), sp: 0.12 + r() * 0.18 }] : [] });
+      }
+    });
     login.seeded = `${W}x${H}`;
   }
 
@@ -427,216 +442,84 @@
     const time = now / 1000;
     const still = state.low;
     const rtl = html.dir === "rtl";
-    const S = clamp(W / 1000, 0.55, 1.15); // scene scale
-    const yH = H * (H < 860 ? 0.74 : 0.68);
-    const cx = W / 2;
-    const flip = (x) => (rtl ? W - x : x);
 
-    // camera for the descent
     let p = 0;
-    if (login.descent >= 0) p = clamp((now - login.descent) / (state.low ? 250 : 1200), 0, 1);
+    if (login.descent >= 0) p = clamp((now - login.descent) / (still ? 250 : 1100), 0, 1);
     const e = easeInOut(p);
-    const fx = cx, fy = yH + 40 * S;
-    const zoom = 1 + e * 2.6;
-    const sx = lerp(fx, W / 2, e), sy = lerp(fy, H * 0.3, e);
+    const scale = 1 + e * 2.2;
 
-    ctx.save();
-    ctx.clearRect(0, 0, W, H);
-    ctx.translate(sx, sy);
-    ctx.scale(zoom, zoom);
-    ctx.translate(-fx, -fy);
-
-    // sky
-    const sky = ctx.createLinearGradient(0, 0, 0, yH);
-    sky.addColorStop(0, P.skyTop);
-    sky.addColorStop(0.7, P.bg);
-    sky.addColorStop(1, P.s2);
-    ctx.fillStyle = sky;
-    ctx.fillRect(-W, -H, W * 3, yH + H);
-
-    // horizon glow
-    const glow = ctx.createRadialGradient(cx, yH, 0, cx, yH, W * 0.6);
-    glow.addColorStop(0, rgba(P.gold, P.night ? 0.16 : 0.3));
-    glow.addColorStop(1, rgba(P.gold, 0));
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, P.bg);
+    bg.addColorStop(1, P.skyTop);
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+    const glow = ctx.createRadialGradient(W / 2, H * 0.55, 0, W / 2, H * 0.55, Math.max(W, H) * 0.6);
+    glow.addColorStop(0, rgba(P.water, P.night ? 0.1 : 0.12));
+    glow.addColorStop(1, rgba(P.water, 0));
     ctx.fillStyle = glow;
-    ctx.fillRect(-W, 0, W * 3, yH);
+    ctx.fillRect(0, 0, W, H);
 
-    // stars, with a little parallax
-    const px = (login.mx - 0.5) * 14, py = (login.my - 0.5) * 8;
-    for (const s of login.stars) {
-      const y = s.y * (yH - 40);
-      if (y > yH - 30) continue;
-      const tw = still ? 0.8 : 0.55 + 0.45 * Math.sin(time * s.sp + s.ph);
-      const a = (P.night ? 0.9 : 0.25) * s.z * tw * (1 - y / yH * 0.6);
-      ctx.fillStyle = s.gold ? rgba(P.gold, a) : P.night ? `rgba(233,240,255,${a})` : rgba(P.gold, a * 0.7);
-      ctx.beginPath();
-      ctx.arc(s.x * W + px * s.z, y + py * s.z, s.z * 1.3, 0, 6.28);
-      ctx.fill();
-    }
-
-    // a shooting star now and then (night only)
-    if (P.night && !still) {
-      if (!login.shoot && Math.random() < 0.004) login.shoot = { x: Math.random() * W * 0.7, y: Math.random() * yH * 0.35, t0: time };
-      if (login.shoot) {
-        const k = (time - login.shoot.t0) / 0.9;
-        if (k > 1) login.shoot = null;
-        else {
-          const x = login.shoot.x + k * 260, y = login.shoot.y + k * 90;
-          const g = ctx.createLinearGradient(x - 90, y - 31, x, y);
-          g.addColorStop(0, "rgba(255,255,255,0)");
-          g.addColorStop(1, `rgba(255,248,225,${0.8 * (1 - k)})`);
-          ctx.strokeStyle = g;
-          ctx.lineWidth = 1.4;
-          ctx.beginPath();
-          ctx.moveTo(x - 90, y - 31);
-          ctx.lineTo(x, y);
-          ctx.stroke();
-        }
-      }
-    }
-
-    // dunes
-    const dune = (amp, base, freq, off, color, par) => {
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(-W, yH);
-      for (let x = -W; x <= W * 2; x += 12) {
-        const y = yH - base - amp * (0.6 * Math.sin(x * freq + off) + 0.4 * Math.sin(x * freq * 2.3 + off * 1.7));
-        ctx.lineTo(x + px * par, Math.min(yH, y));
-      }
-      ctx.lineTo(W * 2, yH);
-      ctx.closePath();
-      ctx.fill();
-    };
-    dune(22 * S, 18 * S, 0.004, 1.2, rgba(P.night ? "#14294a" : "#e8cfa0", P.night ? 0.8 : 0.9), 0.5);
-    dune(14 * S, 4 * S, 0.007, 3.1, P.night ? "#0e2036" : "#dfc28c", 1);
-
-    // earth
-    const earth = ctx.createLinearGradient(0, yH, 0, H);
-    earth.addColorStop(0, P.earth);
-    earth.addColorStop(1, P.skyTop);
-    ctx.fillStyle = earth;
-    ctx.fillRect(-W, yH, W * 3, H * 2);
-    ctx.strokeStyle = rgba(P.gold, 0.07);
-    ctx.lineWidth = 1;
-    for (let i = 1; i < 5; i++) {
-      const y = yH + i * 34 * S + i * i * 3;
-      ctx.beginPath();
-      ctx.moveTo(-W, y);
-      ctx.lineTo(W * 2, y + 6);
-      ctx.stroke();
-    }
-
-    // the channel
-    const c0 = { x: flip(cx - 300 * S), y: yH + 62 * S };
-    const c1 = { x: flip(cx + 270 * S), y: yH + 104 * S };
-    const chY = (x) => c0.y + ((x - c0.x) / (c1.x - c0.x)) * (c1.y - c0.y);
-    const wells = [-170, 0, 170].map((d) => flip(cx + d * S));
-
-    // shafts
-    ctx.strokeStyle = rgba(P.gold, 0.5);
-    ctx.lineWidth = 5 * S;
-    ctx.lineCap = "round";
-    for (const x of wells) {
-      ctx.beginPath();
-      ctx.moveTo(x, yH);
-      ctx.lineTo(x, chY(x));
-      ctx.stroke();
-    }
-
-    // ripple after a wrong password
-    let rip = 0;
-    if (login.ripple >= 0) {
-      const dt = (now - login.ripple) / 1000;
-      rip = dt > 1.6 ? 0 : Math.exp(-dt * 2.6);
-      if (!rip) login.ripple = -1;
-    }
-    const wave = (x) => (rip ? Math.sin(x * 0.06 - time * 18) * 5 * S * rip : 0);
-
-    const channel = (width, style) => {
-      ctx.strokeStyle = style;
-      ctx.lineWidth = width;
-      ctx.beginPath();
-      for (let i = 0; i <= 60; i++) {
-        const x = lerp(c0.x, c1.x, i / 60);
-        const y = chY(x) + wave(x);
-        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
-      }
-      ctx.stroke();
-    };
-    channel(30 * S, P.night ? "#06121f" : "#cdb489");
-    const wg = ctx.createLinearGradient(c0.x, 0, c1.x, 0);
-    wg.addColorStop(0, P.waterDeep);
-    wg.addColorStop(0.6, P.water);
-    wg.addColorStop(1, P.waterBright);
-    channel(18 * S, wg);
-    if (rip) channel(18 * S, rgba(P.danger, rip * 0.55));
-
-    // moving highlight
     ctx.save();
-    ctx.setLineDash([14 * S, 18 * S]);
-    ctx.lineDashOffset = still ? 0 : (-time * 40 * S) * (rtl ? -1 : 1);
-    channel(3 * S, P.night ? "rgba(232,255,252,.75)" : "rgba(255,255,255,.7)");
-    ctx.restore();
-
-    // particles
-    if (!still) {
+    ctx.translate(W / 2, H / 2);
+    ctx.scale(scale, scale);
+    ctx.translate(-W / 2, -H / 2);
+    const at = login.nodes.map((n) => {
+      const drift = still ? 0 : 1;
+      const x = n.x * W + drift * Math.sin(time * 0.15 + n.ph) * n.ax + (login.mx - 0.5) * 24 * n.z;
+      return { x: rtl ? W - x : x, y: n.y * H + drift * Math.cos(time * 0.12 + n.ph) * n.ay + (login.my - 0.5) * 18 * n.z };
+    });
+    ctx.lineCap = "round";
+    for (const l of login.links) {
+      const a = at[l.a], b = at[l.b];
+      const z = (login.nodes[l.a].z + login.nodes[l.b].z) / 2;
+      ctx.strokeStyle = rgba(P.text3, (P.night ? 0.22 : 0.3) * z);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+      if (still) continue;
       ctx.globalCompositeOperation = P.night ? "lighter" : "source-over";
-      for (const q of login.parts) {
-        q.k = (q.k + q.sp / 60) % 1;
-        const x = lerp(c0.x, c1.x, q.k);
-        const y = chY(x) + wave(x) + Math.sin(q.k * 40 + q.s * 9) * 3 * S;
-        const r = 9 * S * q.s;
-        ctx.drawImage(sprite, x - r, y - r, r * 2, r * 2);
+      for (const s of l.sparks) {
+        s.k = (s.k + s.sp * 0.016) % 1;
+        const r = 5 * z;
+        ctx.drawImage(sprite, lerp(a.x, b.x, s.k) - r, lerp(a.y, b.y, s.k) - r, r * 2, r * 2);
       }
       ctx.globalCompositeOperation = "source-over";
     }
-
-    // mounds
-    ctx.fillStyle = P.gold;
-    for (const x of wells) {
+    login.nodes.forEach((n, i) => {
+      const { x, y } = at[i];
+      const tw = still ? 1 : 0.75 + 0.25 * Math.sin(time * 1.1 + n.ph);
+      const gold = i % 5 === 0;
+      ctx.fillStyle = rgba(gold ? P.gold : P.water, 0.18 * n.z);
       ctx.beginPath();
-      ctx.ellipse(x, yH, 20 * S, 14 * S, 0, Math.PI, 0);
+      ctx.arc(x, y, n.r * 3, 0, 6.28);
       ctx.fill();
-    }
-
-    // horizon
-    ctx.strokeStyle = P.gold;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(-W, yH);
-    ctx.lineTo(W * 2, yH);
-    ctx.stroke();
-
-    // outlet: the water leaves as an arrow
-    const ox = c1.x + (rtl ? -34 : 34) * S, oy = c1.y + 6 * S;
-    const pulse = still ? 1 : 1 + 0.12 * Math.sin(time * 3);
-    const og = ctx.createRadialGradient(ox, oy, 0, ox, oy, 60 * S * pulse);
-    og.addColorStop(0, rgba(P.waterBright, 0.45));
-    og.addColorStop(1, rgba(P.waterBright, 0));
-    ctx.fillStyle = og;
-    ctx.fillRect(ox - 80 * S, oy - 80 * S, 160 * S, 160 * S);
-    ctx.fillStyle = P.waterBright;
-    ctx.strokeStyle = P.waterBright;
-    ctx.lineWidth = 6 * S;
-    ctx.lineJoin = "round";
-    const d = rtl ? -1 : 1;
-    ctx.beginPath();
-    ctx.moveTo(ox - 16 * S * d, oy - 20 * S);
-    ctx.lineTo(ox + 20 * S * d, oy);
-    ctx.lineTo(ox - 16 * S * d, oy + 20 * S);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
+      ctx.fillStyle = rgba(gold ? P.gold : P.waterBright, 0.85 * n.z * tw);
+      ctx.beginPath();
+      ctx.arc(x, y, n.r, 0, 6.28);
+      ctx.fill();
+    });
     ctx.restore();
 
-    // the end of the descent: the earth fills the view
-    if (p > 0) {
-      ctx.fillStyle = rgba(P.bg, smooth(0.5, 1, p));
-      ctx.fillRect(0, 0, W, H);
+    // a wrong password: one red ring out from the middle
+    if (login.ripple >= 0) {
+      const k = clamp((now - login.ripple) / (still ? 300 : 900), 0, 1);
+      if (k >= 1) login.ripple = -1;
+      else {
+        ctx.strokeStyle = rgba(P.danger, 0.55 * (1 - k));
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(W / 2, H / 2, 40 + k * Math.max(W, H) * 0.45, 0, 6.28);
+        ctx.stroke();
+      }
     }
 
+    // the end of the zoom: the page's own colour fills the view
+    if (p > 0) {
+      ctx.fillStyle = rgba(P.bg, smooth(0.55, 1, e));
+      ctx.fillRect(0, 0, W, H);
+    }
     if (p >= 1) {
       login.descent = -1;
       enterApp();
@@ -922,41 +805,51 @@
 
   // ------------------------------------------------------------------ the map
 
-  const map = { canvas: $("#map"), running: false, geo: null, stars: [], mouse: null };
+  const map = { canvas: $("#map"), running: false, geo: null, mouse: null };
 
   // the layout changes with the size, the direction and the servers and tunnels on it
   const mapKey = (W, H) => `${W}x${H}${html.dir}${SERVERS.map((s) => s.id).join()}${TUNNELS.map((x) => x.id + x.level).join()}`;
 
+  // Servers are nodes, tunnels the links between them (the panel's own scene-map.ts): one
+  // node in the middle, two side by side, more around an ellipse from the top, clockwise.
   function layout(W, H) {
     const narrow = W < 640;
-    const yH = narrow ? 110 : 150;
-    const pad = narrow ? 44 : 110;
     const rtl = html.dir === "rtl";
-    const xs = SERVERS.map((_, i) => pad + (i * (W - 2 * pad)) / (SERVERS.length - 1));
+    const n = SERVERS.length;
+    const padX = narrow ? 56 : 120;
+    const padY = narrow ? 52 : 64;
     const pos = {};
-    SERVERS.forEach((s, i) => (pos[s.id] = rtl ? W - xs[i] : xs[i]));
-    const base = yH + (narrow ? 52 : 64);
-    const levels = Math.max(...TUNNELS.map((x) => x.level)) + 1;
-    const step = Math.min(narrow ? 32 : 38, (H - base - 44) / Math.max(1, levels - 1));
+    SERVERS.forEach((s, i) => {
+      let p;
+      if (n === 1) p = { x: W / 2, y: H / 2 - 12 };
+      else if (n === 2) p = { x: i === 0 ? padX + 40 : W - padX - 40, y: H / 2 - 12 };
+      else {
+        const a = -Math.PI / 2 + (i * 2 * Math.PI) / n;
+        p = { x: W / 2 + Math.cos(a) * (W / 2 - padX), y: H / 2 - 8 + Math.sin(a) * (H / 2 - padY) };
+      }
+      pos[s.id] = rtl ? { x: W - p.x, y: p.y } : p;
+    });
+    // links between the same two servers bend apart, one to each side in turn
+    const seen = {};
     const chans = TUNNELS.map((tn) => {
-      const y0 = base + tn.level * step;
-      const p0 = { x: pos[tn.a], y: y0 };
-      const p1 = { x: pos[tn.b], y: y0 + 16 };
-      const c = { x: (p0.x + p1.x) / 2, y: y0 + 26 };
+      const pair = [tn.a, tn.b].sort().join("|");
+      const k = seen[pair] || 0;
+      seen[pair] = k + 1;
+      const p0 = pos[tn.a], p1 = pos[tn.b];
+      const dx = p1.x - p0.x, dy = p1.y - p0.y;
+      const d = Math.hypot(dx, dy) || 1;
+      let nx = -dy / d, ny = dx / d;
+      const mid = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
+      if ((mid.x - W / 2) * nx + (mid.y - H / 2) * ny < 0) (nx = -nx), (ny = -ny);
+      const side = k % 2 === 0 ? 1 : -1;
+      const bend = (0.12 * d + Math.ceil(k / 2) * (narrow ? 22 : 30)) * (k === 0 ? 1 : side);
+      const c = { x: mid.x + nx * bend, y: mid.y + ny * bend };
       const pts = Array.from({ length: 61 }, (_, i) => qb(p0, c, p1, i / 60));
       let len = 0;
       for (let i = 1; i < pts.length; i++) len += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
       return { tn, p0, p1, c, pts, len };
     });
-    const depth = {};
-    for (const ch of chans) {
-      depth[ch.tn.a] = Math.max(depth[ch.tn.a] || 0, ch.p0.y);
-      depth[ch.tn.b] = Math.max(depth[ch.tn.b] || 0, ch.p1.y);
-    }
-    const r = rng(11);
-    map.stars = Array.from({ length: Math.round(W / 14) }, () => ({ x: r() * W, y: r() * (yH - 70) + 6, z: 0.3 + r() * 0.7, ph: r() * 6.28 }));
-    const pebbles = Array.from({ length: Math.round(W / 9) }, () => ({ x: r() * W, y: yH + 10 + r() * (H - yH - 14), r: 0.6 + r() * 1.4 }));
-    return { W, H, yH, pos, chans, depth, narrow, rtl, pebbles, key: mapKey(W, H) };
+    return { W, H, pos, chans, narrow, rtl, r: narrow ? 14 : 18, key: mapKey(W, H) };
   }
 
   function mapFrame(now) {
@@ -977,64 +870,20 @@
 
     ctx.clearRect(0, 0, W, H);
 
-    // sky
-    const sky = ctx.createLinearGradient(0, 0, 0, g.yH);
-    sky.addColorStop(0, P.bg);
-    sky.addColorStop(1, P.s1);
-    ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, W, g.yH);
-    const glow = ctx.createRadialGradient(W * (rtl ? 0.25 : 0.75), g.yH, 0, W * (rtl ? 0.25 : 0.75), g.yH, W * 0.5);
-    glow.addColorStop(0, rgba(P.gold, P.night ? 0.12 : 0.22));
-    glow.addColorStop(1, rgba(P.gold, 0));
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, W, g.yH);
-    for (const s of map.stars) {
-      const a = (P.night ? 0.7 : 0.2) * s.z * (still ? 0.8 : 0.6 + 0.4 * Math.sin(time * 1.3 + s.ph));
-      ctx.fillStyle = P.night ? `rgba(233,240,255,${a})` : rgba(P.gold, a);
-      ctx.fillRect(s.x, s.y, s.z * 1.6, s.z * 1.6);
-    }
-
-    // earth
-    const earth = ctx.createLinearGradient(0, g.yH, 0, H);
-    earth.addColorStop(0, P.earth);
-    earth.addColorStop(1, P.night ? P.skyTop : P.s2);
-    ctx.fillStyle = earth;
-    ctx.fillRect(0, g.yH, W, H - g.yH);
-    ctx.fillStyle = rgba(P.gold, P.night ? 0.07 : 0.12);
-    for (const q of g.pebbles) {
-      ctx.beginPath();
-      ctx.arc(q.x, q.y, q.r, 0, 6.28);
-      ctx.fill();
-    }
-    ctx.strokeStyle = rgba(P.gold, 0.06);
-    ctx.lineWidth = 1;
-    for (let i = 1; i < 6; i++) {
-      const y = g.yH + i * ((H - g.yH) / 6);
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(W, y + 4);
-      ctx.stroke();
-    }
-
-    // shafts
+    // the ground: a quiet grid of dots
+    ctx.fillStyle = rgba(P.text3, P.night ? 0.16 : 0.22);
+    const step = g.narrow ? 22 : 28;
+    for (let y = step / 2; y < H; y += step) for (let x = step / 2; x < W; x += step) ctx.fillRect(x - 0.75, y - 0.75, 1.5, 1.5);
     ctx.lineCap = "round";
-    for (const s of SERVERS) {
-      ctx.strokeStyle = rgba(P.gold, 0.45);
-      ctx.lineWidth = g.narrow ? 3 : 4;
-      ctx.beginPath();
-      ctx.moveTo(g.pos[s.id], g.yH);
-      ctx.lineTo(g.pos[s.id], (g.depth[s.id] || g.yH + 40) + 4);
-      ctx.stroke();
-    }
 
-    // channels
+    // links
     const hover = map.hoverT || state.hot;
     for (const ch of g.chans) {
       const tn = ch.tn;
       const target = tn.st === "off" ? 0 : 1;
       const speed = still ? 10 : 1.1;
       tn.fill = tn.fill < target ? Math.min(target, tn.fill + dt * speed) : Math.max(target, tn.fill - dt * speed);
-      const reach = tn.st === "down" ? 0.55 : 1; // a broken channel holds water up to the break
+      const reach = tn.st === "down" ? 0.55 : 1; // a broken link carries traffic up to the break
       const lit = hover === tn.id;
       const path = (from, to) => {
         const a = Math.floor(from * 60), b = Math.ceil(to * 60);
@@ -1042,9 +891,9 @@
         for (let i = a; i <= b; i++) (i === a ? ctx.moveTo : ctx.lineTo).call(ctx, ch.pts[i].x, ch.pts[i].y);
       };
 
-      // bed
-      ctx.lineWidth = g.narrow ? 12 : 16;
-      ctx.strokeStyle = P.night ? "#06121f" : "#cdb489";
+      // the track
+      ctx.lineWidth = g.narrow ? 8 : 10;
+      ctx.strokeStyle = rgba(P.text3, P.night ? (lit ? 0.3 : 0.16) : lit ? 0.32 : 0.2);
       path(0, 1);
       ctx.stroke();
       if (tn.st === "off" || tn.fill < 1) {
@@ -1056,13 +905,13 @@
         ctx.stroke();
         ctx.restore();
       }
-      // water
+      // traffic
       const w = Math.min(tn.fill, reach);
       if (w > 0.01) {
-        const grad = ctx.createLinearGradient(ch.p0.x, 0, ch.p1.x, 0);
+        const grad = ctx.createLinearGradient(ch.p0.x, ch.p0.y, ch.p1.x, ch.p1.y);
         grad.addColorStop(0, P.waterDeep);
         grad.addColorStop(1, lit ? P.waterBright : P.water);
-        ctx.lineWidth = g.narrow ? 6 : 8;
+        ctx.lineWidth = g.narrow ? 3.5 : 4.5;
         ctx.strokeStyle = grad;
         ctx.globalAlpha = still ? 0.35 + 0.65 * clamp((tn.down + tn.up) / 400, 0.2, 1) : 1;
         path(0, w);
@@ -1106,7 +955,7 @@
           if (q.k > tn.fill) continue;
           const i = q.k * 60, i0 = Math.floor(i), f = i - i0;
           const a = ch.pts[i0], b = ch.pts[Math.min(60, i0 + 1)];
-          const x = lerp(a.x, b.x, f), y = lerp(a.y, b.y, f) + Math.sin(time * 3 + q.j) * 1.5;
+          const x = lerp(a.x, b.x, f), y = lerp(a.y, b.y, f);
           const r = (q.dir < 0 ? 7 : 5) * q.s * (g.narrow ? 0.8 : 1);
           ctx.globalAlpha = q.dir < 0 ? 1 : 0.6;
           ctx.drawImage(sprite, x - r, y - r, r * 2, r * 2);
@@ -1116,12 +965,12 @@
       }
     }
 
-    // channel labels
+    // link labels
     ctx.textBaseline = "middle";
     ctx.direction = html.dir;
     for (const ch of g.chans) {
       const tn = ch.tn;
-      const k = 0.28 + 0.14 * (tn.level % 3);
+      const k = 0.42 + 0.08 * (tn.level % 3);
       const p = ch.pts[Math.round(k * 60)];
       let label = tn.id;
       if (tn.st === "up") {
@@ -1130,7 +979,7 @@
       } else label += `  ${stateLabel(tn.st)}`;
       ctx.font = uiFont(500, g.narrow ? 10 : 12);
       const tw = ctx.measureText(label).width + 14;
-      const y = p.y - (g.narrow ? 12 : 15);
+      const y = clamp(p.y, 12, H - 12);
       ctx.fillStyle = rgba(P.night ? P.skyTop : "#fbf6ec", 0.85);
       roundRect(ctx, p.x - tw / 2, y - 9, tw, 18, 4);
       ctx.fill();
@@ -1142,38 +991,48 @@
       ctx.fillText(label, p.x, y + 1);
     }
 
-    // horizon, mounds, server labels
-    ctx.strokeStyle = P.gold;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, g.yH);
-    ctx.lineTo(W, g.yH);
-    ctx.stroke();
-    SERVERS.forEach((s, i) => {
-      const x = g.pos[s.id];
+    // the servers: a node with its state on the ring, its name and what it is under it
+    for (const s of SERVERS) {
+      const { x, y } = g.pos[s.id];
       const lit = map.hoverS === s.id;
-      ctx.fillStyle = P.gold;
+      const col = s.st === "up" ? P.water : s.st === "warn" ? P.warn : P.danger;
+      const r = g.r + (lit ? 2 : 0);
+      ctx.fillStyle = rgba(col, P.night ? 0.14 : 0.16);
       ctx.beginPath();
-      ctx.ellipse(x, g.yH, lit ? 20 : 16, lit ? 13 : 11, 0, Math.PI, 0);
+      ctx.arc(x, y, r + 7, 0, 6.28);
       ctx.fill();
-      const lift = g.narrow && i % 2 ? 26 : 0;
+      ctx.fillStyle = P.night ? P.skyTop : "#fffaf1";
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, 6.28);
+      ctx.fill();
+      ctx.stroke();
+      // a small server: two drive bays, each with its light
+      const bw = r * 1.05, bh = r * 0.36;
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = rgba(P.text, 0.75);
+      for (const dy of [-bh * 0.65, bh * 0.65]) {
+        roundRect(ctx, x - bw / 2, y + dy - bh / 2, bw, bh, 2);
+        ctx.stroke();
+        ctx.fillStyle = P.gold;
+        ctx.beginPath();
+        ctx.arc(x + bw / 2 - bh * 0.55, y + dy, 1.4, 0, 6.28);
+        ctx.fill();
+      }
       ctx.textAlign = "center";
       ctx.font = uiFont(600, g.narrow ? 11 : 14);
       ctx.fillStyle = P.text;
-      const ny = g.yH - (g.narrow ? 26 : 44) - lift;
       const nw = ctx.measureText(s.name).width;
-      const lx = clamp(x, nw / 2 + 18, W - nw / 2 - 18); // keep edge labels on screen
+      const lx = clamp(x, nw / 2 + 8, W - nw / 2 - 8); // keep edge labels on screen
+      const ny = y + r + (g.narrow ? 16 : 20);
       ctx.fillText(s.name, lx, ny);
-      ctx.fillStyle = s.st === "up" ? P.water : s.st === "warn" ? P.warn : P.danger;
-      ctx.beginPath();
-      ctx.arc(lx - (nw / 2 + 8) * (rtl ? -1 : 1), ny, 3.5, 0, 6.28);
-      ctx.fill();
       if (!g.narrow) {
         ctx.font = uiFont(400, 12);
         ctx.fillStyle = P.text3;
-        ctx.fillText(`${s.loc[state.lang]} · ${t("role." + s.role)}`, lx, ny + 18);
+        ctx.fillText(`${s.loc[state.lang]} · ${t("role." + s.role)}`, lx, ny + 17);
       }
-    });
+    }
 
     // keep the tooltip fresh while hovering
     if (map.mouse) updateTip();
@@ -1194,7 +1053,7 @@
     if (!g) return {};
     for (const s of SERVERS) {
       const x = g.pos[s.id];
-      if (Math.abs(mx - x) < 40 && my > g.yH - 70 && my < g.yH + 8) return { s };
+      if (Math.abs(mx - x.x) < g.r + 34 && my > x.y - g.r - 8 && my < x.y + g.r + 42) return { s };
     }
     let best = null, bd = 14;
     for (const ch of g.chans) {
@@ -1394,7 +1253,9 @@
   reduced.addEventListener("change", () => setLow(reduced.matches, false));
   addEventListener("resize", () => drawSparks());
 
+  html.dataset.theme = state.theme; // the start theme (the site passes ?theme=dawn along)
   readPalette();
+  applyThemeLabels();
   setLow(state.low, false);
   applyLang();
   tick();

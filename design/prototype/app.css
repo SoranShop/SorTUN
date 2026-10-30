@@ -113,13 +113,6 @@ button {
   animation: draw 700ms var(--ease-water) 950ms forwards;
 }
 
-.boot-logo .arrow {
-  opacity: 0;
-  transform: translateX(-8px);
-  transform-box: fill-box;
-  animation: arrow-in 400ms var(--ease-out) 1500ms forwards;
-}
-
 .boot-word {
   font-size: var(--fs-xl);
   font-weight: 600;
@@ -148,11 +141,9 @@ button {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
 }
-@keyframes arrow-in {
-  to { opacity: 1; transform: none; }
-}
 
-/* ------------------------------------------------------------------ the qanat loader */
+/* ------------------------------------------------------------------ the link loader */
+/* Two servers and the link between them, with traffic moving along it while we wait. */
 
 .qloader {
   width: 180px;
@@ -160,54 +151,37 @@ button {
   overflow: visible;
 }
 
-.qloader .ground { stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
-.qloader .mound { fill: var(--accent); }
-.qloader .shaft { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; opacity: 0.45; }
-.qloader .bed { stroke: var(--earth); stroke-width: 12; stroke-linecap: round; }
+.qloader .bed { fill: none; stroke: var(--stratum-3); stroke-width: 10; stroke-linecap: round; }
 .qloader .flow {
+  fill: none;
   stroke: var(--water);
-  stroke-width: 6;
+  stroke-width: 5;
   stroke-linecap: round;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
   animation: q-flow 1.6s var(--ease-water) infinite;
 }
-.qloader .drop {
-  fill: var(--water-bright);
-  animation: q-drop 1.6s var(--ease-water) infinite;
-}
-.qloader .out {
-  fill: var(--water);
-  transform-box: fill-box;
-  transform-origin: left center;
-  animation: q-out 1.6s var(--ease-out) infinite;
-}
+.qloader .node { fill: var(--card); stroke: var(--accent); stroke-width: 4; }
+.qloader .node.far { animation: q-reach 1.6s var(--ease-out) infinite; }
 
-@keyframes q-drop {
-  0% { transform: translate(0, 0); opacity: 0; }
-  6% { opacity: 1; }
-  30% { transform: translate(0, 32px); }
-  80% { transform: translate(128px, 50px); opacity: 1; }
-  88%, 100% { transform: translate(140px, 52px); opacity: 0; }
-}
 @keyframes q-flow {
-  0%, 30% { stroke-dashoffset: 1; opacity: 1; }
-  80% { stroke-dashoffset: 0; opacity: 1; }
+  0%, 10% { stroke-dashoffset: 1; opacity: 1; }
+  70% { stroke-dashoffset: 0; opacity: 1; }
   100% { stroke-dashoffset: 0; opacity: 0; }
 }
-@keyframes q-out {
-  0%, 78% { opacity: 0; transform: scaleX(0.3); }
-  88% { opacity: 1; transform: scaleX(1.15); }
-  100% { opacity: 0; transform: translateX(10px) scaleX(1); }
+@keyframes q-reach {
+  0%, 62% { stroke: var(--accent); }
+  74% { stroke: var(--water-bright); }
+  100% { stroke: var(--accent); }
 }
 
 [dir="rtl"] .qloader { transform: scaleX(-1); }
 
 @media (prefers-reduced-motion: reduce) {
-  .qloader .drop,
-  .qloader .out { animation: none; opacity: 0; }
+  .qloader .node.far { animation: none; }
   .qloader .flow { animation: none; stroke-dashoffset: 0; opacity: 0.6; }
 }
+
 
 .loader-line {
   position: absolute;

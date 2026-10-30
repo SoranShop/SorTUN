@@ -927,7 +927,7 @@ dependencies = [
 
 [[package]]
 name = "sortun"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "anyhow",
  "base64 0.23.1",
@@ -960,7 +960,7 @@ dependencies = [
 
 [[package]]
 name = "sortun-panel"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "anyhow",
  "argon2",

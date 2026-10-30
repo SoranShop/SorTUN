@@ -8,10 +8,10 @@ import { copyText } from "./clipboard";
 const ICONS: Record<string, ReactNode> = {
   map: (
     <>
-      <path d="M2 9h20" />
-      <path d="M6 9v6M12 9v8M18 9v6" />
-      <path d="M4 15.5c4 1.2 12 2.4 16 2" opacity=".6" />
-      <path d="M4.5 9a1.5 1.2 0 0 1 3 0M10.5 9a1.5 1.2 0 0 1 3 0M16.5 9a1.5 1.2 0 0 1 3 0" />
+      <circle cx="5.5" cy="17.5" r="2.5" />
+      <circle cx="18.5" cy="6.5" r="2.5" />
+      <circle cx="18.5" cy="17.5" r="2.5" />
+      <path d="M7.5 15.8 16.4 8.2M8 17.5h8" />
     </>
   ),
   servers: (
@@ -23,18 +23,19 @@ const ICONS: Record<string, ReactNode> = {
   ),
   tunnels: (
     <>
-      <path d="M3 17c3-6 15-6 18 0" />
-      <path d="M6.5 17c2-3.2 9-3.2 11 0" />
-      <path d="M3 17h3.5M17.5 17H21" />
+      <circle cx="5" cy="18" r="2.5" />
+      <circle cx="19" cy="6" r="2.5" />
+      <path d="M5 15.5C5 9.5 19 14.5 19 8.5" />
     </>
   ),
   logs: <path d="M5 5h14M5 9.5h9M5 14h14M5 18.5h7" />,
   networks: (
     <>
-      <path d="M2.5 8h19" />
-      <path d="M6 8v6M18 8v6" />
-      <path d="M4.5 8a1.5 1.2 0 0 1 3 0M16.5 8a1.5 1.2 0 0 1 3 0" />
-      <path d="M6 16.5c4 3.2 8 3.2 12 0" strokeDasharray="2.2 2.2" />
+      <rect x="3" y="4" width="7" height="5" rx="1.5" />
+      <rect x="14" y="4" width="7" height="5" rx="1.5" />
+      <path d="M6.5 9v4.5h11V9" />
+      <path d="M12 13.5V18" />
+      <rect x="9" y="17" width="6" height="3.5" rx="1.2" strokeDasharray="2 1.6" />
     </>
   ),
   settings: (

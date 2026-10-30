@@ -17,8 +17,6 @@ const PAGES = [
   "/fa/docs/transports/",
   "/docs/tour/",
   "/fa/docs/tour/",
-  "/docs/video/",
-  "/fa/docs/video/",
   "/fa/docs/using-the-panel/",
 ];
 
@@ -154,15 +152,6 @@ test("the low-power button brings motion back when the system asks for less", as
   await expect(page.locator("html")).toHaveAttribute("data-low", "0");
 });
 
-test("the video page has a player and chapters that move it", async ({ page }) => {
-  await open(page, "/docs/video/");
-  const video = page.locator("video[data-video]");
-  await expect(video).toHaveAttribute("poster", /poster\.jpg$/);
-  await expect(video.locator("source")).toHaveAttribute("src", /sortun-panel-tutorial\.mp4$/);
-  await page.locator("[data-seek]").nth(3).click();
-  await expect.poll(() => video.evaluate((v: HTMLVideoElement) => Math.round(v.currentTime))).toBeGreaterThanOrEqual(30);
-});
-
 test("reduced motion holds the hero still and one screen tall", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await open(page, "/");
@@ -172,7 +161,7 @@ test("reduced motion holds the hero still and one screen tall", async ({ page })
   expect(h).toBeLessThanOrEqual(vh + 1);
 });
 
-test("the hero goes down the well as the page scrolls, and its words leave", async ({ page }) => {
+test("the hero fades as the page scrolls, and its words leave", async ({ page }) => {
   await open(page, "/");
   await expect(page.locator(".hero")).toHaveClass(/ready/);
   const text = page.locator(".hero-text");
@@ -183,14 +172,14 @@ test("the hero goes down the well as the page scrolls, and its words leave", asy
 });
 
 for (const theme of ["night", "dawn"] as const) {
-  test(`the journey ends in the page's own colour, with no seam (${theme})`, async ({ page }) => {
+  test(`the hero ends in the page's own colour, with no seam (${theme})`, async ({ page }) => {
     await open(page, "/", theme);
     await expect(page.locator(".hero")).toHaveClass(/ready/);
     await page.evaluate(() => {
       const s = document.querySelector<HTMLElement>(".hero")!;
       window.scrollTo({ top: s.offsetTop + s.offsetHeight - window.innerHeight, behavior: "instant" });
     });
-    // The first frame builds the underground, so wait for the picture rather than a fixed time.
+    // Wait for the picture rather than a fixed time.
     await expect
       .poll(
         () =>

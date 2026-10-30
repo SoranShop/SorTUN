@@ -21,26 +21,9 @@ import { PROFILES, addressesOf, hostOf, parsePorts, portOf } from "./Wizard";
 import { Choice, More, noteOf, pairOf } from "./Choice";
 import { benchLabel, isV6 } from "./Benchmark";
 import type { BenchChoice } from "./Benchmark";
+import { fallbackList } from "./fallback";
 
 /** What the panel last saw of a side it cannot ask now (its server is offline), as a spec to start from. */
-/**
- * The fallback addresses as typed (separated by commas or spaces): an address without a port gets the tunnel's,
- * an IPv6 one in brackets. `bad` is the first one that is not an address.
- */
-export function fallbackList(text: string, port: string): { list: string[]; bad?: string } {
-  const list: string[] = [];
-  for (const item of text.split(/[\s,]+/).filter(Boolean)) {
-    const withPort = /^\[[0-9a-fA-F:.]+\]:\d{1,5}$/.test(item) || /^[^:\[\]]+:\d{1,5}$/.test(item);
-    const v6 = /^[0-9a-fA-F:.]+$/.test(item) && item.includes(":");
-    const host = /^[A-Za-z0-9.-]+$/.test(item);
-    if (withPort && +item.slice(item.lastIndexOf(":") + 1) <= 65535 && +item.slice(item.lastIndexOf(":") + 1) > 0) list.push(item);
-    else if (v6) list.push(`[${item}]:${port}`);
-    else if (host) list.push(`${item}:${port}`);
-    else return { list, bad: item };
-  }
-  return { list };
-}
-
 function specOf(name: string, info: TunnelInfo): Spec {
   return {
     name,

@@ -304,10 +304,9 @@ hours. Both servers need this release (`POST /api/bench`, `GET /api/bench?id=`,
 
 ## What you see
 
-- **Map:** each server is a well on the horizon; each tunnel whose entry and exit servers
-  are both connected is a channel of water between them. Flowing water is traffic (the
-  particles follow the throughput); a dashed empty channel is a stopped tunnel; a red pulse
-  is one that is broken. Hover for details.
+- **Map:** each server is a node; each tunnel whose entry and exit servers are both connected
+  is a link between them. Moving light on a link is traffic (it follows the throughput); a
+  dashed empty link is a stopped tunnel; a red pulse is one that is broken. Hover for details.
 - **Servers:** CPU, memory, network, uptime and the number of tunnels of each server. (On
   Linux; nothing is shown where there is no `/proc`.) The two buttons beside *Arrange* show them
   as **cards** or as **rows** (one line each, the actions in a menu); the browser remembers it.
@@ -333,7 +332,7 @@ hours. Both servers need this release (`POST /api/bench`, `GET /api/bench?id=`,
 - **Speed test:** on a tunnel's page. The entry server measures download, upload and UDP
   through the tunnel ([Speed test](speedtest.md)); it uses the tunnel for the
   seconds you choose.
-- **Fallback addresses:** on a tunnel's edit page (with mux, or `quic`), other addresses the
+- **Fallback addresses:** in the wizard (*Where do they meet?*) and on a tunnel's edit page (with mux, or `quic`), other addresses the
   dialing server tries while the main one is down: another IP or route of the same server, or
   another server that has the same tunnel. It goes back to the main address once it answers
   ([`tunnel.fallback`](configuration.md)). The dialing server needs 2.8.0 or newer.

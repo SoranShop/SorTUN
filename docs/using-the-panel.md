@@ -3,9 +3,8 @@
 This page walks through the panel in the order you need it, from a new server to a tunnel you
 can trust. You do not need any other tutorial: everything about servers and tunnels is done here,
 in the browser. Try the same screens first, with sample data and nothing to install, in the
-[live demo](https://soranshop.github.io/SorTUN/try/), take the
-[guided tour](https://soranshop.github.io/SorTUN/docs/tour/), which opens each screen as it explains it, or
-watch the [video tutorial](https://soranshop.github.io/SorTUN/docs/video/) (about two minutes, from a bare server to a running tunnel).
+[live demo](https://soranshop.github.io/SorTUN/try/), or take the
+[guided tour](https://soranshop.github.io/SorTUN/docs/tour/), which opens each screen as it explains it.
 
 ## 1. Sign in
 
@@ -62,8 +61,8 @@ step failed and why. You cannot end with half a tunnel.
 ## 4. See what is happening
 
 - **Map:** the overview. The key numbers (throughput, with a line of the last minutes),
-  then the map: each server is a well; each tunnel is a channel, with its name and its rate
-  now. Flowing water is traffic, a dashed empty channel is a stopped tunnel, a red pulse is a
+  then the map: each server is a node; each tunnel is a link, with its name and its rate
+  now. Moving light is traffic, a dashed empty link is a stopped tunnel, a red pulse is a
   broken one. Hover for details, click a tunnel to open it. Under the map: the tunnels,
   **Needs attention** (a broken tunnel, a tunnel that is connected but lets no user through, one
   whose streams are nearly all taken, an offline server, a busy CPU, servers behind on the

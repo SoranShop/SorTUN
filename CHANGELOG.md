@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.1.0 - 2026-10-31
+
+SorTUN's own look, in the same colours (navy, turquoise and gold).
+
+- **A new logo:** two gold server rings joined by an S-shaped turquoise link, in the panel, the
+  site, the tab icons and the README.
+- **The map** is a network: servers are nodes around the map, tunnels the links between them,
+  with light moving along a link for its traffic. A tunnel's page, the loader and the wizard's
+  steps follow it, and a server's card shows a small server with its CPU on the side.
+- **The sign-in screen and the site's front page** show a quiet network of servers, drifting
+  slowly. A wrong password sends a red ring out; a right one zooms into the network.
+- **Fallback addresses in the wizard**, under the address to dial (they were only on the edit
+  page).
+- The live demo starts in the theme the site asks for (`?theme=dawn`), and its sample servers
+  run this version. The video tutorial is gone until a new one is made.
+
 ## 3.0.0 - 2026-10-30
 
 Everything has SorTUN's name now: the programs (`sortun`, `sortun-panel`), the manager

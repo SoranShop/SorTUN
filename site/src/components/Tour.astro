@@ -31,7 +31,7 @@ const T = {
     moreLink: "Using the panel",
     steps: [
       { id: "signin", hi: "#pw-wrap", title: "Sign in", text: "The manager printed a one-time link on the server: open it and you are in. In the demo the password is sortun. With Show me, the tour signs in for you and you watch the descent into the panel." },
-      { id: "map", page: "map", hi: "#main", title: "The map", text: "Every server is a well on the horizon, every tunnel a channel of water between two of them. Flowing water is traffic; a dashed empty channel is a stopped tunnel; a red pulse is a broken one. Hover a channel for its numbers." },
+      { id: "map", page: "map", hi: "#main", title: "The map", text: "Every server is a node, every tunnel a link between two of them. Moving light on a link is traffic; a dashed empty link is a stopped tunnel; a red pulse is a broken one. Hover a link for its numbers." },
       { id: "servers", page: "servers", hi: "#srv-add", title: "Add your servers", text: "Servers lists every server with its CPU, memory and network. Add server gives a join code and one command to run on the new server; it appears here within seconds, and opens no port." },
       { id: "tunnels", page: "tunnels", hi: "#tn-new", title: "Your tunnels", text: "Tunnels lists every tunnel with its two servers, transport, state and traffic. New tunnel opens the wizard." },
       { id: "wizard", page: "tunnels", wizard: true, hi: ".wizard, #wizard, [role=dialog]", title: "The wizard", text: "Five short steps: servers, kind, connection, ports, build. Each question explains itself, the defaults suit most paths, and if anything fails while building, both servers are put back as they were." },
@@ -55,7 +55,7 @@ const T = {
     moreLink: "کار با پنل",
     steps: [
       { id: "signin", hi: "#pw-wrap", title: "ورود", text: "مدیر روی سرور یک لینک یک‌بارمصرف چاپ کرد: بازش کنید و وارد شده‌اید. در دمو رمز sortun است. با «نشانم بده»، تور به‌جای شما وارد می‌شود و فرود به داخل پنل را می‌بینید." },
-      { id: "map", page: "map", hi: "#main", title: "نقشه", text: "هر سرور یک چاه روی افق است و هر تانل مجرای آبی بین دو تا از آن‌ها. آب روان ترافیک است؛ مجرای خالی و خط‌چین تانل متوقف است؛ نبض قرمز یعنی خراب. برای دیدن عددها روی یک مجرا نگه دارید." },
+      { id: "map", page: "map", hi: "#main", title: "نقشه", text: "هر سرور یک گره است و هر تانل پیوندی بین دو تا از آن‌ها. نورِ در حرکت روی پیوند ترافیک است؛ پیوند خالی و خط‌چین تانل متوقف است؛ نبض قرمز یعنی خراب. برای دیدن عددها روی یک پیوند نگه دارید." },
       { id: "servers", page: "servers", hi: "#srv-add", title: "سرورهایتان را اضافه کنید", text: "«سرورها» هر سرور را با CPU، حافظه و شبکه‌اش نشان می‌دهد. «افزودن سرور» یک کد پیوستن و یک دستور می‌دهد که روی سرور تازه اجرا می‌کنید؛ در چند ثانیه اینجا ظاهر می‌شود و هیچ پورتی باز نمی‌کند." },
       { id: "tunnels", page: "tunnels", hi: "#tn-new", title: "تانل‌هایتان", text: "«تانل‌ها» هر تانل را با دو سرورش، ترنسپورت، وضعیت و ترافیکش نشان می‌دهد. «تانل تازه» ویزارد را باز می‌کند." },
       { id: "wizard", page: "tunnels", wizard: true, hi: ".wizard, #wizard, [role=dialog]", title: "ویزارد", text: "پنج گام کوتاه: سرورها، نوع، اتصال، پورت‌ها، ساخت. هر پرسش خودش را توضیح می‌دهد، پیش‌فرض‌ها برای بیشتر مسیرها درست‌اند، و اگر در ساخت چیزی شکست بخورد هر دو سرور به حالت قبل برمی‌گردند." },

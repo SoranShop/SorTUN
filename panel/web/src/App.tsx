@@ -46,23 +46,14 @@ function Boot({ note }: { note: string }) {
             </linearGradient>
           </defs>
           <rect className="draw" pathLength={1} x="4" y="4" width="248" height="248" rx="54" stroke="var(--line-strong)" strokeWidth="2" />
-          <path className="draw d2" pathLength={1} d="M0 96 H256" stroke="#e9c46a" strokeWidth="4" />
-          <g stroke="#e9c46a" strokeLinecap="round" strokeWidth="5" opacity=".6">
-            <path className="draw d3" pathLength={1} d="M58 96 V146" />
-            <path className="draw d3" pathLength={1} d="M104 96 V154" />
-            <path className="draw d4" pathLength={1} d="M150 96 V162" />
+          <path className="fillin" d="M76 184 C 76 108, 180 148, 180 72" stroke="#06121f" strokeWidth="34" strokeLinecap="round" fill="none" />
+          <path className="water" pathLength={1} d="M76 184 C 76 108, 180 148, 180 72" stroke="url(#bw)" strokeWidth="18" strokeLinecap="round" fill="none" />
+          <circle className="draw d2" pathLength={1} cx="76" cy="184" r="27" stroke="#e9c46a" strokeWidth="9" />
+          <circle className="draw d3" pathLength={1} cx="180" cy="72" r="27" stroke="#e9c46a" strokeWidth="9" />
+          <g className="fillin">
+            <circle cx="76" cy="184" r="8" fill="#34d0c3" />
+            <circle cx="180" cy="72" r="8" fill="#7ef0e4" />
           </g>
-          <g className="fillin" fill="#e9c46a">
-            <path d="M46 96 a12 9 0 0 1 24 0 Z" />
-            <path d="M92 96 a12 9 0 0 1 24 0 Z" />
-            <path d="M138 96 a12 9 0 0 1 24 0 Z" />
-            <circle cx="44" cy="44" r="2" opacity=".8" />
-            <circle cx="198" cy="34" r="1.6" opacity=".6" />
-            <circle cx="150" cy="58" r="1.2" opacity=".5" />
-          </g>
-          <path className="fillin" d="M26 142 L186 172" stroke="#06121f" strokeWidth="26" strokeLinecap="round" />
-          <path className="water" pathLength={1} d="M26 142 L186 172" stroke="url(#bw)" strokeWidth="16" strokeLinecap="round" fill="none" />
-          <path className="arrow" d="M190 154 L226 176 L190 198 Z" fill="#7ef0e4" stroke="#7ef0e4" strokeWidth="6" strokeLinejoin="round" />
         </svg>
         <div className="boot-word">
           SorTUN<small>{t("boot.sub")}</small>

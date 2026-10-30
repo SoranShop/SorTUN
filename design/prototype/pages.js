@@ -182,7 +182,7 @@
       "set.motionLow": "کم‌مصرف",
       "set.night": "شب",
       "set.dawn": "سحر",
-      "set.updText": "آخرین نسخه: 0.6.1 · ۲ ساعت پیش بررسی شد",
+      "set.updText": "آخرین نسخه: 3.0.0 · ۲ ساعت پیش بررسی شد",
       "set.check": "بررسی الان",
       "set.checked": "همه به‌روزند.",
       "set.auto": "بررسی خودکار روزانه",
@@ -375,7 +375,7 @@
       "set.motionLow": "Low power",
       "set.night": "Night",
       "set.dawn": "Dawn",
-      "set.updText": "Latest: 0.6.1 · checked 2 hours ago",
+      "set.updText": "Latest: 3.0.0 · checked 2 hours ago",
       "set.check": "Check now",
       "set.checked": "Everything is up to date.",
       "set.auto": "Check daily",
@@ -414,11 +414,11 @@
   // ------------------------------------------------------------------ more sample data
 
   const EXTRA = {
-    teh: { ver: "0.6.1", arch: "x86_64", up: 38 * 86400 + 4 * 3600, via: "local", net: 62, panel: true },
-    tbz: { ver: "0.6.1", arch: "x86_64", up: 12 * 86400 + 7 * 3600, via: "tcpmux", net: 21 },
-    fra: { ver: "0.6.1", arch: "x86_64", up: 51 * 86400, via: "tcpmux", net: 58 },
-    hel: { ver: "0.6.1", arch: "aarch64", up: 9 * 86400 + 2 * 3600, via: "wss", net: 8 },
-    ams: { ver: "0.6.1", arch: "aarch64", up: 3 * 86400 + 11 * 3600, via: "tcpmux", net: 2 },
+    teh: { ver: "3.0.0", arch: "x86_64", up: 38 * 86400 + 4 * 3600, via: "local", net: 62, panel: true },
+    tbz: { ver: "3.0.0", arch: "x86_64", up: 12 * 86400 + 7 * 3600, via: "tcpmux", net: 21 },
+    fra: { ver: "3.0.0", arch: "x86_64", up: 51 * 86400, via: "tcpmux", net: 58 },
+    hel: { ver: "3.0.0", arch: "aarch64", up: 9 * 86400 + 2 * 3600, via: "wss", net: 8 },
+    ams: { ver: "3.0.0", arch: "aarch64", up: 3 * 86400 + 11 * 3600, via: "tcpmux", net: 2 },
   };
   for (const s of SERVERS) Object.assign(s, EXTRA[s.id], { seen: 1 + Math.floor(Math.random() * 3) });
 
@@ -475,14 +475,16 @@
 
   // ------------------------------------------------------------------ shared UI parts
 
-  function wellSvg(st, level = 0.6) {
+  // a server, with a bar of how busy it is (its CPU) on the side
+  function serverMark(st, level = 0.6) {
     const col = st === "up" ? "var(--water)" : st === "warn" ? "var(--warn)" : "var(--danger)";
-    const y = 40 - 14 * level;
-    return `<svg class="srv-well" viewBox="0 0 44 44" aria-hidden="true">
-      <path d="M4 16h36" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
-      <path d="M12 16a10 7 0 0 1 20 0Z" fill="var(--accent)"/>
-      <rect x="18" y="16" width="8" height="25" rx="2" fill="var(--stratum-3)"/>
-      <rect x="18" y="${y}" width="8" height="${41 - y}" rx="2" fill="${col}"/>
+    const h = Math.round(26 * clamp(level, 0.1, 1));
+    return `<svg class="srv-mark" viewBox="0 0 44 44" aria-hidden="true">
+      <rect x="6" y="9" width="24" height="11" rx="3" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <rect x="6" y="24" width="24" height="11" rx="3" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <circle cx="25" cy="14.5" r="1.8" fill="${col}"/><circle cx="25" cy="29.5" r="1.8" fill="${col}"/>
+      <rect x="35" y="9" width="4" height="26" rx="2" fill="var(--stratum-3)"/>
+      <rect x="35" y="${35 - h}" width="4" height="${h}" rx="2" fill="${col}"/>
     </svg>`;
   }
 
@@ -577,7 +579,7 @@
   K.icon = icon;
   K.esc = esc;
   K.tf = tf;
-  K.wellSvg = wellSvg;
+  K.serverMark = serverMark;
   K.mmss = mmss;
 
   // ------------------------------------------------------------------ servers
@@ -614,7 +616,7 @@
         .map((s) => {
           const n = TUNNELS.filter((x) => x.a === s.id || x.b === s.id).length;
           return `<li class="srv ${s.isNew ? "is-new" : ""}" data-s="${s.id}">
-            ${wellSvg(s.st, s.cpu / 100 + 0.3)}
+            ${serverMark(s.st, s.cpu / 100 + 0.3)}
             <div><button class="srv-name link" data-open="${s.id}">${s.name}</button><div class="srv-sub">${s.loc[state.lang]} · ${t("role." + s.role)} · ${s.arch} · SorTUN ${s.ver}</div></div>
             <div class="c-link"><div class="srv-ip">${s.ip}</div><div class="srv-link"><i class="dot ${s.st === "warn" ? "warn" : "up"}"></i><span class="js-seen">${s.panel ? t("srv.thisPanel") : `${tf("srv.via", { via: s.via })} · ${tf("srv.seen", { s: fmt(s.seen) })}`}</span></div></div>
             <div class="m-cpu">${meter(t("srv.cpu"), Math.round(s.cpu))}</div>
@@ -721,12 +723,12 @@
           const name = ($("#add-name", d).value.trim() || "istanbul-1").replace(/[^\w-]/g, "");
           const w = $("#add-wait", d);
           w.classList.add("done");
-          w.innerHTML = `${wellSvg("up", 0.9)}<span><b>${tf("add.connected", { name })}</b><br><span class="mono xs muted" dir="ltr">198.51.100.90 · aarch64 · SorTUN 0.6.1</span></span>`;
+          w.innerHTML = `${serverMark("up", 0.9)}<span><b>${tf("add.connected", { name })}</b><br><span class="mono xs muted" dir="ltr">198.51.100.90 · aarch64 · SorTUN 3.0.0</span></span>`;
           const done = $("#add-done", d);
           done.disabled = false;
           done.onclick = () => {
             if (!SERVERS.some((s) => s.id === name)) {
-              SERVERS.push({ id: name, name, loc: { fa: "استانبول", en: "Istanbul" }, ip: "198.51.100.90", role: "exit", st: "up", cpu: 3, ram: 14, ver: "0.6.1", arch: "aarch64", up: 60, via: dir === "agent" ? "tcpmux" : "direct", net: 1, seen: 1, isNew: true });
+              SERVERS.push({ id: name, name, loc: { fa: "استانبول", en: "Istanbul" }, ip: "198.51.100.90", role: "exit", st: "up", cpu: 3, ram: 14, ver: "3.0.0", arch: "aarch64", up: 60, via: dir === "agent" ? "tcpmux" : "direct", net: 1, seen: 1, isNew: true });
             }
             close();
             K.setPage("servers", true);
@@ -1054,7 +1056,7 @@
     } else tip?.classList.remove("is-on");
   }
 
-  // the tunnel as one channel between two wells
+  // the tunnel as one link between its two servers
   function drawRoute(tn, now) {
     const cv = $("#d-route");
     if (!cv) return;
@@ -1063,45 +1065,32 @@
     const rtl = document.documentElement.dir === "rtl";
     const time = now / 1000;
     const a = byId(tn.a), b = byId(tn.b);
-    const yH = 58, x0 = rtl ? W - 90 : 90, x1 = rtl ? 90 : W - 90;
-    const y0 = 118, y1 = 124;
+    const yN = Math.round(H / 2) + 6, R = 18;
+    const x0 = rtl ? W - 90 : 90, x1 = rtl ? 90 : W - 90;
     ctx.clearRect(0, 0, W, H);
-    // earth
-    const g = ctx.createLinearGradient(0, yH, 0, H);
-    g.addColorStop(0, P.earth);
-    g.addColorStop(1, P.bg);
-    ctx.fillStyle = g;
-    ctx.fillRect(0, yH, W, H - yH);
-    // shafts
-    ctx.strokeStyle = rgba(P.gold, 0.5);
-    ctx.lineWidth = 4;
+    // the ground: a quiet grid of dots
+    ctx.fillStyle = rgba(P.text3, P.night ? 0.16 : 0.22);
+    for (let y = 14; y < H; y += 28) for (let x = 14; x < W; x += 28) ctx.fillRect(x - 0.75, y - 0.75, 1.5, 1.5);
     ctx.lineCap = "round";
-    for (const [x, y] of [[x0, y0], [x1, y1]]) {
-      ctx.beginPath();
-      ctx.moveTo(x, yH);
-      ctx.lineTo(x, y);
-      ctx.stroke();
-    }
-    // channel
-    const pt = (k) => ({ x: x0 + (x1 - x0) * k, y: y0 + (y1 - y0) * k + Math.sin(k * Math.PI) * 10 });
+    // the link
+    const pt = (k) => ({ x: x0 + (x1 - x0) * k, y: yN - Math.sin(k * Math.PI) * 18 });
     const stroke = (from, to, w, col) => {
       ctx.strokeStyle = col;
       ctx.lineWidth = w;
       ctx.beginPath();
       for (let i = 0; i <= 50; i++) {
-        const k = from + ((to - from) * i) / 50;
-        const p = pt(k);
+        const p = pt(from + ((to - from) * i) / 50);
         i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y);
       }
       ctx.stroke();
     };
-    stroke(0, 1, 18, P.night ? "#06121f" : "#cdb489");
+    stroke(0, 1, 12, rgba(P.text3, P.night ? 0.16 : 0.2));
     const reach = tn.st === "down" ? 0.55 : tn.st === "off" ? 0 : 1;
     if (reach > 0) {
       const wg = ctx.createLinearGradient(x0, 0, x1, 0);
       wg.addColorStop(0, P.waterDeep);
       wg.addColorStop(1, P.waterBright);
-      stroke(0, reach, 10, wg);
+      stroke(0, reach, 5, wg);
     }
     if (tn.st !== "up") {
       ctx.save();
@@ -1122,51 +1111,66 @@
       ctx.arc(p.x, p.y, 5, 0, 6.28);
       ctx.fill();
     }
-    // particles: downloads flow back to the entry
+    // particles: most of the traffic comes back to the entry (downloads)
     if (tn.st === "up" && !K.state.low) {
       const rate = tn.down + tn.up;
       const want = Math.round(clamp(10 + rate / 6, 10, 90));
-      while (detail.parts.length < want) detail.parts.push({ k: Math.random(), dir: Math.random() < 0.8 ? -1 : 1, s: 0.5 + Math.random() * 0.7, j: Math.random() * 6 });
+      while (detail.parts.length < want) detail.parts.push({ k: Math.random(), dir: Math.random() < 0.8 ? -1 : 1, s: 0.5 + Math.random() * 0.7 });
       detail.parts.length = want;
       const v = clamp(0.12 + rate / 2500, 0.12, 0.5);
       ctx.globalCompositeOperation = P.night ? "lighter" : "source-over";
       for (const q of detail.parts) {
         q.k = (q.k + q.dir * v * 0.016 + 1) % 1;
         const p = pt(q.k);
-        const r = (q.dir < 0 ? 8 : 6) * q.s;
         ctx.globalAlpha = q.dir < 0 ? 1 : 0.55;
         ctx.fillStyle = P.waterBright;
         ctx.beginPath();
-        ctx.arc(p.x, p.y + Math.sin(time * 3 + q.j) * 2, r / 3, 0, 6.28);
+        ctx.arc(p.x, p.y, ((q.dir < 0 ? 7 : 5) * q.s) / 3, 0, 6.28);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = "source-over";
     }
-    // horizon and mounds
-    ctx.strokeStyle = P.gold;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, yH);
-    ctx.lineTo(W, yH);
-    ctx.stroke();
-    ctx.fillStyle = P.gold;
-    for (const x of [x0, x1]) {
+    // the two servers, as on the map
+    const node = (x, s) => {
+      const col = s.st === "up" ? P.water : s.st === "warn" ? P.warn : P.danger;
+      ctx.fillStyle = rgba(col, P.night ? 0.14 : 0.16);
       ctx.beginPath();
-      ctx.ellipse(x, yH, 18, 12, 0, Math.PI, 0);
+      ctx.arc(x, yN, R + 7, 0, 6.28);
       ctx.fill();
-    }
+      ctx.fillStyle = P.night ? P.skyTop : "#fffaf1";
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(x, yN, R, 0, 6.28);
+      ctx.fill();
+      ctx.stroke();
+      const bw = R * 1.05, bh = R * 0.36;
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = rgba(P.text, 0.75);
+      for (const dy of [-bh * 0.65, bh * 0.65]) {
+        ctx.beginPath();
+        ctx.roundRect(x - bw / 2, yN + dy - bh / 2, bw, bh, 2);
+        ctx.stroke();
+        ctx.fillStyle = P.gold;
+        ctx.beginPath();
+        ctx.arc(x + bw / 2 - bh * 0.55, yN + dy, 1.4, 0, 6.28);
+        ctx.fill();
+      }
+    };
+    node(x0, a);
+    node(x1, b);
     // labels
     ctx.textAlign = "center";
     ctx.direction = document.documentElement.dir;
     const lbl = (x, s, role, note) => {
       ctx.font = uiFont(600, 14);
       ctx.fillStyle = P.text;
-      ctx.fillText(s.name, x, yH - 30);
+      ctx.fillText(s.name, x, yN - R - 30);
       ctx.font = uiFont(400, 11);
       ctx.fillStyle = P.text3;
-      ctx.fillText(`${t("role." + role)} · ⁦${s.ip}⁩`, x, yH - 14); // the IP stays left-to-right
-      ctx.fillText(note, x, y1 + 26);
+      ctx.fillText(`${t("role." + role)} · ⁦${s.ip}⁩`, x, yN - R - 14); // the IP stays left-to-right
+      ctx.fillText(note, x, yN + R + 24);
     };
     lbl(x0, a, "entry", t("d.users"));
     lbl(x1, b, "exit", t("d.targets"));
@@ -1175,7 +1179,7 @@
       const p = pt(0.5);
       ctx.font = uiFont(600, 13);
       ctx.fillStyle = P.text;
-      ctx.fillText(`${r.v} ${r.u}`, p.x, p.y - 20);
+      ctx.fillText(`${r.v} ${r.u}`, p.x, p.y - 16);
     }
   }
 
@@ -1192,7 +1196,6 @@
         <rect class="well-water" x="34" y="${y}" width="52" height="${108 - y}" rx="6"/>
         <rect class="well-surface" x="34" y="${y}" width="52" height="3"/>
         <rect class="well-wall" x="34" y="16" width="52" height="92" rx="6"/>
-        <path d="M22 16h76" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
       </svg>
       <div class="gauge-read">
         ${

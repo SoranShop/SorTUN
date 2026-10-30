@@ -19,7 +19,7 @@
       "wz.create": "ساختن تانل",
       "wz.save": "ذخیره و ری‌استارت",
       "wz.stepOf": "مرحلهٔ {n} از ۵",
-      "wz.q1": "آب از کدام چاه به کدام چاه برود؟",
+      "wz.q1": "کدام دو سرور؟",
       "wz.l1": "کاربران به سرور entry وصل می‌شوند؛ exit به مقصدها می‌رسد. پنل هر دو طرف را با هم می‌سازد.",
       "wz.name": "نام تانل",
       "wz.nameHelp": "حروف لاتین، رقم، - و _ . نام سرویس روی هر دو سرور می‌شود: sortun@{name}",
@@ -33,7 +33,7 @@
       "wz.direct": "direct: entry به exit وصل می‌شود",
       "wz.reverseHelp": "رایج‌ترین حالت وقتی entry در ایران است: entry فقط گوش می‌دهد و اتصالی به بیرون نمی‌زند.",
       "wz.directHelp": "لازم برای CDN: entry به لبهٔ CDN وصل می‌شود و CDN به exit.",
-      "wz.q2": "آب از چه راهی برود؟",
+      "wz.q2": "چطور به هم وصل شوند؟",
       "wz.l2": "ترنسپورت روی هر دو طرف یکی است. هر کدام در یک چیز بهتر است.",
       "wz.profile": "پروفایل",
       "wz.rec": "پیشنهادی",
@@ -51,7 +51,7 @@
       "pr.ultraspeed": "بزرگ‌ترین پنجره‌ها و بافرها؛ حافظهٔ بیشتر.",
       "pr.gaming": "کمترین تأخیر: datagram، تکرار بسته، DSCP. بهترین با kcp.",
       "pr.gamingHint": "پروفایل gaming با kcp یا quic بهترین نتیجه را می‌دهد.",
-      "wz.q3": "دو چاه کجا به هم می‌رسند؟",
+      "wz.q3": "کجا به هم می‌رسند؟",
       "wz.l3": "{listener} گوش می‌دهد و {dialer} به آن وصل می‌شود.",
       "wz.port": "پورت تانل روی {s}",
       "wz.portFree": "آزاد است",
@@ -113,7 +113,7 @@
       "wz.create": "Create the tunnel",
       "wz.save": "Save and restart",
       "wz.stepOf": "Step {n} of 5",
-      "wz.q1": "Water from which well to which?",
+      "wz.q1": "Which two servers?",
       "wz.l1": "Users connect to the entry server; the exit reaches the targets. The panel sets up both sides at once.",
       "wz.name": "Tunnel name",
       "wz.nameHelp": "Latin letters, digits, - and _. Becomes the service on both servers: sortun@{name}",
@@ -127,7 +127,7 @@
       "wz.direct": "direct: the entry dials the exit",
       "wz.reverseHelp": "The usual choice when the entry is in Iran: it only listens and makes no outgoing connection.",
       "wz.directHelp": "Needed for a CDN: the entry dials the CDN edge, and the CDN reaches the exit.",
-      "wz.q2": "Which way should the water take?",
+      "wz.q2": "How should they connect?",
       "wz.l2": "The transport is the same on both sides. Each is best at something.",
       "wz.profile": "Profile",
       "wz.rec": "recommended",
@@ -145,7 +145,7 @@
       "pr.ultraspeed": "The largest windows and buffers; more memory.",
       "pr.gaming": "Lowest latency: datagrams, packet copies, DSCP. Best with kcp.",
       "pr.gamingHint": "The gaming profile works best with kcp or quic.",
-      "wz.q3": "Where do the two wells meet?",
+      "wz.q3": "Where do they meet?",
       "wz.l3": "{listener} listens and {dialer} connects to it.",
       "wz.port": "Tunnel port on {s}",
       "wz.portFree": "free",
@@ -833,6 +833,8 @@
     $("#wz-open", el).focus();
   }
 
+  // The tunnel being made: the two servers, the link growing from both towards the middle,
+  // then the traffic running through it.
   function drawBuild(now) {
     const cv = $("#wz-build", el);
     if (!cv) return;
@@ -843,25 +845,13 @@
     const d = W.draft;
     build.dig += (build.digTo - build.dig) * 0.06;
     if (build.fillOn) build.fill = Math.min(1, build.fill + 0.012);
-    const yH = 60, xa = rtl ? w - 50 : 50, xb = rtl ? 50 : w - 50;
-    const pt = (k) => ({ x: xa + (xb - xa) * k, y: 132 + 16 * k + Math.sin(k * Math.PI) * 14 });
+    const yN = Math.round(H / 2) + 10, R = 16;
+    const xa = rtl ? w - 56 : 56, xb = rtl ? 56 : w - 56;
+    const pt = (k) => ({ x: xa + (xb - xa) * k, y: yN - Math.sin(k * Math.PI) * 18 });
     ctx.clearRect(0, 0, w, H);
-    const g = ctx.createLinearGradient(0, yH, 0, H);
-    g.addColorStop(0, P.earth);
-    g.addColorStop(1, P.bg);
-    ctx.fillStyle = g;
-    ctx.fillRect(0, yH, w, H - yH);
-    // shafts go down first
-    ctx.strokeStyle = rgba(P.gold, 0.55);
-    ctx.lineWidth = 4;
+    ctx.fillStyle = rgba(P.text3, P.night ? 0.16 : 0.22);
+    for (let y = 14; y < H; y += 28) for (let x = 14; x < w; x += 28) ctx.fillRect(x - 0.75, y - 0.75, 1.5, 1.5);
     ctx.lineCap = "round";
-    const shaft = clamp(build.dig * 3, 0, 1);
-    for (const [x, k] of [[xa, 0], [xb, 1]]) {
-      ctx.beginPath();
-      ctx.moveTo(x, yH);
-      ctx.lineTo(x, yH + (pt(k).y - yH) * shaft);
-      ctx.stroke();
-    }
     const stroke = (from, to, width, col, dash) => {
       if (to <= from) return;
       ctx.save();
@@ -876,17 +866,18 @@
       ctx.stroke();
       ctx.restore();
     };
-    // the channel is dug from both ends towards the middle
-    const dig = clamp((build.dig - 0.2) / 0.8, 0, 1) / 2;
-    stroke(0, dig, 18, P.night ? "#06121f" : "#cdb489");
-    stroke(1 - dig, 1, 18, P.night ? "#06121f" : "#cdb489");
-    if (dig < 0.5) stroke(dig, 1 - dig, 1.2, rgba(P.text3, 0.5), [4, 6]);
-    // then the water runs through
+    // the link grows from both ends towards the middle
+    const grow = clamp(build.dig, 0, 1) / 2;
+    const track = rgba(P.text3, P.night ? 0.22 : 0.28);
+    stroke(0, grow, 12, track);
+    stroke(1 - grow, 1, 12, track);
+    if (grow < 0.5) stroke(grow, 1 - grow, 1.2, rgba(P.text3, 0.5), [4, 6]);
+    // then the traffic runs through
     if (build.fill > 0) {
       const wg = ctx.createLinearGradient(xa, 0, xb, 0);
       wg.addColorStop(0, P.waterDeep);
       wg.addColorStop(1, P.waterBright);
-      stroke(0, build.fill, 10, wg);
+      stroke(0, build.fill, 5, wg);
       if (!state.low) {
         while (build.parts.length < 40) build.parts.push({ k: Math.random(), s: 0.5 + Math.random() * 0.7 });
         ctx.fillStyle = P.waterBright;
@@ -896,7 +887,7 @@
           const p = pt(q.k);
           ctx.globalAlpha = 0.9;
           ctx.beginPath();
-          ctx.arc(p.x, p.y + Math.sin(time * 4 + q.s * 9) * 2, 2.4 * q.s, 0, 6.28);
+          ctx.arc(p.x, p.y, 2.4 * q.s, 0, 6.28);
           ctx.fill();
         }
         ctx.globalAlpha = 1;
@@ -906,26 +897,29 @@
         glow.addColorStop(0, rgba(P.waterBright, 0.18 + 0.06 * Math.sin(time * 2)));
         glow.addColorStop(1, rgba(P.waterBright, 0));
         ctx.fillStyle = glow;
-        ctx.fillRect(0, yH, w, H - yH);
+        ctx.fillRect(0, 0, w, H);
       }
     }
-    // horizon, mounds, names
-    ctx.strokeStyle = P.gold;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, yH);
-    ctx.lineTo(w, yH);
-    ctx.stroke();
-    ctx.fillStyle = P.gold;
+    // the two servers and their names
+    const live = build.fill >= 1;
     for (const x of [xa, xb]) {
+      const col = live ? P.water : P.gold;
+      ctx.fillStyle = P.night ? P.skyTop : "#fffaf1";
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.ellipse(x, yH, 18, 12, 0, Math.PI, 0);
+      ctx.arc(x, yN, R, 0, 6.28);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.arc(x, yN, 4, 0, 6.28);
       ctx.fill();
     }
     ctx.textAlign = "center";
     ctx.font = uiFont(600, 13);
     ctx.fillStyle = P.text;
-    ctx.fillText(byId(d.a).name, xa, yH - 26);
-    ctx.fillText(byId(d.b).name, xb, yH - 26);
+    ctx.fillText(byId(d.a).name, xa, yN - R - 14);
+    ctx.fillText(byId(d.b).name, xb, yN - R - 14);
   }
 })();

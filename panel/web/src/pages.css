@@ -391,7 +391,7 @@ pre.notes { max-height: 240px; overflow: auto; white-space: pre-wrap; }
 .srv:hover { border-color: var(--line-strong); }
 .srv.is-off { background: color-mix(in srgb, var(--card) 70%, var(--danger-soft)); }
 .srv-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--sp-3); }
-.srv-well { width: 42px; height: 42px; }
+.srv-mark { width: 42px; height: 42px; }
 .srv-id { min-width: 0; }
 .srv-name { display: flex; align-items: center; gap: var(--sp-2); font-weight: 600; font-size: var(--fs-md); overflow: hidden; }
 .srv-sub { font-size: var(--fs-xs); color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1016,21 +1016,22 @@ label.sp-opt { display: inline-flex; align-items: center; gap: var(--sp-2); min-
 }
 .wz-top h2 { margin: 0; font-size: var(--fs-lg); flex: 1; }
 
-/* the steps are wells on a horizon; the channel under them fills as you go */
-.wz-steps { position: relative; padding: var(--sp-2) var(--sp-6) var(--sp-5); border-bottom: var(--hairline) solid var(--line); }
+/* the steps are dots on a line; the line between them fills as you go */
+.wz-steps { position: relative; padding: var(--sp-3) var(--sp-6) var(--sp-4); border-bottom: var(--hairline) solid var(--line); }
 .wz-steps ol { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, 1fr); max-width: 900px; margin: 0 auto; padding: 0; list-style: none; }
 .wz-steps li { display: grid; justify-items: center; gap: 6px; font-size: var(--fs-xs); color: var(--text-3); text-align: center; }
-.wz-steps li .mound { width: 30px; height: 15px; border-radius: 15px 15px 0 0; background: var(--stratum-3); transition: background var(--dur-mid); }
-.wz-steps li.done .mound, .wz-steps li.now .mound { background: var(--accent); }
+.wz-steps li .mound { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--stratum-3); background: var(--card); box-sizing: border-box; transition: background var(--dur-mid), border-color var(--dur-mid); }
+.wz-steps li.done .mound { background: var(--accent); border-color: var(--accent); }
+.wz-steps li.now .mound { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
 .wz-steps li.now { color: var(--text); font-weight: 600; }
 .wz-steps li.done { color: var(--text-2); cursor: pointer; }
 .wz-steps li.done:hover { color: var(--accent); }
 .wz-channel, .wz-flow { max-width: calc(900px * 0.8); margin: 0 auto; }
-.wz-channel { position: absolute; inset-inline: calc(var(--sp-6) + 10%); top: calc(var(--sp-2) + 15px); height: 2px; background: var(--accent); opacity: 0.5; }
-.wz-flow { position: absolute; inset-inline: calc(var(--sp-6) + 10%); top: calc(var(--sp-2) + 15px + 22px); height: 6px; border-radius: 3px; background: var(--stratum-3); overflow: hidden; }
-.wz-flow i { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: 3px; background: linear-gradient(90deg, var(--water-deep), var(--water-bright)); transition: width 700ms var(--ease-water); }
+.wz-channel { display: none; }
+.wz-flow { position: absolute; inset-inline: calc(var(--sp-6) + 10%); top: calc(var(--sp-3) + 6px); height: 4px; border-radius: 2px; background: var(--stratum-3); overflow: hidden; }
+.wz-flow i { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: 2px; background: linear-gradient(90deg, var(--water-deep), var(--water-bright)); transition: width 700ms var(--ease-water); }
 [dir="rtl"] .wz-flow i { background: linear-gradient(270deg, var(--water-deep), var(--water-bright)); }
-.wz-steps li .lbl { margin-top: 22px; }
+.wz-steps li .lbl { margin-top: 2px; }
 
 .wz-body { overflow: auto; padding: var(--sp-6); }
 .wz-inner { max-width: 880px; margin: 0 auto; display: grid; gap: var(--sp-6); }
@@ -1052,7 +1053,7 @@ label.sp-opt { display: inline-flex; align-items: center; gap: var(--sp-2); min-
 .wz-foot .grow { flex: 1; }
 
 
-/* entry / exit well pickers */
+/* entry / exit server pickers */
 .pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--sp-4); align-items: start; }
 .pair-mid { display: grid; justify-items: center; gap: var(--sp-2); padding-top: 42px; color: var(--text-3); font-size: var(--fs-xs); }
 .pair-mid svg { width: 90px; height: 36px; }

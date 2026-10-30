@@ -433,14 +433,17 @@ export function MapPage({
 
 // ---------------------------------------------------------------- servers
 
-function Well({ level = 0.6, online = true }: { level?: number; online?: boolean }) {
-  const y = 40 - 14 * level;
+/** A server, with a bar of how busy it is (its CPU) on the side. */
+function ServerMark({ level = 0.6, online = true }: { level?: number; online?: boolean }) {
+  const h = Math.round(26 * Math.max(0.1, Math.min(1, level)));
   return (
-    <svg className="srv-well" viewBox="0 0 44 44" aria-hidden="true">
-      <path d="M4 16h36" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" />
-      <path d="M12 16a10 7 0 0 1 20 0Z" fill="var(--accent)" />
-      <rect x="18" y="16" width="8" height="25" rx="2" fill="var(--stratum-3)" />
-      <rect x="18" y={y} width="8" height={41 - y} rx="2" fill={online ? "var(--water)" : "var(--text-3)"} />
+    <svg className="srv-mark" viewBox="0 0 44 44" aria-hidden="true">
+      <rect x="6" y="9" width="24" height="11" rx="3" fill="none" stroke="var(--accent)" strokeWidth="2" />
+      <rect x="6" y="24" width="24" height="11" rx="3" fill="none" stroke="var(--accent)" strokeWidth="2" />
+      <circle cx="25" cy="14.5" r="1.8" fill={online ? "var(--water)" : "var(--text-3)"} />
+      <circle cx="25" cy="29.5" r="1.8" fill={online ? "var(--water)" : "var(--text-3)"} />
+      <rect x="35" y="9" width="4" height="26" rx="2" fill="var(--stratum-3)" />
+      <rect x="35" y={35 - h} width="4" height={h} rx="2" fill={online ? "var(--water)" : "var(--text-3)"} />
     </svg>
   );
 }
@@ -802,13 +805,10 @@ function AddServer({ servers, agentsOn, onClose }: { servers: ServerInfo[]; agen
           <div className={`waiting ${joined ? "done" : ""}`}>
             {!joined && (
               <svg className="qloader" viewBox="0 0 180 90" aria-hidden="true">
-                <path className="bed" d="M30 58 L158 76" />
-                <path className="flow" pathLength={1} d="M30 58 L158 76" />
-                <path className="shaft" d="M38 26 V58 M84 26 V64 M130 26 V70" />
-                <path className="ground" d="M8 26 H172" />
-                <path className="mound" d="M30 26 a8 6 0 0 1 16 0Z M76 26 a8 6 0 0 1 16 0Z M122 26 a8 6 0 0 1 16 0Z" />
-                <circle className="drop" cx="38" cy="26" r="4" />
-                <path className="out" d="M164 68 L178 77 L164 86 Z" />
+                <path className="bed" d="M32 45 C 70 15, 110 75, 148 45" />
+                <path className="flow" pathLength={1} d="M32 45 C 70 15, 110 75, 148 45" />
+                <circle className="node" cx="32" cy="45" r="11" />
+                <circle className="node far" cx="148" cy="45" r="11" />
               </svg>
             )}
             <span>{joined ? t("add.connected", { name: joined.name }) : t("add.waiting")}</span>
@@ -1043,7 +1043,7 @@ export function ServersPage({ servers, loaded, agentsOn, onChanged }: { servers:
             return (
               <li className={`srv card ${s.online ? "" : "is-off"}`} key={s.id}>
                 <header className="srv-head">
-                  <Well level={h?.cpu_pct != null ? Math.min(1, h.cpu_pct / 100 + 0.3) : 0.5} online={s.online} />
+                  <ServerMark level={h?.cpu_pct != null ? Math.min(1, h.cpu_pct / 100 + 0.3) : 0.5} online={s.online} />
                   <div className="srv-id">
                     <div className="srv-name">
                       {s.name}

@@ -49,7 +49,7 @@ export const ui = {
     version: "Version",
     footer: "SorTUN is source-available software. The site is built from the repository's docs.",
     notFound: "This page is not here.",
-    notFoundText: "The channel ends before this well. Try the documentation index or the search.",
+    notFoundText: "This address leads nowhere. Try the documentation index or the search.",
     backHome: "Back to the front page",
     docsIntro: "Start with Getting started. Come back to the reference when you need a specific setting.",
     demoTitle: "Try the panel",
@@ -86,7 +86,7 @@ export const ui = {
     version: "نسخه",
     footer: "SorTUN سورس‌در‌دسترس است. این سایت از مستندات همین مخزن ساخته می‌شود.",
     notFound: "این صفحه اینجا نیست.",
-    notFoundText: "مجرا پیش از این چاه تمام می‌شود. فهرست مستندات یا جستجو را امتحان کنید.",
+    notFoundText: "این آدرس به جایی نمی‌رسد. فهرست مستندات یا جستجو را امتحان کنید.",
     backHome: "بازگشت به صفحهٔ اول",
     docsIntro: "از «شروع کار» آغاز کنید. برای یک تنظیم مشخص به صفحه‌های مرجع برگردید.",
     demoTitle: "پنل را امتحان کنید",
@@ -105,7 +105,7 @@ export interface Section {
 
 /** The map of the docs. A slug is the file name of a page in `docs/`, lower case. */
 export const SECTIONS: Section[] = [
-  { id: "start", title: { en: "Get started", fa: "شروع کار" }, pages: ["getting-started", "using-the-panel", "video", "tour", "manager", "panel"] },
+  { id: "start", title: { en: "Get started", fa: "شروع کار" }, pages: ["getting-started", "using-the-panel", "tour", "manager", "panel"] },
   { id: "concepts", title: { en: "Concepts", fa: "مفاهیم" }, pages: ["how-it-works", "transports", "profiles", "udp-and-games", "cdn"] },
   { id: "guides", title: { en: "Guides", fa: "راهنماها" }, pages: ["networks", "troubleshooting", "speedtest", "telegram", "performance"] },
   { id: "reference", title: { en: "Reference", fa: "مرجع" }, pages: ["configuration", "status", "accessibility"] },
@@ -120,7 +120,6 @@ export const LABELS: Record<string, Record<Lang, string>> = {
   panel: { en: "The web panel", fa: "پنل وب" },
   "using-the-panel": { en: "Using the panel", fa: "کار با پنل" },
   tour: { en: "Guided tour", fa: "تور راهنما" },
-  video: { en: "Video tutorial", fa: "ویدیوی آموزشی" },
   "how-it-works": { en: "How it works", fa: "چطور کار می‌کند" },
   transports: { en: "Transports", fa: "ترنسپورت‌ها" },
   profiles: { en: "Profiles", fa: "پروفایل‌ها" },
@@ -142,7 +141,7 @@ export const LABELS: Record<string, Record<Lang, string>> = {
 };
 
 /** Pages made by the site itself (not a file of docs/): they exist in both languages. */
-export const OWN_PAGES = new Set(["how-it-works", "tour", "video"]);
+export const OWN_PAGES = new Set(["how-it-works", "tour"]);
 
 export const sectionOf = (slug: string) => SECTIONS.find((s) => s.pages.includes(slug));
 

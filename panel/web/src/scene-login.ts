@@ -1,6 +1,7 @@
-// The login scene: a desert night, three wells and a channel of flowing water. A wrong
-// password ripples the water; a right one descends the view into the dashboard.
-import { clamp, easeInOut, fitCanvas, lerp, rgba, rng, smooth } from "./draw";
+// The login scene: a quiet network of servers, drifting slowly, with light moving along the
+// links between them. A wrong password sends a ring out from the middle; a right one zooms
+// into the network, and the dashboard comes after it.
+import { clamp, easeInOut, fitCanvas, lerp, rgba, rng } from "./draw";
 import type { Palette } from "./draw";
 
 export interface LoginSceneOptions {
@@ -10,33 +11,43 @@ export interface LoginSceneOptions {
 }
 
 export interface LoginScene {
-  /** Starts the descent; `done` runs when it ends. */
+  /** Starts the zoom; `done` runs when it ends. */
   descend: (done: () => void) => void;
   ripple: () => void;
   stop: () => void;
 }
 
-interface Star {
+interface Node {
+  /** Where it rests, as a share of the screen. */
   x: number;
   y: number;
-  z: number;
+  /** How far and how fast it drifts. */
+  ax: number;
+  ay: number;
   ph: number;
-  sp: number;
-  gold: boolean;
+  r: number;
+  /** Nearer nodes move more with the pointer. */
+  z: number;
+}
+
+interface Link {
+  a: number;
+  b: number;
+  /** Light along the link: where each one is (0-1) and its speed. */
+  sparks: { k: number; sp: number }[];
 }
 
 export function startLoginScene(canvas: HTMLCanvasElement, opts: LoginSceneOptions): LoginScene {
   let raf = 0;
   let stopped = false;
-  let descentStart = -1;
+  let zoomStart = -1;
   let onDone: (() => void) | null = null;
   let rippleAt = -1;
   let mx = 0.5;
   let my = 0.5;
   let seededFor = "";
-  let stars: Star[] = [];
-  let parts: { k: number; sp: number; s: number }[] = [];
-  let shoot: { x: number; y: number; t0: number } | null = null;
+  let nodes: Node[] = [];
+  let links: Link[] = [];
 
   const onMove = (e: PointerEvent) => {
     mx = e.clientX / innerWidth;
@@ -46,15 +57,32 @@ export function startLoginScene(canvas: HTMLCanvasElement, opts: LoginSceneOptio
 
   const seed = (W: number, H: number) => {
     const r = rng(7);
-    stars = Array.from({ length: Math.round((W * H) / 5200) }, () => ({
-      x: r(),
-      y: r(),
-      z: 0.3 + r() * 0.7,
+    const count = clamp(Math.round((W * H) / 52000), 12, 34);
+    nodes = Array.from({ length: count }, () => ({
+      x: 0.04 + r() * 0.92,
+      y: 0.06 + r() * 0.88,
+      ax: 6 + r() * 14,
+      ay: 6 + r() * 14,
       ph: r() * 6.28,
-      sp: 0.6 + r() * 1.8,
-      gold: r() < 0.18,
+      r: 1.8 + r() * 2.6,
+      z: 0.3 + r() * 0.7,
     }));
-    parts = Array.from({ length: 34 }, (_, i) => ({ k: i / 34, sp: 0.07 + r() * 0.05, s: 0.6 + r() * 0.7 }));
+    // Each node is linked to its two nearest, once.
+    const seen = new Set<string>();
+    links = [];
+    nodes.forEach((n, i) => {
+      const near = nodes
+        .map((m, j) => ({ j, d: Math.hypot((m.x - n.x) * W, (m.y - n.y) * H) }))
+        .filter((o) => o.j !== i)
+        .sort((p, q) => p.d - q.d)
+        .slice(0, 2);
+      for (const { j } of near) {
+        const k = i < j ? `${i}-${j}` : `${j}-${i}`;
+        if (seen.has(k)) continue;
+        seen.add(k);
+        links.push({ a: i, b: j, sparks: r() < 0.55 ? [{ k: r(), sp: 0.12 + r() * 0.18 }] : [] });
+      }
+    });
     seededFor = `${W}x${H}`;
   };
 
@@ -67,222 +95,107 @@ export function startLoginScene(canvas: HTMLCanvasElement, opts: LoginSceneOptio
     const time = now / 1000;
     const still = opts.low();
     const rtl = opts.rtl();
-    const S = clamp(W / 1000, 0.55, 1.15);
-    const yH = H * (H < 860 ? 0.74 : 0.68);
-    const cx = W / 2;
-    const flip = (x: number) => (rtl ? W - x : x);
 
-    // The camera for the descent.
+    // The zoom into the middle, when the password was right.
     let p = 0;
-    if (descentStart >= 0) p = clamp((now - descentStart) / (still ? 250 : 1200), 0, 1);
+    if (zoomStart >= 0) p = clamp((now - zoomStart) / (still ? 250 : 1100), 0, 1);
     const e = easeInOut(p);
-    const fx = cx;
-    const fy = yH + 40 * S;
-    const zoom = 1 + e * 2.6;
-    const sx = lerp(fx, W / 2, e);
-    const sy = lerp(fy, H * 0.3, e);
+    const scale = 1 + e * 2.2;
 
-    ctx.save();
-    ctx.clearRect(0, 0, W, H);
-    ctx.translate(sx, sy);
-    ctx.scale(zoom, zoom);
-    ctx.translate(-fx, -fy);
-
-    const sky = ctx.createLinearGradient(0, 0, 0, yH);
-    sky.addColorStop(0, P.skyTop);
-    sky.addColorStop(0.7, P.bg);
-    sky.addColorStop(1, P.s2);
-    ctx.fillStyle = sky;
-    ctx.fillRect(-W, -H, W * 3, yH + H);
-
-    const glow = ctx.createRadialGradient(cx, yH, 0, cx, yH, W * 0.6);
-    glow.addColorStop(0, rgba(P.gold, P.night ? 0.16 : 0.3));
-    glow.addColorStop(1, rgba(P.gold, 0));
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, P.bg);
+    bg.addColorStop(1, P.skyTop);
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+    const glow = ctx.createRadialGradient(W / 2, H * 0.55, 0, W / 2, H * 0.55, Math.max(W, H) * 0.6);
+    glow.addColorStop(0, rgba(P.water, P.night ? 0.1 : 0.12));
+    glow.addColorStop(1, rgba(P.water, 0));
     ctx.fillStyle = glow;
-    ctx.fillRect(-W, 0, W * 3, yH);
+    ctx.fillRect(0, 0, W, H);
 
-    // Stars, with a little parallax.
-    const px = (mx - 0.5) * 14;
-    const py = (my - 0.5) * 8;
-    for (const s of stars) {
-      const y = s.y * (yH - 40);
-      if (y > yH - 30) continue;
-      const tw = still ? 0.8 : 0.55 + 0.45 * Math.sin(time * s.sp + s.ph);
-      const a = (P.night ? 0.9 : 0.25) * s.z * tw * (1 - (y / yH) * 0.6);
-      ctx.fillStyle = s.gold ? rgba(P.gold, a) : P.night ? `rgba(233,240,255,${a})` : rgba(P.gold, a * 0.7);
-      ctx.beginPath();
-      ctx.arc(s.x * W + px * s.z, y + py * s.z, s.z * 1.3, 0, 6.28);
-      ctx.fill();
-    }
-
-    // A shooting star now and then, at night.
-    if (P.night && !still) {
-      if (!shoot && Math.random() < 0.004) shoot = { x: Math.random() * W * 0.7, y: Math.random() * yH * 0.35, t0: time };
-      if (shoot) {
-        const k = (time - shoot.t0) / 0.9;
-        if (k > 1) shoot = null;
-        else {
-          const x = shoot.x + k * 260;
-          const y = shoot.y + k * 90;
-          const g = ctx.createLinearGradient(x - 90, y - 31, x, y);
-          g.addColorStop(0, "rgba(255,255,255,0)");
-          g.addColorStop(1, `rgba(255,248,225,${0.8 * (1 - k)})`);
-          ctx.strokeStyle = g;
-          ctx.lineWidth = 1.4;
-          ctx.beginPath();
-          ctx.moveTo(x - 90, y - 31);
-          ctx.lineTo(x, y);
-          ctx.stroke();
-        }
-      }
-    }
-
-    // Dunes.
-    const dune = (amp: number, base: number, freq: number, off: number, color: string, par: number) => {
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(-W, yH);
-      for (let x = -W; x <= W * 2; x += 12) {
-        const y = yH - base - amp * (0.6 * Math.sin(x * freq + off) + 0.4 * Math.sin(x * freq * 2.3 + off * 1.7));
-        ctx.lineTo(x + px * par, Math.min(yH, y));
-      }
-      ctx.lineTo(W * 2, yH);
-      ctx.closePath();
-      ctx.fill();
-    };
-    dune(22 * S, 18 * S, 0.004, 1.2, rgba(P.night ? "#14294a" : "#e8cfa0", P.night ? 0.8 : 0.9), 0.5);
-    dune(14 * S, 4 * S, 0.007, 3.1, P.night ? "#0e2036" : "#dfc28c", 1);
-
-    // The earth below the horizon.
-    const earth = ctx.createLinearGradient(0, yH, 0, H);
-    earth.addColorStop(0, P.earth);
-    earth.addColorStop(1, P.skyTop);
-    ctx.fillStyle = earth;
-    ctx.fillRect(-W, yH, W * 3, H * 2);
-    ctx.strokeStyle = rgba(P.gold, 0.07);
-    ctx.lineWidth = 1;
-    for (let i = 1; i < 5; i++) {
-      const y = yH + i * 34 * S + i * i * 3;
-      ctx.beginPath();
-      ctx.moveTo(-W, y);
-      ctx.lineTo(W * 2, y + 6);
-      ctx.stroke();
-    }
-
-    // The channel and its wells.
-    const c0 = { x: flip(cx - 300 * S), y: yH + 62 * S };
-    const c1 = { x: flip(cx + 270 * S), y: yH + 104 * S };
-    const chY = (x: number) => c0.y + ((x - c0.x) / (c1.x - c0.x)) * (c1.y - c0.y);
-    const wells = [-170, 0, 170].map((d) => flip(cx + d * S));
-    ctx.strokeStyle = rgba(P.gold, 0.5);
-    ctx.lineWidth = 5 * S;
-    ctx.lineCap = "round";
-    for (const x of wells) {
-      ctx.beginPath();
-      ctx.moveTo(x, yH);
-      ctx.lineTo(x, chY(x));
-      ctx.stroke();
-    }
-
-    // The ripple after a wrong password.
-    let rip = 0;
-    if (rippleAt >= 0) {
-      const dt = (now - rippleAt) / 1000;
-      rip = dt > 1.6 ? 0 : Math.exp(-dt * 2.6);
-      if (!rip) rippleAt = -1;
-    }
-    const wave = (x: number) => (rip ? Math.sin(x * 0.06 - time * 18) * 5 * S * rip : 0);
-    const channel = (width: number, style: string | CanvasGradient) => {
-      ctx.strokeStyle = style;
-      ctx.lineWidth = width;
-      ctx.beginPath();
-      for (let i = 0; i <= 60; i++) {
-        const x = lerp(c0.x, c1.x, i / 60);
-        const y = chY(x) + wave(x);
-        if (i) ctx.lineTo(x, y);
-        else ctx.moveTo(x, y);
-      }
-      ctx.stroke();
-    };
-    channel(30 * S, P.night ? "#06121f" : "#cdb489");
-    const wg = ctx.createLinearGradient(c0.x, 0, c1.x, 0);
-    wg.addColorStop(0, P.waterDeep);
-    wg.addColorStop(0.6, P.water);
-    wg.addColorStop(1, P.waterBright);
-    channel(18 * S, wg);
-    if (rip) channel(18 * S, rgba(P.danger, rip * 0.55));
     ctx.save();
-    ctx.setLineDash([14 * S, 18 * S]);
-    ctx.lineDashOffset = still ? 0 : -time * 40 * S * (rtl ? -1 : 1);
-    channel(3 * S, P.night ? "rgba(232,255,252,.75)" : "rgba(255,255,255,.7)");
-    ctx.restore();
+    ctx.translate(W / 2, H / 2);
+    ctx.scale(scale, scale);
+    ctx.translate(-W / 2, -H / 2);
 
-    if (!still) {
+    const at = nodes.map((n) => {
+      const drift = still ? 0 : 1;
+      const px = (mx - 0.5) * 24 * n.z;
+      const py = (my - 0.5) * 18 * n.z;
+      const x = n.x * W + drift * Math.sin(time * 0.15 + n.ph) * n.ax + px;
+      return {
+        x: rtl ? W - x : x,
+        y: n.y * H + drift * Math.cos(time * 0.12 + n.ph) * n.ay + py,
+      };
+    });
+
+    ctx.lineCap = "round";
+    for (const l of links) {
+      const a = at[l.a];
+      const b = at[l.b];
+      const z = (nodes[l.a].z + nodes[l.b].z) / 2;
+      ctx.strokeStyle = rgba(P.text3, (P.night ? 0.22 : 0.3) * z);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+      if (still) continue;
       ctx.globalCompositeOperation = P.night ? "lighter" : "source-over";
-      for (const q of parts) {
-        q.k = (q.k + q.sp / 60) % 1;
-        const x = lerp(c0.x, c1.x, q.k);
-        const y = chY(x) + wave(x) + Math.sin(q.k * 40 + q.s * 9) * 3 * S;
-        const r = 9 * S * q.s;
-        ctx.drawImage(P.sprite, x - r, y - r, r * 2, r * 2);
+      for (const s of l.sparks) {
+        s.k = (s.k + s.sp * 0.016) % 1;
+        const r = 5 * z;
+        ctx.globalAlpha = 0.9;
+        ctx.drawImage(P.sprite, lerp(a.x, b.x, s.k) - r, lerp(a.y, b.y, s.k) - r, r * 2, r * 2);
       }
+      ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = "source-over";
     }
 
-    // Mounds, the horizon and the outlet (the water leaves as an arrow).
-    ctx.fillStyle = P.gold;
-    for (const x of wells) {
+    nodes.forEach((n, i) => {
+      const { x, y } = at[i];
+      const twinkle = still ? 1 : 0.75 + 0.25 * Math.sin(time * 1.1 + n.ph);
+      ctx.fillStyle = rgba(i % 5 === 0 ? P.gold : P.water, 0.18 * n.z);
       ctx.beginPath();
-      ctx.ellipse(x, yH, 20 * S, 14 * S, 0, Math.PI, 0);
+      ctx.arc(x, y, n.r * 3, 0, 6.28);
       ctx.fill();
-    }
-    ctx.strokeStyle = P.gold;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(-W, yH);
-    ctx.lineTo(W * 2, yH);
-    ctx.stroke();
-
-    const ox = c1.x + (rtl ? -34 : 34) * S;
-    const oy = c1.y + 6 * S;
-    const pulse = still ? 1 : 1 + 0.12 * Math.sin(time * 3);
-    const og = ctx.createRadialGradient(ox, oy, 0, ox, oy, 60 * S * pulse);
-    og.addColorStop(0, rgba(P.waterBright, 0.45));
-    og.addColorStop(1, rgba(P.waterBright, 0));
-    ctx.fillStyle = og;
-    ctx.fillRect(ox - 80 * S, oy - 80 * S, 160 * S, 160 * S);
-    ctx.fillStyle = P.waterBright;
-    ctx.strokeStyle = P.waterBright;
-    ctx.lineWidth = 6 * S;
-    ctx.lineJoin = "round";
-    const d = rtl ? -1 : 1;
-    ctx.beginPath();
-    ctx.moveTo(ox - 16 * S * d, oy - 20 * S);
-    ctx.lineTo(ox + 20 * S * d, oy);
-    ctx.lineTo(ox - 16 * S * d, oy + 20 * S);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+      ctx.fillStyle = rgba(i % 5 === 0 ? P.gold : P.waterBright, 0.85 * n.z * twinkle);
+      ctx.beginPath();
+      ctx.arc(x, y, n.r, 0, 6.28);
+      ctx.fill();
+    });
     ctx.restore();
 
-    // The end of the descent: the earth fills the view.
-    if (p > 0) {
-      ctx.fillStyle = rgba(P.bg, smooth(0.5, 1, p));
-      ctx.fillRect(0, 0, W, H);
+    // A wrong password: one red ring out from the middle.
+    if (rippleAt >= 0) {
+      const k = clamp((now - rippleAt) / (still ? 300 : 900), 0, 1);
+      if (k >= 1) rippleAt = -1;
+      else {
+        ctx.strokeStyle = rgba(P.danger, 0.55 * (1 - k));
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(W / 2, H / 2, 40 + k * Math.max(W, H) * 0.45, 0, 6.28);
+        ctx.stroke();
+      }
     }
-    if (p >= 1 && descentStart >= 0) {
-      descentStart = -1;
-      const done = onDone;
-      onDone = null;
-      done?.();
+
+    // The zoom ends in the page's own colour, so the dashboard comes in without a jump.
+    if (p > 0) {
+      ctx.fillStyle = rgba(P.bg, smoothEnd(e));
+      ctx.fillRect(0, 0, W, H);
+      if (p >= 1 && onDone) {
+        const done = onDone;
+        onDone = null;
+        done();
+      }
     }
   };
   raf = requestAnimationFrame(frame);
 
   return {
     descend(done) {
+      zoomStart = performance.now();
       onDone = done;
-      descentStart = performance.now();
     },
     ripple() {
       rippleAt = performance.now();
@@ -293,4 +206,9 @@ export function startLoginScene(canvas: HTMLCanvasElement, opts: LoginSceneOptio
       removeEventListener("pointermove", onMove);
     },
   };
+}
+
+/** The cover over the zoom: none for most of it, all of it at the end. */
+function smoothEnd(e: number): number {
+  return clamp((e - 0.55) / 0.45, 0, 1);
 }

@@ -1,7 +1,7 @@
-// The map: servers are wells on the horizon, tunnels are channels of water between them,
-// and the traffic is the particles in the water. Drawn on a canvas; the page around it
-// (numbers, tooltip, text alternative) is React.
-import { clamp, fitCanvas, lerp, quad, rgba, rng, uiFont } from "./draw";
+// The map: servers are nodes, tunnels are the links between them, and the traffic is the
+// particles moving along a link. Drawn on a canvas; the page around it (numbers, tooltip, text
+// alternative) is React.
+import { clamp, fitCanvas, lerp, quad, rgba, uiFont } from "./draw";
 import type { Palette } from "./draw";
 
 export interface MapServer {
@@ -19,7 +19,7 @@ export interface MapTunnel {
   st: "up" | "down" | "off";
   /** Mbit/s, both directions together. */
   rate: number;
-  /** The tunnel's name, on the channel. */
+  /** The tunnel's name, on its link. */
   label: string;
   /** Next to the name: the rate while it flows, else its state. */
   value: string;
@@ -50,18 +50,40 @@ interface Particle {
   k: number;
   dir: number;
   s: number;
-  j: number;
+}
+
+interface Point {
+  x: number;
+  y: number;
 }
 
 interface Geo {
   key: string;
-  yH: number;
   narrow: boolean;
-  pos: Record<string, number>;
-  chans: { t: MapTunnel; pts: { x: number; y: number }[]; len: number }[];
-  depth: Record<string, number>;
-  stars: { x: number; y: number; z: number; ph: number }[];
-  pebbles: { x: number; y: number; r: number }[];
+  /** The node's radius. */
+  r: number;
+  pos: Record<string, Point>;
+  links: { t: MapTunnel; pts: Point[]; len: number }[];
+}
+
+/** Where the nodes go: one in the middle, two side by side, more around an ellipse. */
+function place(ids: string[], W: number, H: number, narrow: boolean, rtl: boolean): Record<string, Point> {
+  const pos: Record<string, Point> = {};
+  const n = ids.length;
+  const padX = narrow ? 56 : 120;
+  const padY = narrow ? 52 : 64;
+  ids.forEach((id, i) => {
+    let p: Point;
+    if (n === 1) p = { x: W / 2, y: H / 2 - 12 };
+    else if (n === 2) p = { x: i === 0 ? padX + 40 : W - padX - 40, y: H / 2 - 12 };
+    else {
+      // From the top, clockwise, so the first server (this one) is where the eye starts.
+      const a = -Math.PI / 2 + (i * 2 * Math.PI) / n;
+      p = { x: W / 2 + Math.cos(a) * (W / 2 - padX), y: H / 2 - 8 + Math.sin(a) * (H / 2 - padY) };
+    }
+    pos[id] = rtl ? { x: W - p.x, y: p.y } : p;
+  });
+  return pos;
 }
 
 export function startMap(canvas: HTMLCanvasElement, opts: MapOptions): () => void {
@@ -69,57 +91,56 @@ export function startMap(canvas: HTMLCanvasElement, opts: MapOptions): () => voi
   let stopped = false;
   let geo: Geo | null = null;
   let last = 0;
-  let mouse: { x: number; y: number } | null = null;
+  let mouse: Point | null = null;
   let hover: MapHit | null = null;
   const fill = new Map<string, number>();
   const parts = new Map<string, Particle[]>();
 
   const layout = (W: number, H: number): Geo => {
     const { servers, tunnels } = opts.data();
-    const rtl = opts.rtl();
     const narrow = W < 640;
-    const yH = narrow ? 110 : 150;
-    const pad = narrow ? 44 : 110;
-    const n = servers.length;
-    const pos: Record<string, number> = {};
-    servers.forEach((s, i) => {
-      const x = n === 1 ? W / 2 : pad + (i * (W - 2 * pad)) / (n - 1);
-      pos[s.id] = rtl ? W - x : x;
-    });
-    const base = yH + (narrow ? 52 : 64);
-    const levels = Math.max(1, tunnels.length);
-    const step = Math.min(narrow ? 32 : 38, (H - base - 44) / Math.max(1, levels - 1));
-    const depth: Record<string, number> = {};
-    const chans = tunnels
-      .filter((t) => pos[t.a] !== undefined && pos[t.b] !== undefined)
-      .map((t, level) => {
-        const y0 = base + level * step;
-        const p0 = { x: pos[t.a], y: y0 };
-        const p1 = { x: pos[t.b], y: y0 + 16 };
-        const c = { x: (p0.x + p1.x) / 2, y: y0 + 26 };
+    const pos = place(
+      servers.map((s) => s.id),
+      W,
+      H,
+      narrow,
+      opts.rtl(),
+    );
+    // Links between the same two servers bend apart, one to each side in turn.
+    const seen = new Map<string, number>();
+    const links = tunnels
+      .filter((t) => pos[t.a] && pos[t.b])
+      .map((t) => {
+        const pair = [t.a, t.b].sort().join("|");
+        const k = seen.get(pair) ?? 0;
+        seen.set(pair, k + 1);
+        const p0 = pos[t.a];
+        const p1 = pos[t.b];
+        const dx = p1.x - p0.x;
+        const dy = p1.y - p0.y;
+        const d = Math.hypot(dx, dy) || 1;
+        // The normal, turned away from the middle of the map so links curve outwards.
+        let nx = -dy / d;
+        let ny = dx / d;
+        const mid = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
+        if ((mid.x - W / 2) * nx + (mid.y - H / 2) * ny < 0) {
+          nx = -nx;
+          ny = -ny;
+        }
+        const side = k % 2 === 0 ? 1 : -1;
+        const bend = (0.12 * d + Math.ceil(k / 2) * (narrow ? 22 : 30)) * (k === 0 ? 1 : side);
+        const c = { x: mid.x + nx * bend, y: mid.y + ny * bend };
         const pts = Array.from({ length: 61 }, (_, i) => quad(p0, c, p1, i / 60));
         let len = 0;
         for (let i = 1; i < pts.length; i++) len += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
-        depth[t.a] = Math.max(depth[t.a] ?? 0, p0.y);
-        depth[t.b] = Math.max(depth[t.b] ?? 0, p1.y);
         return { t, pts, len };
       });
-    const r = rng(11);
-    return {
-      key: key(W, H),
-      yH,
-      narrow,
-      pos,
-      chans,
-      depth,
-      stars: Array.from({ length: Math.round(W / 14) }, () => ({ x: r() * W, y: r() * (yH - 70) + 6, z: 0.3 + r() * 0.7, ph: r() * 6.28 })),
-      pebbles: Array.from({ length: Math.round(W / 9) }, () => ({ x: r() * W, y: yH + 10 + r() * (H - yH - 14), r: 0.6 + r() * 1.4 })),
-    };
+    return { key: key(W, H), narrow, r: narrow ? 14 : 18, pos, links };
   };
 
   const key = (W: number, H: number) => {
     const { servers, tunnels } = opts.data();
-    return `${W}x${H}${opts.rtl()}${servers.map((s) => s.id).join()}|${tunnels.map((t) => t.id).join()}`;
+    return `${W}x${H}${opts.rtl()}${servers.map((s) => s.id).join()}|${tunnels.map((t) => `${t.id}${t.a}${t.b}`).join()}`;
   };
 
   const frame = (now: number) => {
@@ -142,57 +163,23 @@ export function startMap(canvas: HTMLCanvasElement, opts: MapOptions): () => voi
     const rtl = opts.rtl();
     ctx.clearRect(0, 0, W, H);
 
-    // Sky.
-    const sky = ctx.createLinearGradient(0, 0, 0, g.yH);
-    sky.addColorStop(0, P.bg);
-    sky.addColorStop(1, P.s1);
-    ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, W, g.yH);
-    const gx = W * (rtl ? 0.25 : 0.75);
-    const glow = ctx.createRadialGradient(gx, g.yH, 0, gx, g.yH, W * 0.5);
-    glow.addColorStop(0, rgba(P.gold, P.night ? 0.12 : 0.22));
-    glow.addColorStop(1, rgba(P.gold, 0));
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, W, g.yH);
-    for (const s of g.stars) {
-      const a = (P.night ? 0.7 : 0.2) * s.z * (still ? 0.8 : 0.6 + 0.4 * Math.sin(time * 1.3 + s.ph));
-      ctx.fillStyle = P.night ? `rgba(233,240,255,${a})` : rgba(P.gold, a);
-      ctx.fillRect(s.x, s.y, s.z * 1.6, s.z * 1.6);
+    // The ground: a quiet grid of dots.
+    ctx.fillStyle = rgba(P.text3, P.night ? 0.16 : 0.22);
+    const step = g.narrow ? 22 : 28;
+    for (let y = step / 2; y < H; y += step) {
+      for (let x = step / 2; x < W; x += step) ctx.fillRect(x - 0.75, y - 0.75, 1.5, 1.5);
     }
 
-    // Earth.
-    const earth = ctx.createLinearGradient(0, g.yH, 0, H);
-    earth.addColorStop(0, P.earth);
-    earth.addColorStop(1, P.night ? P.skyTop : P.s2);
-    ctx.fillStyle = earth;
-    ctx.fillRect(0, g.yH, W, H - g.yH);
-    ctx.fillStyle = rgba(P.gold, P.night ? 0.07 : 0.12);
-    for (const q of g.pebbles) {
-      ctx.beginPath();
-      ctx.arc(q.x, q.y, q.r, 0, 6.28);
-      ctx.fill();
-    }
-
-    // Shafts.
+    // Links.
     ctx.lineCap = "round";
-    for (const s of servers) {
-      ctx.strokeStyle = rgba(P.gold, 0.45);
-      ctx.lineWidth = g.narrow ? 3 : 4;
-      ctx.beginPath();
-      ctx.moveTo(g.pos[s.id], g.yH);
-      ctx.lineTo(g.pos[s.id], (g.depth[s.id] ?? g.yH + 40) + 4);
-      ctx.stroke();
-    }
-
-    // Channels.
-    for (const ch of g.chans) {
+    for (const ch of g.links) {
       const t = current(ch.t);
       const lit = hover?.kind === "tunnel" && hover.id === t.id;
       const target = t.st === "off" ? 0 : 1;
       const cur = fill.get(t.id) ?? 0;
       const speed = still ? 10 : 1.1;
-      const now2 = cur < target ? Math.min(target, cur + dt * speed) : Math.max(target, cur - dt * speed);
-      fill.set(t.id, now2);
+      const shown = cur < target ? Math.min(target, cur + dt * speed) : Math.max(target, cur - dt * speed);
+      fill.set(t.id, shown);
       const reach = t.st === "down" ? 0.55 : 1;
       const path = (from: number, to: number) => {
         ctx.beginPath();
@@ -201,11 +188,11 @@ export function startMap(canvas: HTMLCanvasElement, opts: MapOptions): () => voi
           else ctx.lineTo(ch.pts[i].x, ch.pts[i].y);
         }
       };
-      ctx.lineWidth = g.narrow ? 12 : 16;
-      ctx.strokeStyle = P.night ? "#06121f" : "#cdb489";
+      ctx.lineWidth = g.narrow ? 8 : 10;
+      ctx.strokeStyle = rgba(P.text3, P.night ? (lit ? 0.3 : 0.16) : lit ? 0.32 : 0.2);
       path(0, 1);
       ctx.stroke();
-      if (t.st === "off" || now2 < 1) {
+      if (t.st === "off" || shown < 1) {
         ctx.save();
         ctx.setLineDash([4, 6]);
         ctx.lineWidth = 1.2;
@@ -214,21 +201,21 @@ export function startMap(canvas: HTMLCanvasElement, opts: MapOptions): () => voi
         ctx.stroke();
         ctx.restore();
       }
-      const w = Math.min(now2, reach);
+      const w = Math.min(shown, reach);
       if (w > 0.01) {
         const a = ch.pts[0];
         const b = ch.pts[60];
-        const grad = ctx.createLinearGradient(a.x, 0, b.x, 0);
+        const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
         grad.addColorStop(0, P.waterDeep);
         grad.addColorStop(1, lit ? P.waterBright : P.water);
-        ctx.lineWidth = g.narrow ? 6 : 8;
+        ctx.lineWidth = g.narrow ? 3.5 : 4.5;
         ctx.strokeStyle = grad;
         ctx.globalAlpha = still ? 0.35 + 0.65 * clamp(t.rate / 400, 0.2, 1) : 1;
         path(0, w);
         ctx.stroke();
         ctx.globalAlpha = 1;
       }
-      if (t.st === "down" && now2 > 0.5) {
+      if (t.st === "down" && shown > 0.5) {
         const b = ch.pts[Math.round(reach * 60)];
         const k = still ? 0.5 : (time * 0.8) % 1;
         ctx.strokeStyle = rgba(P.danger, 1 - k);
@@ -248,12 +235,12 @@ export function startMap(canvas: HTMLCanvasElement, opts: MapOptions): () => voi
         ctx.stroke();
         ctx.restore();
       }
-      // Particles: downloads flow from the exit to the entry, uploads the other way.
+      // Particles: downloads move from the exit to the entry, uploads the other way.
       if (!still && t.st === "up") {
         const list = parts.get(t.id) ?? [];
         parts.set(t.id, list);
-        const want = Math.round(clamp(6 + t.rate / 9, 6, 56));
-        while (list.length < want) list.push({ k: Math.random(), dir: Math.random() < 0.8 ? -1 : 1, s: 0.5 + Math.random() * 0.7, j: Math.random() * 6 });
+        const want = Math.round(clamp(5 + t.rate / 10, 5, 48));
+        while (list.length < want) list.push({ k: Math.random(), dir: Math.random() < 0.8 ? -1 : 1, s: 0.5 + Math.random() * 0.7 });
         list.length = Math.min(list.length, want);
         const v = clamp(50 + t.rate * 0.35, 50, 240) / ch.len;
         ctx.globalCompositeOperation = P.night ? "lighter" : "source-over";
@@ -261,30 +248,28 @@ export function startMap(canvas: HTMLCanvasElement, opts: MapOptions): () => voi
           q.k += q.dir * v * dt * (q.dir < 0 ? 1 : 0.8);
           if (q.k < 0) q.k += 1;
           if (q.k > 1) q.k -= 1;
-          if (q.k > now2) continue;
+          if (q.k > shown) continue;
           const i = q.k * 60;
           const i0 = Math.floor(i);
           const f = i - i0;
           const a = ch.pts[i0];
           const b = ch.pts[Math.min(60, i0 + 1)];
-          const x = lerp(a.x, b.x, f);
-          const y = lerp(a.y, b.y, f) + Math.sin(time * 3 + q.j) * 1.5;
-          const r = (q.dir < 0 ? 7 : 5) * q.s * (g.narrow ? 0.8 : 1);
+          const r = (q.dir < 0 ? 6 : 4.5) * q.s * (g.narrow ? 0.8 : 1);
           ctx.globalAlpha = q.dir < 0 ? 1 : 0.6;
-          ctx.drawImage(P.sprite, x - r, y - r, r * 2, r * 2);
+          ctx.drawImage(P.sprite, lerp(a.x, b.x, f) - r, lerp(a.y, b.y, f) - r, r * 2, r * 2);
         }
         ctx.globalAlpha = 1;
         ctx.globalCompositeOperation = "source-over";
       }
     }
 
-    // Channel labels: a pill with the name, and the rate (or the state) after it. Each part
-    // is drawn on its own, left to right, so a number and its unit never turn around in RTL.
+    // Link labels: a pill with the name, and the rate (or the state) after it. Each part is
+    // drawn on its own, left to right, so a number and its unit never turn around in RTL.
     ctx.textBaseline = "middle";
     ctx.direction = "ltr";
-    g.chans.forEach((ch, i) => {
+    g.links.forEach((ch, i) => {
       const t = current(ch.t);
-      const p = ch.pts[Math.round((0.3 + 0.13 * (i % 3)) * 60)];
+      const p = ch.pts[Math.round((0.42 + 0.08 * (i % 3)) * 60)];
       const fs = g.narrow ? 10 : 12;
       const nameFont = uiFont(600, fs);
       const valueFont = uiFont(500, fs);
@@ -297,9 +282,9 @@ export function startMap(canvas: HTMLCanvasElement, opts: MapOptions): () => voi
       const w = nw + gap + vw + padX * 2 + 8;
       const h = g.narrow ? 18 : 22;
       const x = clamp(p.x - w / 2, 6, W - w - 6);
-      const y = p.y - (g.narrow ? 13 : 17);
+      const y = clamp(p.y, h, H - h);
       const lit = hover?.kind === "tunnel" && hover.id === t.id;
-      ctx.fillStyle = rgba(P.night ? P.skyTop : "#fffaf1", P.night ? 0.88 : 0.94);
+      ctx.fillStyle = rgba(P.night ? P.skyTop : "#fffaf1", P.night ? 0.92 : 0.96);
       ctx.beginPath();
       ctx.roundRect(x, y - h / 2, w, h, h / 2);
       ctx.fill();
@@ -325,38 +310,50 @@ export function startMap(canvas: HTMLCanvasElement, opts: MapOptions): () => voi
     });
     ctx.direction = rtl ? "rtl" : "ltr";
 
-    // The horizon, the mounds and the servers' names.
-    ctx.strokeStyle = P.gold;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, g.yH);
-    ctx.lineTo(W, g.yH);
-    ctx.stroke();
-    servers.forEach((s, i) => {
-      const x = g.pos[s.id];
+    // The servers: a node with its state on the ring, its name and what it is under it.
+    for (const s of servers) {
+      const { x, y } = g.pos[s.id];
       const lit = hover?.kind === "server" && hover.id === s.id;
-      ctx.fillStyle = P.gold;
+      const state = s.st === "up" ? P.water : s.st === "warn" ? P.warn : P.danger;
+      const r = g.r + (lit ? 2 : 0);
+      ctx.fillStyle = rgba(state, P.night ? 0.14 : 0.16);
       ctx.beginPath();
-      ctx.ellipse(x, g.yH, lit ? 20 : 16, lit ? 13 : 11, 0, Math.PI, 0);
+      ctx.arc(x, y, r + 7, 0, 6.28);
       ctx.fill();
-      const lift = g.narrow && i % 2 ? 26 : 0;
+      ctx.fillStyle = P.night ? P.skyTop : "#fffaf1";
+      ctx.strokeStyle = state;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, 6.28);
+      ctx.fill();
+      ctx.stroke();
+      // A small server: two drive bays, each with its light.
+      const bw = r * 1.05;
+      const bh = r * 0.36;
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = rgba(P.text, 0.75);
+      for (const dy of [-bh * 0.65, bh * 0.65]) {
+        ctx.beginPath();
+        ctx.roundRect(x - bw / 2, y + dy - bh / 2, bw, bh, 2);
+        ctx.stroke();
+        ctx.fillStyle = P.gold;
+        ctx.beginPath();
+        ctx.arc(x + bw / 2 - bh * 0.55, y + dy, 1.4, 0, 6.28);
+        ctx.fill();
+      }
       ctx.textAlign = "center";
       ctx.font = uiFont(600, g.narrow ? 11 : 14);
       ctx.fillStyle = P.text;
-      const ny = g.yH - (g.narrow ? 26 : 44) - lift;
       const nw = ctx.measureText(s.name).width;
-      const lx = clamp(x, nw / 2 + 18, W - nw / 2 - 18);
+      const lx = clamp(x, nw / 2 + 8, W - nw / 2 - 8);
+      const ny = y + r + (g.narrow ? 16 : 20);
       ctx.fillText(s.name, lx, ny);
-      ctx.fillStyle = s.st === "up" ? P.water : s.st === "warn" ? P.warn : P.danger;
-      ctx.beginPath();
-      ctx.arc(lx - (nw / 2 + 8) * (rtl ? -1 : 1), ny, 3.5, 0, 6.28);
-      ctx.fill();
       if (!g.narrow) {
         ctx.font = uiFont(400, 12);
         ctx.fillStyle = P.text3;
-        ctx.fillText(s.sub, lx, ny + 18);
+        ctx.fillText(s.sub, lx, ny + 17);
       }
-    });
+    }
 
     if (mouse) {
       const h = hit(g, opts.data(), mouse.x, mouse.y);
@@ -370,11 +367,12 @@ export function startMap(canvas: HTMLCanvasElement, opts: MapOptions): () => voi
 
   const hit = (g: Geo, data: MapData, x: number, y: number): MapHit | null => {
     for (const s of data.servers) {
-      if (Math.abs(x - g.pos[s.id]) < 40 && y > g.yH - 70 && y < g.yH + 8) return { kind: "server", id: s.id, x, y };
+      const p = g.pos[s.id];
+      if (p && Math.abs(x - p.x) < g.r + 34 && y > p.y - g.r - 8 && y < p.y + g.r + 42) return { kind: "server", id: s.id, x, y };
     }
     let best: MapHit | null = null;
     let bd = 14;
-    for (const ch of g.chans) {
+    for (const ch of g.links) {
       for (const p of ch.pts) {
         const d = Math.hypot(p.x - x, p.y - y);
         if (d < bd) {

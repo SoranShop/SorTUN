@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" alt="SorTUN. Water finds its way underground." width="100%">
+  <img src="assets/banner.png" alt="SorTUN. Your servers, linked. Your traffic, through." width="100%">
 </p>
 
 <p align="center">
@@ -19,11 +19,9 @@
 
 ---
 
-**SorTUN** works like the qanats of Iran: channels dug under the desert that carry water from the
-mountains to the villages, through a line of wells, without ever coming to the surface. It does
-the same for traffic. It joins two servers with a fast, encrypted tunnel; your
-users connect to the **entry**, and SorTUN carries their TCP and UDP traffic to the **exit**, which
-reaches the real destinations.
+**SorTUN** joins two servers with a fast, encrypted tunnel. Your users connect to the **entry**,
+and SorTUN carries their TCP and UDP traffic to the **exit**, which reaches the real
+destinations.
 
 ```mermaid
 flowchart LR
@@ -36,7 +34,7 @@ It is one small Rust program (about 8 MiB of memory per side, no garbage collect
 to run it: servers, tunnels, charts and logs in a browser.
 
 <p align="center">
-  <img src="assets/screens/map-night-en.png" alt="The panel's map: servers as wells, tunnels as channels, with live traffic" width="92%">
+  <img src="assets/screens/map-night-en.png" alt="The panel's map: servers as nodes, tunnels as the links between them, with live traffic" width="92%">
 </p>
 
 <table align="center">
@@ -90,7 +88,7 @@ Everything else is on the website, in English and Persian:
 | | |
 |---|---|
 | [Getting started](https://soranshop.github.io/SorTUN/docs/getting-started/) | install, the first tunnel, systemd |
-| [Using the panel](https://soranshop.github.io/SorTUN/docs/using-the-panel/) · [Guided tour](https://soranshop.github.io/SorTUN/docs/tour/) · [Video tutorial](https://soranshop.github.io/SorTUN/docs/video/) | the panel, page by page, and in two minutes of video |
+| [Using the panel](https://soranshop.github.io/SorTUN/docs/using-the-panel/) · [Guided tour](https://soranshop.github.io/SorTUN/docs/tour/) | the panel, page by page |
 | [The manager script](https://soranshop.github.io/SorTUN/docs/manager/) | installing, updating, the menu |
 | [Transports](https://soranshop.github.io/SorTUN/docs/transports/) · [Which one?](https://soranshop.github.io/SorTUN/docs/how-it-works/) | choosing and tuning |
 | [Configuration reference](https://soranshop.github.io/SorTUN/docs/configuration/) | every setting, default and limit |
