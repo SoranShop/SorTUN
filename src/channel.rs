@@ -235,7 +235,7 @@ pub async fn connect(dialer: &Dialer, crypto: &Crypto, early: &[u8]) -> io::Resu
 ///
 /// A connection that fails the tunnel handshake (or does not finish it in time) is not
 /// closed right away: it is read and discarded for a random time first, so probing does
-/// not reveal a Kariz server by how fast it hangs up. A failed WebSocket upgrade has
+/// not reveal a SorTUN server by how fast it hangs up. A failed WebSocket upgrade has
 /// been answered like a web server would and is closed; so is an upgrade whose early
 /// data does not hold a valid hello (`404` instead of `101`).
 pub async fn accept(
@@ -540,7 +540,7 @@ mod tests {
 
     #[tokio::test]
     async fn nothing_readable_on_the_wire() {
-        const MARKER: &[u8] = b"KARIZ-PLAINTEXT-MARKER";
+        const MARKER: &[u8] = b"SORTUN-PLAINTEXT-MARKER";
         for enc in [Encryption::Auto, Encryption::None] {
             let (l, _) = listener().await;
             let (port, captured) = spy(l.local_addr().unwrap()).await;

@@ -1,7 +1,7 @@
 # The manager script
 
-`scripts/kariz.sh` installs SorTUN and its [web panel](panel.md) on a Linux server with systemd,
-and connects a server to a panel. After the first run it is also the `kariz-manager` command.
+`scripts/sortun.sh` installs SorTUN and its [web panel](panel.md) on a Linux server with systemd,
+and connects a server to a panel. After the first run it is also the `sortun-manager` command.
 
 **Tunnels are not made here.** Servers, tunnels, private networks, backups and updates of the
 other servers are all done in the web panel. The manager is only the way to get SorTUN onto a
@@ -12,7 +12,7 @@ server and the panel running; from then on you work in the browser.
 As root, on each server:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh)
 ```
 
 The first time on a server it installs the SorTUN core by itself, then asks what else this
@@ -30,7 +30,7 @@ script) the menu and the questions are numbered and read as lines.
 
 | | |
 |---|---|
-| **1** Install or update SorTUN | finds your CPU (x86_64, aarch64 or armv7), downloads the latest release, checks its SHA-256 and its signature, and installs `kariz`, `kariz-panel`, the systemd units and the `kariz-manager` command |
+| **1** Install or update SorTUN | finds your CPU (x86_64, aarch64 or armv7), downloads the latest release, checks its SHA-256 and its signature, and installs `sortun`, `sortun-panel`, the systemd units and the `sortun-manager` command |
 | **2** Status and addresses | what runs on this server, its addresses and the panel's address |
 | **3** to **8** Web panel | install the panel here, make a login link, set the admin password, change the domain or IP and its certificate (Let's Encrypt, or the files of one you have), change the panel's port, remove the panel |
 | **9**, **10** Agent | connect this server to a panel with a join code, or disconnect it |
@@ -43,8 +43,8 @@ personal access token before running the script: it is used only to lift that li
 Other ways to install:
 
 ```bash
-kariz-manager install --version v1.0.0        # a specific release
-kariz-manager install --binary ./kariz        # a binary you built yourself
+sortun-manager install --version v1.0.0        # a specific release
+sortun-manager install --binary ./sortun        # a binary you built yourself
 ```
 
 ## The usual path
@@ -62,24 +62,24 @@ kariz-manager install --binary ./kariz        # a binary you built yourself
 The menu and the commands do the same things:
 
 ```bash
-kariz-manager install [--version vX.Y.Z] [--binary PATH]   # SorTUN (and the panel program)
-kariz-manager update [--version vX.Y.Z]                    # a new release; what runs is restarted
-kariz-manager uninstall [--yes]                            # --yes also deletes the configs
+sortun-manager install [--version vX.Y.Z] [--binary PATH]   # SorTUN (and the panel program)
+sortun-manager update [--version vX.Y.Z]                    # a new release; what runs is restarted
+sortun-manager uninstall [--yes]                            # --yes also deletes the configs
 
-kariz-manager panel install [--port N] [--host H] [--name NAME]   # the panel on this server: address, certificate, a login link; asks what to call this server (default: its host name)
-kariz-manager panel name [NAME]                    # rename this server in the panel
-kariz-manager panel link [--host H]                 # another one-time login link
-kariz-manager panel password [--stdin | --random]  # a new admin password (asked twice, hidden)
-kariz-manager panel status | logs                   # the service, its address / follow the log
-kariz-manager panel cert [--domain D | --ip A]      # a new domain or IP address, with its certificate
-kariz-manager panel cert --cert-file F --key-file K # a certificate of your own (asked for in the menu too)
-kariz-manager panel port [N]                        # the port the panel opens on (asked without N)
-kariz-manager panel heal                            # a certificate for this server's new IP address (a timer runs it)
-kariz-manager panel uninstall [--yes]
+sortun-manager panel install [--port N] [--host H] [--name NAME]   # the panel on this server: address, certificate, a login link; asks what to call this server (default: its host name)
+sortun-manager panel name [NAME]                    # rename this server in the panel
+sortun-manager panel link [--host H]                 # another one-time login link
+sortun-manager panel password [--stdin | --random]  # a new admin password (asked twice, hidden)
+sortun-manager panel status | logs                   # the service, its address / follow the log
+sortun-manager panel cert [--domain D | --ip A]      # a new domain or IP address, with its certificate
+sortun-manager panel cert --cert-file F --key-file K # a certificate of your own (asked for in the menu too)
+sortun-manager panel port [N]                        # the port the panel opens on (asked without N)
+sortun-manager panel heal                            # a certificate for this server's new IP address (a timer runs it)
+sortun-manager panel uninstall [--yes]
 
-kariz-manager --agent kz1_... [--yes]               # connect this server to a panel (the code is from the panel)
-kariz-manager agent status | logs | remove
-kariz-manager status                                # what runs here and this server's addresses
+sortun-manager --agent kz1_... [--yes]               # connect this server to a panel (the code is from the panel)
+sortun-manager agent status | logs | remove
+sortun-manager status                                # what runs here and this server's addresses
 ```
 
 A server that already has an agent can be joined to another panel with a new code: the manager
@@ -88,11 +88,11 @@ place. The old panel keeps listing that server as offline until you remove it th
 
 ## Update and uninstall
 
-Opening the menu (and `kariz-manager status`) looks for a newer release. If one is out and the
+Opening the menu (and `sortun-manager status`) looks for a newer release. If one is out and the
 core, the panel or the agent here is older, it says which and asks whether to update all of them
 now. Joining a panel with `--agent CODE` updates an older program first, because an old agent
-can refuse what a newer panel sends. `KARIZ_NO_UPDATE_CHECK=1` turns the look off. `update` also
-fetches the `kariz-manager` script of the release it installed (unless you install from files of
+can refuse what a newer panel sends. `SORTUN_NO_UPDATE_CHECK=1` turns the look off. `update` also
+fetches the `sortun-manager` script of the release it installed (unless you install from files of
 your own).
 
 `install` and `update` check the release's **signature** (from 0.11, a release without a valid
@@ -103,23 +103,23 @@ button: [Updating from the panel](panel.md#updating).
 
 The manager script updates itself too, in three ways:
 
-- The panel and the agent put the `kariz-manager` of their own release in place each time they
+- The panel and the agent put the `sortun-manager` of their own release in place each time they
   start, when the one there is missing or different. An update from the panel restarts them, so
   a server that is only ever updated from the panel gets the menu of its new release too.
-- `update` (and the *Install or update* item) fetches the `kariz-manager` of the release it
+- `update` (and the *Install or update* item) fetches the `sortun-manager` of the release it
   installed (from main, if that release has no tag yet) and, when it replaces the one that is open
   in the menu, the menu opens again as the new one. If the download fails it says so and the old
   script stays.
 - A copy of the script you run from a file (a new one you copied to the server) is installed as
-  `kariz-manager` at once, even when the core is up to date. Run the file once and the
-  `kariz-manager` command is the new script from then on.
+  `sortun-manager` at once, even when the core is up to date. Run the file once and the
+  `sortun-manager` command is the new script from then on.
 
 To fetch it by hand:
 
 ```bash
-curl -fsSL -o /usr/local/bin/kariz-manager \
-    https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh
-chmod +x /usr/local/bin/kariz-manager
+curl -fsSL -o /usr/local/bin/sortun-manager \
+    https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh
+chmod +x /usr/local/bin/sortun-manager
 ```
 
 `uninstall` removes SorTUN from the server completely: every tunnel, the agent (its service, its
@@ -135,17 +135,17 @@ SorTUN logs go to the journal, with systemd's priority for each line. The panel 
 its Logs page; on the server:
 
 ```bash
-journalctl -u kariz@main -f                 # follow one tunnel
-journalctl -u kariz@main -p warning         # only warnings and errors
-journalctl -u kariz-panel -f                # the panel
-journalctl -u kariz-agent -f                # the agent
+journalctl -u sortun@main -f                 # follow one tunnel
+journalctl -u sortun@main -p warning         # only warnings and errors
+journalctl -u sortun-panel -f                # the panel
+journalctl -u sortun-agent -f                # the agent
 ```
 
 ## Good to know
 
 - It needs root, systemd, and `curl` or `wget`.
-- Tunnels are ordinary SorTUN configs in `/etc/kariz/<name>.toml`, run by the service
-  `kariz@<name>`; the panel's agent writes them. You can read them, and the
+- Tunnels are ordinary SorTUN configs in `/etc/sortun/<name>.toml`, run by the service
+  `sortun@<name>`; the panel's agent writes them. You can read them, and the
   [configuration reference](configuration.md) explains every setting, but change them in the
   panel so both sides stay in step.
-- The service unit is `systemd/kariz@.service`.
+- The service unit is `systemd/sortun@.service`.

@@ -3,7 +3,7 @@ import { ApiError, api } from "./api";
 import { useApp } from "./store";
 import { Dialog } from "./ui";
 
-const fileName = () => `kariz-backup-${new Date().toISOString().slice(0, 10)}.kzb`;
+const fileName = () => `sortun-backup-${new Date().toISOString().slice(0, 10)}.kzb`;
 
 /** Downloads the panel's backup, locked with a passphrase. */
 export function BackupDialog({ onClose }: { onClose: () => void }) {

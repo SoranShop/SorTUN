@@ -1,11 +1,11 @@
-//! What a server reports about itself: its health (from `/proc`, on Linux) and its Kariz
+//! What a server reports about itself: its health (from `/proc`, on Linux) and its SorTUN
 //! tunnels (the config files, systemd, the running daemons' control sockets). The panel
 //! runs this for its own server; agents run it for theirs.
 
 use std::path::Path;
 use std::time::{Duration, Instant};
 
-use kariz::config::{mode_name, role_name, Config};
+use sortun::config::{mode_name, role_name, Config};
 
 use crate::manage::Services;
 use crate::wire::{ForwardInfo, Health, NetTotals, TunnelInfo};
@@ -83,7 +83,7 @@ fn read_ifaces() -> Option<Vec<Iface>> {
 
 /// The interfaces whose traffic a provider counts: the network cards. A container has
 /// none it can see, so there the interfaces of the default route stand for them; with
-/// neither, every interface but the loopback and Kariz's own `kz-` links.
+/// neither, every interface but the loopback and SorTUN's own `kz-` links.
 pub fn cards<'a>(ifaces: Option<&'a [Iface]>, route: Option<&str>) -> Option<Vec<&'a Iface>> {
     let ifaces = ifaces?;
     let with_device: Vec<&Iface> = ifaces.iter().filter(|i| i.device).collect();
@@ -290,7 +290,7 @@ impl Sampler {
 }
 
 /// The IPv4 networks in `/proc/net/route` that are up, without the default route and the
-/// `kz-` interfaces of Kariz's own private links, as `a.b.c.d/p`, sorted and without repeats.
+/// `kz-` interfaces of SorTUN's own private links, as `a.b.c.d/p`, sorted and without repeats.
 pub fn parse_routes(text: &str) -> Vec<String> {
     let mut out: Vec<String> = text
         .lines()
@@ -325,7 +325,7 @@ pub fn parse_routes(text: &str) -> Vec<String> {
 
 // ---- tunnels ----
 
-/// The tunnels configured in `dir` (`/etc/kariz`), with their state. Slow parts (systemd,
+/// The tunnels configured in `dir` (`/etc/sortun`), with their state. Slow parts (systemd,
 /// the control sockets) are asked with short time limits, so a stuck daemon does not
 /// stall the report.
 pub async fn tunnels(dir: &Path, services: &dyn Services) -> Vec<TunnelInfo> {
@@ -427,11 +427,11 @@ async fn tunnel(name: &str, path: &Path, services: &dyn Services) -> TunnelInfo 
 }
 
 #[cfg(unix)]
-async fn tunnel_status(config: &Config) -> Option<kariz::stats::Status> {
+async fn tunnel_status(config: &Config) -> Option<sortun::stats::Status> {
     let socket = config.control_socket()?;
     let ask = async {
-        let connection = kariz::control::connect(&socket).await.ok()?;
-        kariz::control::status(connection).await.ok()
+        let connection = sortun::control::connect(&socket).await.ok()?;
+        sortun::control::status(connection).await.ok()
     };
     tokio::time::timeout(Duration::from_secs(2), ask)
         .await
@@ -440,7 +440,7 @@ async fn tunnel_status(config: &Config) -> Option<kariz::stats::Status> {
 }
 
 #[cfg(not(unix))]
-async fn tunnel_status(_: &Config) -> Option<kariz::stats::Status> {
+async fn tunnel_status(_: &Config) -> Option<sortun::stats::Status> {
     None
 }
 
@@ -519,7 +519,7 @@ eth1\t0000000A\t00000000\t0000\t0\t0\t0\t000000FF\t0\t0\t0\n";
         assert_eq!(names, ["eth0"]);
         let t = parse_net(dev, Some(&names));
         assert_eq!((t.rx_bytes, t.tx_bytes, t.tx_packets), (1000, 2000, 20));
-        // Without /sys: everything but the loopback and Kariz's links (GRE inside the
+        // Without /sys: everything but the loopback and SorTUN's links (GRE inside the
         // card's own count would be counted twice).
         assert_eq!(parse_net(dev, None).rx_bytes, 1070);
 

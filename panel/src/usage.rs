@@ -26,8 +26,8 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Mutex;
 
 use anyhow::Result;
-use kariz::stats::Status;
-use kariz::wire::DirStatus;
+use sortun::stats::Status;
+use sortun::wire::DirStatus;
 use rusqlite::{params, OptionalExtension};
 use serde::{Deserialize, Serialize};
 
@@ -1027,8 +1027,8 @@ pub struct ServerSummary {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use kariz::stats::{PeerStatus, Totals as StatTotals};
-    use kariz::wire::{LegStatus, WireStatus};
+    use sortun::stats::{PeerStatus, Totals as StatTotals};
+    use sortun::wire::{LegStatus, WireStatus};
 
     /// The `wire` counters of a leg that a test makes up.
     fn leg(sent: (u64, u64, u64, u64), received: (u64, u64, u64, u64)) -> LegStatus {
@@ -1047,7 +1047,7 @@ mod tests {
     fn status(uptime: u64, up: u64, down: u64, wire: Option<WireStatus>) -> Status {
         Status {
             status_version: 1,
-            kariz: "2.7.0".into(),
+            sortun: "2.7.0".into(),
             role: "entry".into(),
             mode: "direct".into(),
             transport: "tcpmux".into(),

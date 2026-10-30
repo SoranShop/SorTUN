@@ -53,17 +53,17 @@ test("a server can be added over a VXLAN link as well as a GRE one", async ({ pa
   await page.locator(".page-band .btn-primary").click();
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("button", { name: /Over a GRE link/ }).click();
-  await expect(dialog.getByText(/a new private network, kariz/)).toBeVisible();
+  await expect(dialog.getByText(/a new private network, sortun/)).toBeVisible();
   await dialog.getByRole("button", { name: /Over a VXLAN link/ }).click();
   await expect(dialog.getByRole("button", { name: /Over a VXLAN link/ })).toHaveAttribute("aria-pressed", "true");
-  await expect(dialog.getByText(/a new VXLAN network, kariz-vxlan/)).toBeVisible();
+  await expect(dialog.getByText(/a new VXLAN network, sortun-vxlan/)).toBeVisible();
   await expect(dialog.getByText(/Only UDP to the network's port/)).toBeVisible();
 
   // Reverse, across a link: the kind is a choice there.
   await dialog.getByRole("button", { name: /The panel connects to it/ }).click();
   await dialog.getByLabel(/Across a private link/).check();
   await dialog.getByRole("button", { name: "VXLAN", exact: true }).click();
-  await expect(dialog.getByText(/a new VXLAN network, kariz-vxlan/)).toBeVisible();
+  await expect(dialog.getByText(/a new VXLAN network, sortun-vxlan/)).toBeVisible();
 });
 
 // A network over IPv6: chosen in the dialog, shown on its card, and its servers' IPv6

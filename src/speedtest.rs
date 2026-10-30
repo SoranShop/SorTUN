@@ -291,7 +291,7 @@ fn mbps(bytes: u64, over: Duration) -> f64 {
 }
 
 /// Prefix of the progress lines meant for programs (the panel), not for a person: `@idle`,
-/// `@download`, `@upload` and `@udp`, then the phase's result as JSON. `kariz speedtest` does
+/// `@download`, `@upload` and `@udp`, then the phase's result as JSON. `sortun speedtest` does
 /// not print them.
 pub const RESULT_LINE: char = '@';
 

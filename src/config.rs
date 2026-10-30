@@ -202,19 +202,19 @@ pub struct TunnelConfig {
     pub quic: Option<QuicConfig>,
     /// Only for `kcp`.
     pub kcp: Option<KcpConfig>,
-    /// The exit side answers speed test streams (`kariz speedtest` on the entry side).
+    /// The exit side answers speed test streams (`sortun speedtest` on the entry side).
     /// They only produce, consume and echo data; they dial nothing.
     #[serde(default = "default_true")]
     pub speedtest: bool,
 }
 
-/// `[control]`: the entry side's local control socket, through which `kariz speedtest`
+/// `[control]`: the entry side's local control socket, through which `sortun speedtest`
 /// uses the running daemon's live sessions (Unix only).
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ControlConfig {
     /// Where the socket goes. Default: the config file's path with `.sock` instead of
-    /// `.toml` (`/etc/kariz/main.toml` -> `/etc/kariz/main.sock`). Owner only.
+    /// `.toml` (`/etc/sortun/main.toml` -> `/etc/sortun/main.sock`). Owner only.
     pub socket: Option<PathBuf>,
 }
 
@@ -943,7 +943,7 @@ impl Config {
             .apply(&self.tunnel.mux)
     }
 
-    /// Settings that are valid but weaken the tunnel; shown by `kariz check` and at startup.
+    /// Settings that are valid but weaken the tunnel; shown by `sortun check` and at startup.
     pub fn warnings(&self) -> Vec<&'static str> {
         let mut warnings = Vec::new();
         if self.tunnel.encryption == Encryption::None {
@@ -1021,10 +1021,10 @@ impl Config {
             );
         }
         if self.tunnel.token.trim().len() < 16 {
-            bail!("tunnel.token must be at least 16 characters (generate one with `kariz token`)");
+            bail!("tunnel.token must be at least 16 characters (generate one with `sortun token`)");
         }
         if self.tunnel.token.contains("CHANGE-ME") {
-            bail!("tunnel.token still has the sample value; generate one with `kariz token`");
+            bail!("tunnel.token still has the sample value; generate one with `sortun token`");
         }
 
         if self.is_acceptor() {
@@ -1383,7 +1383,7 @@ impl Config {
                 bail!("tunnel.ws.headers: invalid header name {name:?}");
             }
             if RESERVED_WS_HEADERS.contains(&name.to_ascii_lowercase().as_str()) {
-                bail!("tunnel.ws.headers: {name} is set by kariz itself");
+                bail!("tunnel.ws.headers: {name} is set by sortun itself");
             }
             if !is_header_value(value) {
                 bail!("tunnel.ws.headers: invalid value for {name}");
@@ -2103,7 +2103,7 @@ keepalive_secs = 1
             ("headers = { \"Bad Name\" = \"v\" }", "invalid header name"),
             (
                 "headers = { \"Sec-WebSocket-Key\" = \"v\" }",
-                "set by kariz",
+                "set by sortun",
             ),
             ("headers = { \"X-A\" = \"a\\nb\" }", "invalid value"),
         ] {

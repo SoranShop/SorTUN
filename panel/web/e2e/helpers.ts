@@ -8,9 +8,9 @@ export async function signIn(page: Page, opts: { lang?: "en" | "fa"; theme?: "ni
     ([lang, theme]) => {
       // Only what the person has not chosen yet: a reload must keep their choice.
       const put = (k: string, v: string) => localStorage.getItem(k) === null && localStorage.setItem(k, v);
-      put("kariz.lang", lang);
-      put("kariz.theme", theme);
-      put("kariz.low", "1");
+      put("sortun.lang", lang);
+      put("sortun.theme", theme);
+      put("sortun.low", "1");
     },
     [opts.lang ?? "en", opts.theme ?? "night"],
   );

@@ -6,7 +6,7 @@ profile = "balanced"
 [tunnel]
 transport = "tcpmux"
 remote = "ENTRY_SERVER_IP:3080"
-token = "CHANGE-ME-run-kariz-token"
+token = "CHANGE-ME-run-sortun-token"
 
 # Every field is optional; defaults come from the profile.
 [tunnel.mux]

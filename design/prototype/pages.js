@@ -1,4 +1,4 @@
-/* Kariz panel prototype, step 9.3: servers, tunnels, tunnel detail, logs, settings. */
+/* SorTUN panel prototype, step 9.3: servers, tunnels, tunnel detail, logs, settings. */
 (() => {
   "use strict";
   const K = window.K;
@@ -23,7 +23,7 @@
       "srv.tn": "{n} تانل",
       "srv.thisPanel": "پنل همین‌جاست",
       "srv.details": "جزئیات سرور",
-      "srv.update": "به‌روزرسانی کاریز",
+      "srv.update": "به‌روزرسانی SorTUN",
       "srv.restartAgent": "ری‌استارت agent",
       "srv.remove": "حذف سرور",
       "srv.removeNote": "تانل‌های این سرور اول باید حذف شوند.",
@@ -107,7 +107,7 @@
       "ago.d": "{n} روز پیش",
       "dur.d": "{d} روز و {h} ساعت",
       "dur.h": "{h} ساعت و {m} دقیقه",
-      "ev.start": "کاریز روی هر دو سرور شروع شد",
+      "ev.start": "SorTUN روی هر دو سرور شروع شد",
       "ev.session": "session mux برقرار شد (۲ از ۲)",
       "ev.speed": "اسپیدتست: ↓ ۸۴۲ ↑ ۱۹۶ Mbps",
       "ev.edit": "پورت 2053 اضافه شد",
@@ -191,7 +191,7 @@
       "set.bkDown": "دانلود پشتیبان",
       "set.bkUp": "بازیابی از فایل",
       "set.bkPass": "عبارت رمز پشتیبان",
-      "set.bkMade": "kariz-backup-2026-09-29.kbk آماده شد.",
+      "set.bkMade": "sortun-backup-2026-09-29.kbk آماده شد.",
       "set.when": "زمان",
       "set.what": "کار",
       "set.who": "از",
@@ -216,7 +216,7 @@
       "srv.tn": "{n} tunnels",
       "srv.thisPanel": "the panel runs here",
       "srv.details": "Server details",
-      "srv.update": "Update Kariz",
+      "srv.update": "Update SorTUN",
       "srv.restartAgent": "Restart the agent",
       "srv.remove": "Remove server",
       "srv.removeNote": "Its tunnels have to be deleted first.",
@@ -300,7 +300,7 @@
       "ago.d": "{n} days ago",
       "dur.d": "{d} d {h} h",
       "dur.h": "{h} h {m} min",
-      "ev.start": "Kariz started on both servers",
+      "ev.start": "SorTUN started on both servers",
       "ev.session": "Mux sessions established (2 of 2)",
       "ev.speed": "Speed test: ↓ 842 ↑ 196 Mbps",
       "ev.edit": "Port 2053 added",
@@ -384,7 +384,7 @@
       "set.bkDown": "Download backup",
       "set.bkUp": "Restore from a file",
       "set.bkPass": "Backup passphrase",
-      "set.bkMade": "kariz-backup-2026-09-29.kbk is ready.",
+      "set.bkMade": "sortun-backup-2026-09-29.kbk is ready.",
       "set.when": "When",
       "set.what": "What",
       "set.who": "From",
@@ -557,11 +557,11 @@
     const lsn = entryListens ? a : b;
     const host = lsn.ip.includes(":") ? `[${lsn.ip}]` : lsn.ip;
     const bind = tn.ipv4only ? "0.0.0.0" : "[::]";
-    const common = (role) => `# Written by the Kariz panel. Edit it from the panel, not by hand.\nrole = "${role}"\nmode = "${tn.mode}"\nprofile = "${tn.prof}"\n\n[tunnel]\ntransport = "${tn.tr}"\n`;
+    const common = (role) => `# Written by the SorTUN panel. Edit it from the panel, not by hand.\nrole = "${role}"\nmode = "${tn.mode}"\nprofile = "${tn.prof}"\n\n[tunnel]\ntransport = "${tn.tr}"\n`;
     const side = (listens) => (listens ? `listen = "${bind}:${tn.listenPort}"\n` : `remote = "${host}:${tn.listenPort}"\n`);
     const extra = (dialer) =>
       tn.tr === "ws" || tn.tr === "wss"
-        ? `\n[tunnel.ws]\npath = "${tn.wsPath || "/ws"}"\n` + (tn.tr === "wss" ? (dialer ? `\n[tunnel.tls]\npin_sha256 = "9f2c41e07b5d3a18c6e4f0a9d2b7c85e1f3a6d0c4b8e2f7a9c1d5e3b6a0f4c82"\n` : `\n[tunnel.tls]\ncert = "/etc/kariz/${tn.id}.crt"\nkey = "/etc/kariz/${tn.id}.key"\n`) : "")
+        ? `\n[tunnel.ws]\npath = "${tn.wsPath || "/ws"}"\n` + (tn.tr === "wss" ? (dialer ? `\n[tunnel.tls]\npin_sha256 = "9f2c41e07b5d3a18c6e4f0a9d2b7c85e1f3a6d0c4b8e2f7a9c1d5e3b6a0f4c82"\n` : `\n[tunnel.tls]\ncert = "/etc/sortun/${tn.id}.crt"\nkey = "/etc/sortun/${tn.id}.key"\n`) : "")
         : "";
     const tok = `token = "${tn.token}"\n`;
     const entry =
@@ -615,7 +615,7 @@
           const n = TUNNELS.filter((x) => x.a === s.id || x.b === s.id).length;
           return `<li class="srv ${s.isNew ? "is-new" : ""}" data-s="${s.id}">
             ${wellSvg(s.st, s.cpu / 100 + 0.3)}
-            <div><button class="srv-name link" data-open="${s.id}">${s.name}</button><div class="srv-sub">${s.loc[state.lang]} · ${t("role." + s.role)} · ${s.arch} · Kariz ${s.ver}</div></div>
+            <div><button class="srv-name link" data-open="${s.id}">${s.name}</button><div class="srv-sub">${s.loc[state.lang]} · ${t("role." + s.role)} · ${s.arch} · SorTUN ${s.ver}</div></div>
             <div class="c-link"><div class="srv-ip">${s.ip}</div><div class="srv-link"><i class="dot ${s.st === "warn" ? "warn" : "up"}"></i><span class="js-seen">${s.panel ? t("srv.thisPanel") : `${tf("srv.via", { via: s.via })} · ${tf("srv.seen", { s: fmt(s.seen) })}`}</span></div></div>
             <div class="m-cpu">${meter(t("srv.cpu"), Math.round(s.cpu))}</div>
             <div class="m-ram">${meter(t("srv.ram"), Math.round(s.ram))}</div>
@@ -655,7 +655,7 @@
       `<dl class="kv">
         <dt>IP</dt><dd class="mono" dir="ltr">${s.ip}</dd>
         <dt>${t("tip.role")}</dt><dd>${t("role." + s.role)} · ${s.loc[state.lang]}</dd>
-        <dt>${t("srv.version")}</dt><dd>Kariz ${s.ver} <span class="badge water">${t("srv.upToDate")}</span></dd>
+        <dt>${t("srv.version")}</dt><dd>SorTUN ${s.ver} <span class="badge water">${t("srv.upToDate")}</span></dd>
         <dt>${t("srv.arch")}</dt><dd>${s.arch}</dd>
         <dt>${t("srv.uptime")}</dt><dd>${dur(s.up)}</dd>
         <dt>${t("srv.link")}</dt><dd>${s.panel ? t("srv.thisPanel") : tf("srv.via", { via: s.via })}</dd>
@@ -683,8 +683,8 @@
     let join = code();
     const cmd = () =>
       dir === "agent"
-        ? `bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh) \\\n    --agent ${join}`
-        : `bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh) \\\n    --agent ${join} --agent-listen 3999`;
+        ? `bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh) \\\n    --agent ${join}`
+        : `bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh) \\\n    --agent ${join} --agent-listen 3999`;
     dialog(
       t("add.title"),
       `<div class="field"><label for="add-name">${t("add.name")}</label><input class="text mono" id="add-name" placeholder="istanbul-1" dir="ltr"><span class="help">${t("add.nameHelp")}</span></div>
@@ -721,7 +721,7 @@
           const name = ($("#add-name", d).value.trim() || "istanbul-1").replace(/[^\w-]/g, "");
           const w = $("#add-wait", d);
           w.classList.add("done");
-          w.innerHTML = `${wellSvg("up", 0.9)}<span><b>${tf("add.connected", { name })}</b><br><span class="mono xs muted" dir="ltr">198.51.100.90 · aarch64 · Kariz 0.6.1</span></span>`;
+          w.innerHTML = `${wellSvg("up", 0.9)}<span><b>${tf("add.connected", { name })}</b><br><span class="mono xs muted" dir="ltr">198.51.100.90 · aarch64 · SorTUN 0.6.1</span></span>`;
           const done = $("#add-done", d);
           done.disabled = false;
           done.onclick = () => {

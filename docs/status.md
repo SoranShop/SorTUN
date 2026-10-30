@@ -2,15 +2,15 @@
 
 A running SorTUN answers `status` on its control socket, on both sides: whether the other
 side is connected, the round-trip time, the last error, and what goes through each
-forwarded port. `kariz status` shows it on the server; the web panel reads it every
+forwarded port. `sortun status` shows it on the server; the web panel reads it every
 second.
 
-## `kariz status`
+## `sortun status`
 
 On either server, while the tunnel runs:
 
 ```bash
-kariz status -c /etc/kariz/main.toml
+sortun status -c /etc/sortun/main.toml
 ```
 
 ```text
@@ -28,7 +28,7 @@ full*, or *127.0.0.1:443 cannot be reached from the exit side*.
 
 | Option | Meaning |
 |---|---|
-| `-c, --config FILE` | the tunnel's config (default `/etc/kariz/config.toml`) |
+| `-c, --config FILE` | the tunnel's config (default `/etc/sortun/config.toml`) |
 | `--watch` | redraw every second until Ctrl+C |
 | `--json` | print the daemon's document as is (one reading, no rates) |
 
@@ -37,8 +37,8 @@ control socket), 1 for other errors. The web panel shows the same on each tunnel
 
 ## The control socket
 
-Each side opens a Unix socket next to its config: `/etc/kariz/main.sock` for
-`/etc/kariz/main.toml`, or `[control] socket`. Only its owner can open it (mode 0600).
+Each side opens a Unix socket next to its config: `/etc/sortun/main.sock` for
+`/etc/sortun/main.toml`, or `[control] socket`. Only its owner can open it (mode 0600).
 There is none on Windows.
 
 One request per connection, one line:
@@ -56,7 +56,7 @@ tunnel), and any number of clients may ask at once.
 ```json
 {
   "status_version": 1,
-  "kariz": "0.7.0",
+  "sortun": "0.7.0",
   "role": "entry",
   "mode": "reverse",
   "transport": "tcpmux",
@@ -102,7 +102,7 @@ Readers must ignore fields they do not know: later versions add fields and raise
 | Field | Meaning |
 |---|---|
 | `status_version` | the document's format version (1) |
-| `kariz` | the daemon's version |
+| `sortun` | the daemon's version |
 | `role`, `mode`, `transport`, `profile` | as in its config |
 | `uptime_secs` | since the daemon started |
 

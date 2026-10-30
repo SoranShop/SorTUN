@@ -21,13 +21,13 @@ pub struct UpdateSettings {
     pub api: String,
     /// A pinned release key (hex), instead of the built-in one.
     pub key: Option<String>,
-    /// Where downloads are kept (`/var/lib/kariz-panel/updates`).
+    /// Where downloads are kept (`/var/lib/sortun-panel/updates`).
     pub dir: PathBuf,
     /// `panel.toml`, which the swap helper reads to find the panel again.
     pub config: PathBuf,
     /// The installed programs to replace.
     pub panel_bin: PathBuf,
-    pub kariz_bin: PathBuf,
+    pub sortun_bin: PathBuf,
 }
 
 #[derive(Default)]
@@ -208,9 +208,9 @@ async fn run(hub: &Arc<Hub>, op: &str, s: &UpdateSettings, release: Release) -> 
 /// the panel is stopped to be replaced: the new program swaps the files, restarts the
 /// panel, waits for it to answer, and puts the old ones back if it does not.
 fn handoff(s: &UpdateSettings, stage: &std::path::Path, version: &str) -> Result<()> {
-    let helper = stage.join("kariz-panel");
+    let helper = stage.join("sortun-panel");
     let status = std::process::Command::new("systemd-run")
-        .args(["--unit", "kariz-panel-update", "--collect", "--quiet", "--"])
+        .args(["--unit", "sortun-panel-update", "--collect", "--quiet", "--"])
         .arg(&helper)
         .arg("update-apply")
         .arg("--stage")
@@ -220,8 +220,8 @@ fn handoff(s: &UpdateSettings, stage: &std::path::Path, version: &str) -> Result
         .arg(&s.config)
         .arg("--panel-bin")
         .arg(&s.panel_bin)
-        .arg("--kariz-bin")
-        .arg(&s.kariz_bin)
+        .arg("--sortun-bin")
+        .arg(&s.sortun_bin)
         // A few seconds first, so the browser sees the hand-over went well before the panel
         // is stopped.
         .args(["--delay", "3"])

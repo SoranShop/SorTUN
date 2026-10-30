@@ -1,4 +1,4 @@
-//! Kariz: a high-performance, resource-efficient tunnel core.
+//! SorTUN: a high-performance, resource-efficient tunnel core.
 
 pub mod allocator;
 pub mod bench;

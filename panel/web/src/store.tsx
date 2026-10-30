@@ -62,11 +62,11 @@ function save(key: string, value: string) {
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => load("kariz.lang", ["fa", "en"], "fa"));
-  const [theme, setThemeState] = useState<Theme>(() => load("kariz.theme", ["night", "dawn"], "night"));
-  const [digits, setDigitsState] = useState<Digits>(() => load("kariz.digits", ["fa", "latin"], "fa"));
+  const [lang, setLangState] = useState<Lang>(() => load("sortun.lang", ["fa", "en"], "fa"));
+  const [theme, setThemeState] = useState<Theme>(() => load("sortun.theme", ["night", "dawn"], "night"));
+  const [digits, setDigitsState] = useState<Digits>(() => load("sortun.digits", ["fa", "latin"], "fa"));
   const [low, setLowState] = useState<boolean>(
-    () => load("kariz.low", ["0", "1"], matchMedia("(prefers-reduced-motion: reduce)").matches ? "1" : "0") === "1",
+    () => load("sortun.low", ["0", "1"], matchMedia("(prefers-reduced-motion: reduce)").matches ? "1" : "0") === "1",
   );
   const [toasts, setToasts] = useState<Toast[]>([]);
   const nextToast = useRef(1);
@@ -113,23 +113,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return {
       lang,
       setLang: (l) => {
-        save("kariz.lang", l);
+        save("sortun.lang", l);
         setLangState(l);
       },
       theme,
       setTheme: (th) => {
-        save("kariz.theme", th);
+        save("sortun.theme", th);
         setThemeState(th);
       },
       low,
       setLow: (on, announce) => {
-        save("kariz.low", on ? "1" : "0");
+        save("sortun.low", on ? "1" : "0");
         setLowState(on);
         if (announce) toast(t(on ? "toast.low.on" : "toast.low.off"));
       },
       digits,
       setDigits: (d) => {
-        save("kariz.digits", d);
+        save("sortun.digits", d);
         setDigitsState(d);
       },
       t,

@@ -33,7 +33,7 @@ pub struct SystemdRun;
 impl Launcher for SystemdRun {
     fn launch(&self, program: &Path, args: Vec<String>) -> Result<()> {
         let status = std::process::Command::new("systemd-run")
-            .args(["--unit", "kariz-agent-update", "--collect", "--quiet", "--"])
+            .args(["--unit", "sortun-agent-update", "--collect", "--quiet", "--"])
             .arg(program)
             .args(args)
             .status()
@@ -59,7 +59,7 @@ pub struct AgentUpdate {
     /// A release key of the agent's own, instead of the built-in one.
     key: Option<String>,
     panel_bin: PathBuf,
-    kariz_bin: PathBuf,
+    sortun_bin: PathBuf,
     launcher: Box<dyn Launcher>,
     incoming: Mutex<HashMap<String, Incoming>>,
 }
@@ -70,7 +70,7 @@ impl AgentUpdate {
         config: PathBuf,
         key: Option<String>,
         panel_bin: PathBuf,
-        kariz_bin: PathBuf,
+        sortun_bin: PathBuf,
         launcher: Box<dyn Launcher>,
     ) -> Self {
         Self {
@@ -78,7 +78,7 @@ impl AgentUpdate {
             config,
             key,
             panel_bin,
-            kariz_bin,
+            sortun_bin,
             launcher,
             incoming: Mutex::new(HashMap::new()),
         }
@@ -234,13 +234,13 @@ impl AgentUpdate {
             stamp.display().to_string(),
             "--panel-bin".to_owned(),
             self.panel_bin.display().to_string(),
-            "--kariz-bin".to_owned(),
-            self.kariz_bin.display().to_string(),
+            "--sortun-bin".to_owned(),
+            self.sortun_bin.display().to_string(),
             // The agent still has to answer the panel that the hand-over went well.
             "--delay".to_owned(),
             "3".to_owned(),
         ];
-        self.launcher.launch(&dir.join("kariz-panel"), args)
+        self.launcher.launch(&dir.join("sortun-panel"), args)
     }
 }
 
@@ -307,8 +307,8 @@ mod tests {
     fn archive(version: &str) -> Vec<u8> {
         let mut builder = tar::Builder::new(Vec::new());
         for (name, data) in [
-            ("kariz-x/kariz", &b"core"[..]),
-            ("kariz-x/kariz-panel", &b"panel"[..]),
+            ("sortun-x/sortun", &b"core"[..]),
+            ("sortun-x/sortun-panel", &b"panel"[..]),
         ] {
             let mut header = tar::Header::new_gnu();
             header.set_size(data.len() as u64);
@@ -353,8 +353,8 @@ mod tests {
             dir.path().join("updates"),
             dir.path().join("agent.toml"),
             key,
-            PathBuf::from("/usr/local/bin/kariz-panel"),
-            PathBuf::from("/usr/local/bin/kariz"),
+            PathBuf::from("/usr/local/bin/sortun-panel"),
+            PathBuf::from("/usr/local/bin/sortun"),
             Box::new(rec),
         );
         (dir, u, log)
@@ -390,13 +390,13 @@ mod tests {
         send(&u, "99.0.0", &r).unwrap();
         u.apply("99.0.0").unwrap();
         let stage = dir.path().join("updates/99.0.0");
-        assert_eq!(std::fs::read(stage.join("kariz-panel")).unwrap(), b"panel");
-        assert_eq!(std::fs::read(stage.join("kariz")).unwrap(), b"core");
+        assert_eq!(std::fs::read(stage.join("sortun-panel")).unwrap(), b"panel");
+        assert_eq!(std::fs::read(stage.join("sortun")).unwrap(), b"core");
         let launched = log.lock().unwrap();
         assert_eq!(launched.len(), 1);
         assert_eq!(
             launched[0].0,
-            stage.join("kariz-panel"),
+            stage.join("sortun-panel"),
             "the new program is the helper"
         );
         assert_eq!(launched[0].1[0], "agent-update-apply");

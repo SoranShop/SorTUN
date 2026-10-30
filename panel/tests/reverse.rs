@@ -7,10 +7,10 @@ use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
 
-use kariz_panel::agent::{self, Agent};
-use kariz_panel::db::Db;
-use kariz_panel::hub::{Hub, ServerView};
-use kariz_panel::reverse::Reverse;
+use sortun_panel::agent::{self, Agent};
+use sortun_panel::db::Db;
+use sortun_panel::hub::{Hub, ServerView};
+use sortun_panel::reverse::Reverse;
 
 /// A port that is free on TCP and UDP, and so is the next one (the agent listens on both).
 fn free_pair() -> u16 {
@@ -43,10 +43,10 @@ async fn wait_for(what: &str, mut ok: impl FnMut() -> bool) {
 
 fn agent_for(code: &str, dir: &Path) -> Arc<Agent> {
     let path = dir.join("agent.toml");
-    let kariz_dir = dir.join("kariz");
-    std::fs::create_dir_all(&kariz_dir).unwrap();
+    let sortun_dir = dir.join("sortun");
+    std::fs::create_dir_all(&sortun_dir).unwrap();
     let mut config = agent::enroll_from_code(code, &path).unwrap();
-    config.kariz_dir = kariz_dir;
+    config.sortun_dir = sortun_dir;
     config.save(&path).unwrap();
     Agent::new(&path, config)
 }
@@ -54,7 +54,7 @@ fn agent_for(code: &str, dir: &Path) -> Arc<Agent> {
 #[tokio::test]
 async fn the_panel_connects_to_a_server_that_waits_for_it() {
     let _ = tracing_subscriber::fmt()
-        .with_env_filter("kariz_panel=debug,kariz=warn")
+        .with_env_filter("sortun_panel=debug,sortun=warn")
         .with_test_writer()
         .try_init();
     let panel_dir = tempfile::tempdir().unwrap();
@@ -65,7 +65,7 @@ async fn the_panel_connects_to_a_server_that_waits_for_it() {
 
     // What was typed is checked.
     let why =
-        |r: anyhow::Result<kariz_panel::reverse::ReverseJoin>| format!("{:#}", r.unwrap_err());
+        |r: anyhow::Result<sortun_panel::reverse::ReverseJoin>| format!("{:#}", r.unwrap_err());
     assert!(Reverse::new("a b", port, None).is_err());
     let target = Reverse::new("127.0.0.1", port, None).unwrap();
     assert_eq!(
@@ -90,7 +90,7 @@ async fn the_panel_connects_to_a_server_that_waits_for_it() {
         format!("address_taken:{}", made.id)
     );
     // The code has no panel address: it says where the agent listens.
-    let code = kariz_panel::join::decode(&made.code).unwrap();
+    let code = sortun_panel::join::decode(&made.code).unwrap();
     assert_eq!(code.p, "");
     assert_eq!(code.l.as_deref(), Some(format!("0.0.0.0:{port}").as_str()));
 
@@ -160,11 +160,11 @@ async fn an_agent_that_is_another_server_is_let_go() {
         .await
         .unwrap();
     // Server a's agent comes up where the panel dials b.
-    let wrong = kariz_panel::join::JoinCode {
+    let wrong = sortun_panel::join::JoinCode {
         l: Some(format!("0.0.0.0:{port_b}")),
-        ..kariz_panel::join::decode(&a.code).unwrap()
+        ..sortun_panel::join::decode(&a.code).unwrap()
     };
-    let agent = agent_for(&kariz_panel::join::encode(&wrong), dir.path());
+    let agent = agent_for(&sortun_panel::join::encode(&wrong), dir.path());
     let running = tokio::spawn(agent.run());
     // The panel reaches it as b, finds a there, and keeps neither online through it.
     tokio::time::sleep(Duration::from_secs(4)).await;

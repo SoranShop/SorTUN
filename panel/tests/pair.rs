@@ -1,4 +1,4 @@
-//! Making a tunnel as a pair, through the hub and a real agent, with real `kariz` daemons
+//! Making a tunnel as a pair, through the hub and a real agent, with real `sortun` daemons
 //! (run as child processes instead of systemd units): create, traffic, edit, stop, delete,
 //! and a create that cannot connect leaving nothing behind. The daemons' status comes over their control sockets, which are Unix only.
 #![cfg(unix)]
@@ -7,18 +7,18 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
-use kariz_panel::agent::{self, Agent};
-use kariz_panel::db::Db;
-use kariz_panel::hub::{Hub, LOCAL};
-use kariz_panel::manage::Processes;
-use kariz_panel::pair::{self, PairRequest};
-use kariz_panel::wire::ForwardInfo;
+use sortun_panel::agent::{self, Agent};
+use sortun_panel::db::Db;
+use sortun_panel::hub::{Hub, LOCAL};
+use sortun_panel::manage::Processes;
+use sortun_panel::pair::{self, PairRequest};
+use sortun_panel::wire::ForwardInfo;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
-/// The `kariz` program, next to the test programs (built by `cargo build -p kariz`).
-fn kariz_binary() -> Option<PathBuf> {
+/// The `sortun` program, next to the test programs (built by `cargo build -p sortun`).
+fn sortun_binary() -> Option<PathBuf> {
     let exe = std::env::current_exe().ok()?;
-    let bin = exe.parent()?.parent()?.join("kariz");
+    let bin = exe.parent()?.parent()?.join("sortun");
     bin.exists().then_some(bin)
 }
 
@@ -64,7 +64,7 @@ async fn through(port: u16, what: &[u8]) -> bool {
     false
 }
 
-async fn finished(hub: &Hub, id: &str) -> kariz_panel::pair::Op {
+async fn finished(hub: &Hub, id: &str) -> sortun_panel::pair::Op {
     for _ in 0..600 {
         let op = hub.ops.get(id).expect("the operation is known");
         if op.state != "running" {
@@ -85,12 +85,12 @@ fn files(dir: &Path) -> Vec<String> {
 
 #[tokio::test]
 async fn a_pair_is_made_edited_stopped_deleted_and_a_failure_leaves_nothing() {
-    let Some(binary) = kariz_binary() else {
-        eprintln!("skipped: build the kariz program first (cargo build -p kariz)");
+    let Some(binary) = sortun_binary() else {
+        eprintln!("skipped: build the sortun program first (cargo build -p sortun)");
         return;
     };
     let _ = tracing_subscriber::fmt()
-        .with_env_filter("kariz_panel=debug,kariz=warn")
+        .with_env_filter("sortun_panel=debug,sortun=warn")
         .with_test_writer()
         .try_init();
 
@@ -110,7 +110,7 @@ async fn a_pair_is_made_edited_stopped_deleted_and_a_failure_leaves_nothing() {
         None,
     );
     tokio::spawn(hub.clone().run_local());
-    let acceptor = kariz::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
+    let acceptor = sortun::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
         .await
         .unwrap();
     let addr = acceptor.local_addr().unwrap().to_string();
@@ -119,7 +119,7 @@ async fn a_pair_is_made_edited_stopped_deleted_and_a_failure_leaves_nothing() {
     let code = hub.create_join(Some("far-away"), &addr).unwrap();
     let agent_file = root.path().join("agent.toml");
     let mut config = agent::enroll_from_code(&code, &agent_file).unwrap();
-    config.kariz_dir = agent_dir.clone();
+    config.sortun_dir = agent_dir.clone();
     config.save(&agent_file).unwrap();
     let agent = Agent::with_services(
         &agent_file,
@@ -204,7 +204,7 @@ async fn a_pair_is_made_edited_stopped_deleted_and_a_failure_leaves_nothing() {
     for _ in 0..50 {
         points = hub
             .history
-            .series("tun:pair-1:rate", kariz_panel::history::Range::Hour)
+            .series("tun:pair-1:rate", sortun_panel::history::Range::Hour)
             .unwrap()
             .len();
         if points > 0 {
@@ -288,7 +288,7 @@ async fn join_agent(
     let code = hub.create_join(Some(name), addr).unwrap();
     let file = root.join(format!("{name}.toml"));
     let mut config = agent::enroll_from_code(&code, &file).unwrap();
-    config.kariz_dir = dir.clone();
+    config.sortun_dir = dir.clone();
     config.save(&file).unwrap();
     let agent = Agent::with_services(&file, config, Arc::new(Processes::new(&dir, binary)));
     tokio::spawn(agent.run());
@@ -312,8 +312,8 @@ async fn join_agent(
 /// the server it was to move to loses it, and the old pair carries traffic again.
 #[tokio::test]
 async fn a_tunnel_moves_to_another_server_and_a_move_that_fails_changes_nothing() {
-    let Some(binary) = kariz_binary() else {
-        eprintln!("skipped: build the kariz program first (cargo build -p kariz)");
+    let Some(binary) = sortun_binary() else {
+        eprintln!("skipped: build the sortun program first (cargo build -p sortun)");
         return;
     };
     let root = tempfile::tempdir().unwrap();
@@ -328,7 +328,7 @@ async fn a_tunnel_moves_to_another_server_and_a_move_that_fails_changes_nothing(
         None,
     );
     tokio::spawn(hub.clone().run_local());
-    let acceptor = kariz::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
+    let acceptor = sortun::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
         .await
         .unwrap();
     let addr = acceptor.local_addr().unwrap().to_string();

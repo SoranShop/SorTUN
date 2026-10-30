@@ -26,12 +26,12 @@ the sign-in is hardened.
 | Area | Result |
 |---|---|
 | Sign-in: password hashing, link handling, lockout, sessions | Argon2id (19 MiB, 2 passes), links and sessions stored as hashes only, a link works once, sessions listed and revocable, cookie `__Host-`, `Secure`, `HttpOnly`, `SameSite=Strict`. **OK.** |
-| CSRF | the header `X-Kariz-CSRF` on every change plus a JSON body plus `SameSite=Strict`. **OK.** |
+| CSRF | the header `X-SorTUN-CSRF` on every change plus a JSON body plus `SameSite=Strict`. **OK.** |
 | Injection into the tunnel files | every field of a tunnel is a typed value; text with a control character is refused; the file is rendered by the agent, never taken from the panel. A test found that a newline in an address was accepted before phase 12 ended; fixed and tested. **OK.** |
 | Names as paths | tunnel and interface names are `[a-z0-9-]` with a length limit; versions are checked before they become a folder. Tests for `../` and friends. **OK.** |
-| Commands run by the agent | a fixed list: `systemctl`, `journalctl`, `ip`, `ping`, `kariz speedtest`, with fixed arguments and checked values, and only `kariz@NAME` units and `kz-` interfaces. No shell. **OK.** |
+| Commands run by the agent | a fixed list: `systemctl`, `journalctl`, `ip`, `ping`, `sortun speedtest`, with fixed arguments and checked values, and only `sortun@NAME` units and `kz-` interfaces. No shell. **OK.** |
 | Agent identity | a link token plus a per-agent key, proved over a random challenge with a keyed hash compared in constant time; a join code works once. **OK.** |
-| Updates | Ed25519 signatures over a checksum file that names the archive; verified by the panel, again by every agent, and by `kariz-manager`; a rollback if the new program does not come up. **OK**; see the changes below for the download itself. |
+| Updates | Ed25519 signatures over a checksum file that names the archive; verified by the panel, again by every agent, and by `sortun-manager`; a rollback if the new program does not come up. **OK**; see the changes below for the download itself. |
 | Secrets in answers | tunnel tokens are never sent to the panel's browser or kept by the panel; the backup is encrypted. **OK.** |
 | Web app | no `innerHTML` or `dangerouslySetInnerHTML`; text from servers (logs, release notes, names) is always rendered as text. **OK.** |
 | Dependencies | `cargo audit` runs in CI on every change. |
@@ -69,7 +69,7 @@ the sign-in is hardened.
   stand against that. Use a long password, or only sign in with links.
 - **The certificate comes from Let's Encrypt** (a domain, or the server's public IP address) and is
   renewed by a timer, so a browser has a real chain to check. Panels set up earlier keep their
-  self-signed certificate until `kariz-manager panel cert` replaces it.
+  self-signed certificate until `sortun-manager panel cert` replaces it.
 - **The panel says whether a password is set** before sign-in (the login page needs to know).
 - **The agent runs as root** because it manages services and interfaces. Its requests are the fixed
   list above, but a bug in one of them is a bug as root; they are small, validated and tested.
@@ -82,4 +82,4 @@ the sign-in is hardened.
 ## How to report a problem
 
 Open an issue on the repository, or write to the maintainer privately if it should not be public
-yet. Please include the version (`kariz-panel --version`).
+yet. Please include the version (`sortun-panel --version`).

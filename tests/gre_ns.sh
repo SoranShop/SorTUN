@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Two network namespaces joined by a veth pair play two servers with public addresses
-# 192.0.2.1 and 192.0.2.2. `kariz-panel net` (what an agent does when the panel asks) makes
+# 192.0.2.1 and 192.0.2.2. `sortun-panel net` (what an agent does when the panel asks) makes
 # a GRE link between them; the private addresses must ping across it, a second link between
 # the same pair needs its own key, a filtered GRE path makes the ping fail, and `net down`
 # removes the interface. Then the same for VXLAN links (UDP, a VNI each, a port per network),
@@ -8,9 +8,9 @@
 # Needs root (CI runs it with sudo) and the ip_gre module; VXLAN is skipped without its module.
 set -euo pipefail
 
-BIN=${1:?usage: gre_ns.sh PATH-TO-kariz-panel [PATH-TO-kariz]}
+BIN=${1:?usage: gre_ns.sh PATH-TO-sortun-panel [PATH-TO-sortun]}
 BIN=$(readlink -f "$BIN")
-KARIZ=${2:+$(readlink -f "$2")}
+SORTUN=${2:+$(readlink -f "$2")}
 WORK=$(mktemp -d)
 PIDS=()
 cleanup() {
@@ -125,9 +125,9 @@ if command -v iptables >/dev/null; then
     echo "a filtered path fails the test, and it passes again once open"
 fi
 
-# a Kariz tunnel over the private addresses: the exit listens on its end of the link
+# a SorTUN tunnel over the private addresses: the exit listens on its end of the link
 # (10.77.0.2), the entry dials it from the other, and a request goes through end to end
-if [[ -n "$KARIZ" ]]; then
+if [[ -n "$SORTUN" ]]; then
     ip netns exec kzb python3 -m http.server 18081 --bind 127.0.0.1 --directory "$WORK" >/dev/null 2>&1 &
     PIDS+=($!)
     echo hello-over-gre >"$WORK/index.html"
@@ -150,10 +150,10 @@ token = "gre-test-token-0123456789abcdef"
 listen = "127.0.0.1:18080"
 target = "127.0.0.1:18081"
 EOF
-    ip netns exec kzb "$KARIZ" run -c "$WORK/exit.toml" >"$WORK/exit.log" 2>&1 &
+    ip netns exec kzb "$SORTUN" run -c "$WORK/exit.toml" >"$WORK/exit.log" 2>&1 &
     PIDS+=($!)
     sleep 1
-    ip netns exec kza "$KARIZ" run -c "$WORK/entry.toml" >"$WORK/entry.log" 2>&1 &
+    ip netns exec kza "$SORTUN" run -c "$WORK/entry.toml" >"$WORK/entry.log" 2>&1 &
     PIDS+=($!)
     ok=0
     for _ in $(seq 1 20); do
@@ -170,7 +170,7 @@ EOF
     fi
     # it went over the private link, not the public path: GRE packets were counted
     ip -n kza -s link show kz-one | awk '/RX:/{getline; if ($2 == 0) exit 1}'
-    echo "a Kariz tunnel works over the private addresses"
+    echo "a SorTUN tunnel works over the private addresses"
     for pid in "${PIDS[@]}"; do kill "$pid" 2>/dev/null || true; done
     PIDS=()
 fi

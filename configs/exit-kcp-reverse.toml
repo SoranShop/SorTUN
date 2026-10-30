@@ -6,7 +6,7 @@ profile = "balanced"
 [tunnel]
 transport = "kcp"
 remote = "ENTRY_SERVER_IP:4000"
-token = "CHANGE-ME-run-kariz-token"
+token = "CHANGE-ME-run-sortun-token"
 
 [tunnel.kcp]
 mode = "fast2"                     # FEC is set per sending side: add fec_data / fec_parity

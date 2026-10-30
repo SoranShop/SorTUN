@@ -4,12 +4,12 @@ use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand};
 use tracing_subscriber::EnvFilter;
 
-use kariz::config::{mode_name, role_name, Config, Dscp, Encryption, TransportKind};
-use kariz::crypto::Cipher;
-use kariz::speedtest::Options;
+use sortun::config::{mode_name, role_name, Config, Dscp, Encryption, TransportKind};
+use sortun::crypto::Cipher;
+use sortun::speedtest::Options;
 
 mod logging;
-// Shown only by `kariz speedtest` and `kariz status`, which are Unix only (their tests
+// Shown only by `sortun speedtest` and `sortun status`, which are Unix only (their tests
 // run everywhere).
 #[cfg_attr(not(unix), allow(dead_code))]
 mod report;
@@ -23,7 +23,7 @@ mod status_view;
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[derive(Parser)]
-#[command(name = "kariz", version, about = "High-performance tunnel core")]
+#[command(name = "sortun", version, about = "High-performance tunnel core")]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -33,13 +33,13 @@ struct Cli {
 enum Command {
     /// Run one side of the tunnel.
     Run {
-        #[arg(short, long, default_value = "/etc/kariz/config.toml")]
+        #[arg(short, long, default_value = "/etc/sortun/config.toml")]
         config: PathBuf,
     },
     /// Validate a config file and print a summary.
     Check {
         /// The config file, or `-` to read it from standard input.
-        #[arg(short, long, default_value = "/etc/kariz/config.toml")]
+        #[arg(short, long, default_value = "/etc/sortun/config.toml")]
         config: PathBuf,
         /// Print one JSON document instead: the settings, or the error and where it is.
         #[arg(long)]
@@ -48,7 +48,7 @@ enum Command {
     /// Show a running tunnel: whether the other side is connected, the round-trip time,
     /// the last error, and the traffic of each forwarded port. Works on either side.
     Status {
-        #[arg(short, long, default_value = "/etc/kariz/config.toml")]
+        #[arg(short, long, default_value = "/etc/sortun/config.toml")]
         config: PathBuf,
         /// Redraw every second until Ctrl+C.
         #[arg(long)]
@@ -68,7 +68,7 @@ enum Command {
     /// Measure a running tunnel's speed and latency, through its own sessions. Run it
     /// on the entry side, in either mode, while the tunnel is up.
     Speedtest {
-        #[arg(short, long, default_value = "/etc/kariz/config.toml")]
+        #[arg(short, long, default_value = "/etc/sortun/config.toml")]
         config: PathBuf,
         /// Seconds each of the download and upload phases lasts (1-60).
         #[arg(long, default_value_t = 10)]
@@ -83,7 +83,7 @@ enum Command {
 }
 
 fn main() -> Result<()> {
-    kariz::allocator::tune();
+    sortun::allocator::tune();
     match Cli::parse().command {
         Command::Run { config } => run(Config::load(&config)?),
         Command::Check { config, json } => check(&config, json),
@@ -102,7 +102,7 @@ fn main() -> Result<()> {
             Ok(())
         }
         Command::Pin { cert } => {
-            println!("{}", kariz::transport::tls::pin_of_file(&cert)?);
+            println!("{}", sortun::transport::tls::pin_of_file(&cert)?);
             Ok(())
         }
         Command::Speedtest {
@@ -121,7 +121,7 @@ fn main() -> Result<()> {
     }
 }
 
-/// `kariz check`: validates a config (a file, or standard input for `-`) and prints its
+/// `sortun check`: validates a config (a file, or standard input for `-`) and prints its
 /// summary, or with `json` one document for tools (the web panel).
 fn check(path: &Path, json: bool) -> Result<()> {
     let name = if path == Path::new("-") {
@@ -154,7 +154,7 @@ fn check(path: &Path, json: bool) -> Result<()> {
     Ok(())
 }
 
-/// `kariz check --json` for a valid config.
+/// `sortun check --json` for a valid config.
 fn check_ok(config: &Config) -> serde_json::Value {
     serde_json::json!({
         "ok": true,
@@ -174,7 +174,7 @@ fn check_ok(config: &Config) -> serde_json::Value {
     })
 }
 
-/// `kariz check --json` for an invalid config: the message, the setting it names (every
+/// `sortun check --json` for an invalid config: the message, the setting it names (every
 /// validation message starts with one) and, for TOML syntax, where in the text it is.
 fn check_error(e: &anyhow::Error, text: Option<&str>) -> serde_json::Value {
     let mut doc = serde_json::json!({ "ok": false, "error": format!("{e:#}") });
@@ -200,7 +200,7 @@ fn check_error(e: &anyhow::Error, text: Option<&str>) -> serde_json::Value {
     doc
 }
 
-/// `kariz status`: asks the running daemon of this config for its status and shows it.
+/// `sortun status`: asks the running daemon of this config for its status and shows it.
 #[cfg(unix)]
 fn status(path: &Path, watch: bool, json: bool) -> Result<()> {
     use std::io::Write;
@@ -219,8 +219,8 @@ fn status(path: &Path, watch: bool, json: bool) -> Result<()> {
         .build()?;
     let ask = || {
         runtime.block_on(async {
-            let connection = kariz::control::connect(&socket).await?;
-            kariz::control::status(connection).await
+            let connection = sortun::control::connect(&socket).await?;
+            sortun::control::status(connection).await
         })
     };
     let first = match ask() {
@@ -232,8 +232,8 @@ fn status(path: &Path, watch: bool, json: bool) -> Result<()> {
             ) =>
         {
             eprintln!(
-                "kariz status: {name} is not running (nothing answers on {}); \
-                 see `systemctl status kariz@{name}`",
+                "sortun status: {name} is not running (nothing answers on {}); \
+                 see `systemctl status sortun@{name}`",
                 socket.display()
             );
             std::process::exit(3);
@@ -264,16 +264,16 @@ fn status(path: &Path, watch: bool, json: bool) -> Result<()> {
 
 #[cfg(not(unix))]
 fn status(_: &Path, _: bool, _: bool) -> Result<()> {
-    bail!("`kariz status` needs a Linux server: it talks to the running daemon over a Unix socket")
+    bail!("`sortun status` needs a Linux server: it talks to the running daemon over a Unix socket")
 }
 
-/// `kariz speedtest`: asks the running daemon of this config for a test and shows it.
+/// `sortun speedtest`: asks the running daemon of this config for a test and shows it.
 #[cfg(unix)]
 fn speedtest(config: &Config, options: Options) -> Result<()> {
     use std::io::Write;
 
     use anyhow::Context;
-    use kariz::config::Role;
+    use sortun::config::Role;
 
     if config.role != Role::Entry {
         bail!(
@@ -291,10 +291,10 @@ fn speedtest(config: &Config, options: Options) -> Result<()> {
         .build()?;
     let live = style.color;
     let report = runtime.block_on(async {
-        let connection = kariz::control::connect(&socket).await?;
-        kariz::control::request(connection, options, |line| {
+        let connection = sortun::control::connect(&socket).await?;
+        sortun::control::request(connection, options, |line| {
             // Lines for programs (the panel) are not for a person.
-            if line.starts_with(kariz::speedtest::RESULT_LINE) {
+            if line.starts_with(sortun::speedtest::RESULT_LINE) {
                 return;
             }
             // One line, rewritten, on a terminal.
@@ -318,7 +318,7 @@ fn speedtest(config: &Config, options: Options) -> Result<()> {
 #[cfg(not(unix))]
 fn speedtest(_: &Config, _: Options) -> Result<()> {
     bail!(
-        "`kariz speedtest` needs a Linux server: it talks to the running daemon over a Unix \
+        "`sortun speedtest` needs a Linux server: it talks to the running daemon over a Unix \
          socket"
     )
 }
@@ -345,7 +345,7 @@ fn run(config: Config) -> Result<()> {
 
     runtime.block_on(async move {
         tokio::select! {
-            result = kariz::run(config) => result,
+            result = sortun::run(config) => result,
             _ = shutdown_signal() => {
                 tracing::info!("shutting down");
                 Ok(())

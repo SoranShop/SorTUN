@@ -1,4 +1,4 @@
-//! The agent: what runs on every other server (`kariz-panel agent`). It dials the panel,
+//! The agent: what runs on every other server (`sortun-panel agent`). It dials the panel,
 //! proves who it is, and answers the panel's requests: a fixed list, none of which runs anything the panel names.
 //!
 //! On a server the panel connects to (reverse, `listen` in its settings) it does not dial:
@@ -11,8 +11,8 @@ use std::time::Duration;
 
 use anyhow::{bail, Context, Result};
 use bytes::Bytes;
-use kariz::mux::Side;
-use kariz::session::Session;
+use sortun::mux::Side;
+use sortun::session::Session;
 use serde::{Deserialize, Serialize};
 use tracing::{info, warn};
 
@@ -21,10 +21,10 @@ use crate::join::{self, JoinCode};
 use crate::manage::{self, Services};
 use crate::wire::{Ack, HelloReply, Request, SpeedPoll, SpeedStarted, MAX_REQUEST};
 
-pub const DEFAULT_AGENT_CONFIG: &str = "/etc/kariz-panel/agent.toml";
-pub const DEFAULT_KARIZ_DIR: &str = "/etc/kariz";
+pub const DEFAULT_AGENT_CONFIG: &str = "/etc/sortun-panel/agent.toml";
+pub const DEFAULT_SORTUN_DIR: &str = "/etc/sortun";
 
-/// The agent's identity and where the panel is: `/etc/kariz-panel/agent.toml`.
+/// The agent's identity and where the panel is: `/etc/sortun-panel/agent.toml`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct AgentConfig {
@@ -40,9 +40,9 @@ pub struct AgentConfig {
     pub id: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub key: Option<String>,
-    /// Where the Kariz tunnel configs are.
-    #[serde(default = "default_kariz_dir")]
-    pub kariz_dir: PathBuf,
+    /// Where the SorTUN tunnel configs are.
+    #[serde(default = "default_sortun_dir", alias = "kariz_dir")]
+    pub sortun_dir: PathBuf,
     /// How tunnels are started: `systemd` (default) or `process`.
     #[serde(default)]
     pub services: manage::ServiceKind,
@@ -57,8 +57,8 @@ pub struct AgentConfig {
     pub listen: Option<String>,
 }
 
-fn default_kariz_dir() -> PathBuf {
-    PathBuf::from(DEFAULT_KARIZ_DIR)
+fn default_sortun_dir() -> PathBuf {
+    PathBuf::from(DEFAULT_SORTUN_DIR)
 }
 
 impl AgentConfig {
@@ -70,7 +70,7 @@ impl AgentConfig {
             join: Some(code.j.clone()),
             id: None,
             key: None,
-            kariz_dir: default_kariz_dir(),
+            sortun_dir: default_sortun_dir(),
             services: Default::default(),
             release_key: None,
             transport: code.x.clone(),
@@ -145,7 +145,7 @@ struct SpeedJob {
     lines: Vec<String>,
     done: bool,
     error: Option<String>,
-    report: Option<kariz::speedtest::Report>,
+    report: Option<sortun::speedtest::Report>,
     started: Option<std::time::Instant>,
     /// Told to stop the test.
     stop: Arc<tokio::sync::Notify>,
@@ -224,7 +224,7 @@ impl Agent {
                 std::env::current_exe().unwrap_or_default(),
                 std::env::current_exe()
                     .unwrap_or_default()
-                    .with_file_name("kariz"),
+                    .with_file_name("sortun"),
                 launcher,
             ),
         })
@@ -239,7 +239,7 @@ impl Agent {
 
     /// Starts a speed test in the background; its id comes back at once.
     fn speedtest_start(&self, name: String, seconds: u32, streams: u32, udp: bool) -> SpeedStarted {
-        let dir = self.config().kariz_dir;
+        let dir = self.config().sortun_dir;
         // Said now, before anything runs, if the test cannot be made at all.
         if let Err(e) = manage::speedtest_setup(&dir, &name, seconds, streams, udp) {
             return SpeedStarted {
@@ -392,17 +392,17 @@ impl Agent {
                 to_json(&health)
             }
             Request::Tunnels => {
-                to_json(&collect::tunnels(&self.config().kariz_dir, &*self.services).await)
+                to_json(&collect::tunnels(&self.config().sortun_dir, &*self.services).await)
             }
             Request::TunnelCheck { spec } => {
-                let dir = self.config().kariz_dir;
+                let dir = self.config().sortun_dir;
                 let owners = tokio::task::spawn_blocking(manage::ports)
                     .await
                     .unwrap_or_default();
                 to_json(&manage::check(&dir, &owners, &spec))
             }
             Request::TunnelPut { spec } => {
-                let dir = self.config().kariz_dir;
+                let dir = self.config().sortun_dir;
                 to_json(&match manage::put(&dir, &spec) {
                     Ok(pin) => crate::wire::PutReply {
                         ok: true,
@@ -417,7 +417,7 @@ impl Agent {
                 })
             }
             Request::TunnelGet { name } => {
-                let dir = self.config().kariz_dir;
+                let dir = self.config().sortun_dir;
                 match manage::get(&dir, &name) {
                     Ok(spec) => to_json(&spec),
                     Err(e) => to_json(&Ack {
@@ -427,11 +427,11 @@ impl Agent {
                 }
             }
             Request::TunnelDelete { name } => {
-                let dir = self.config().kariz_dir;
+                let dir = self.config().sortun_dir;
                 ack(manage::delete(&dir, &*self.services, &name).await)
             }
             Request::TunnelRevert { name } => {
-                let dir = self.config().kariz_dir;
+                let dir = self.config().sortun_dir;
                 ack(manage::revert(&dir, &name))
             }
             Request::TunnelCtl { name, action } => ack(self.services.ctl(name, action).await),
@@ -509,7 +509,7 @@ impl Agent {
                 streams,
                 udp,
             } => {
-                let dir = self.config().kariz_dir;
+                let dir = self.config().sortun_dir;
                 to_json(&manage::speedtest(&dir, &name, seconds, streams, udp).await)
             }
             Request::TunnelCert { domain, email } => {
@@ -637,7 +637,7 @@ impl Agent {
         let c = self.config();
         if c.join.is_none() && (c.id.is_none() || c.key.is_none()) {
             bail!(
-                "the agent has no join code and no identity: run `kariz-panel agent --join CODE`"
+                "the agent has no join code and no identity: run `sortun-panel agent --join CODE`"
             );
         }
         // The private network links this server had come back with the agent.
@@ -653,7 +653,7 @@ impl Agent {
             return self.listen_for_panel(&listen).await;
         }
         // One transport if the join code named it, else all of them in turn.
-        let kinds: Vec<_> = kariz::link::LINK_TRANSPORTS
+        let kinds: Vec<_> = sortun::link::LINK_TRANSPORTS
             .into_iter()
             .filter(|k| !matches!(c.transport.as_deref(), Some(t) if t != k.name()))
             .collect();
@@ -673,8 +673,8 @@ impl Agent {
         loop {
             let kind = kinds[at];
             // wss and quic are on the port after the agents port, the others on it.
-            let addr = &kariz::link::address_for(&c.panel, kind)?;
-            let dialer = kariz::link::Dialer::via(addr, &c.link_token, kind)?;
+            let addr = &sortun::link::address_for(&c.panel, kind)?;
+            let dialer = sortun::link::Dialer::via(addr, &c.link_token, kind)?;
             match dialer.connect(Side::Server).await {
                 Ok(session) => {
                     info!(panel = %addr, transport = kind.name(), "connected to the panel");
@@ -741,7 +741,7 @@ impl Agent {
     /// Each link the panel makes is served like one the agent dialed.
     async fn listen_for_panel(self: Arc<Self>, listen: &str) -> Result<()> {
         let c = self.config();
-        let kinds: Vec<_> = kariz::link::LINK_TRANSPORTS
+        let kinds: Vec<_> = sortun::link::LINK_TRANSPORTS
             .into_iter()
             .filter(|k| !matches!(c.transport.as_deref(), Some(t) if t != k.name()))
             .collect();
@@ -757,13 +757,13 @@ impl Agent {
         );
         let mut accepting = tokio::task::JoinSet::new();
         for kind in kinds {
-            let addr = kariz::link::address_for(listen, kind)?;
+            let addr = sortun::link::address_for(listen, kind)?;
             for one in listen_addresses(&addr) {
-                let bound = if kind == kariz::config::TransportKind::Wss {
+                let bound = if kind == sortun::config::TransportKind::Wss {
                     crate::cert::ensure(&cert, &key)?;
-                    kariz::link::Acceptor::bind_wss(&one, &c.link_token, &cert, &key).await
+                    sortun::link::Acceptor::bind_wss(&one, &c.link_token, &cert, &key).await
                 } else {
-                    kariz::link::Acceptor::bind_via(&one, &c.link_token, kind).await
+                    sortun::link::Acceptor::bind_via(&one, &c.link_token, kind).await
                 };
                 match bound {
                     Ok(acceptor) => {
@@ -784,7 +784,7 @@ impl Agent {
     }
 
     /// Takes the panel's links on one acceptor, for ever.
-    async fn serve_panel_links(self: Arc<Self>, acceptor: kariz::link::Acceptor) {
+    async fn serve_panel_links(self: Arc<Self>, acceptor: sortun::link::Acceptor) {
         let kind = acceptor.kind().name();
         loop {
             let pending = match acceptor.accept().await {
@@ -1005,7 +1005,7 @@ target = \"127.0.0.1:443\"
             g: None,
             l: None,
         });
-        config.kariz_dir = dir.path().to_path_buf();
+        config.sortun_dir = dir.path().to_path_buf();
         let agent = Agent::new(&dir.path().join("agent.toml"), config);
         let ask = |agent: &Arc<Agent>, request: Request| {
             let agent = agent.clone();
@@ -1090,7 +1090,7 @@ target = \"127.0.0.1:443\"
             g: None,
             l: None,
         });
-        config.kariz_dir = dir.path().to_path_buf();
+        config.sortun_dir = dir.path().to_path_buf();
         let agent = Agent::new(&dir.path().join("agent.toml"), config);
         let health: Health = serde_json::from_slice(&agent.handle(Request::Health).await).unwrap();
         let _ = health; // all None off Linux

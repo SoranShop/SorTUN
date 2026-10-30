@@ -224,7 +224,7 @@ pub async fn run(config: Config) -> Result<()> {
         last_full_warning: std::sync::Mutex::default(),
     });
 
-    // `kariz status` reads the counters and `kariz speedtest` reaches the live sessions
+    // `sortun status` reads the counters and `sortun speedtest` reaches the live sessions
     // through this (Unix only).
     #[cfg(unix)]
     if let Some(socket) = config.control_socket() {

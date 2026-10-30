@@ -1,12 +1,12 @@
-//! The panel's settings: `/etc/kariz-panel/panel.toml`.
+//! The panel's settings: `/etc/sortun-panel/panel.toml`.
 
 use std::path::{Path, PathBuf};
 
 use anyhow::{bail, Context, Result};
 use serde::{Deserialize, Serialize};
 
-pub const DEFAULT_CONFIG: &str = "/etc/kariz-panel/panel.toml";
-pub const DEFAULT_DATA_DIR: &str = "/var/lib/kariz-panel";
+pub const DEFAULT_CONFIG: &str = "/etc/sortun-panel/panel.toml";
+pub const DEFAULT_DATA_DIR: &str = "/var/lib/sortun-panel";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -22,9 +22,9 @@ pub struct Config {
     /// Where agents connect (`0.0.0.0:29001`); without it, no server can be added.
     #[serde(default)]
     pub agent_listen: Option<String>,
-    /// Where this server's Kariz tunnel configs are.
-    #[serde(default = "default_kariz_dir")]
-    pub kariz_dir: PathBuf,
+    /// Where this server's SorTUN tunnel configs are.
+    #[serde(default = "default_sortun_dir", alias = "kariz_dir")]
+    pub sortun_dir: PathBuf,
     /// How tunnels are started: `systemd` (default) or `process`.
     #[serde(default)]
     pub services: crate::manage::ServiceKind,
@@ -42,8 +42,8 @@ pub struct Config {
     pub release_key: Option<String>,
 }
 
-fn default_kariz_dir() -> PathBuf {
-    PathBuf::from("/etc/kariz")
+fn default_sortun_dir() -> PathBuf {
+    PathBuf::from("/etc/sortun")
 }
 
 fn default_data_dir() -> PathBuf {

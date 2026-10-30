@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
-const B = "/Kariz";
+const B = "/SorTUN";
 const PAGES = [
   "/",
   "/docs/",
@@ -23,7 +23,7 @@ const PAGES = [
 ];
 
 async function open(page: Page, path: string, theme: "night" | "dawn" = "night") {
-  await page.addInitScript((t) => localStorage.setItem("kariz-site-theme", t), theme);
+  await page.addInitScript((t) => localStorage.setItem("sortun-site-theme", t), theme);
   await page.goto(`${B}${path}`);
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
 }
@@ -158,7 +158,7 @@ test("the video page has a player and chapters that move it", async ({ page }) =
   await open(page, "/docs/video/");
   const video = page.locator("video[data-video]");
   await expect(video).toHaveAttribute("poster", /poster\.jpg$/);
-  await expect(video.locator("source")).toHaveAttribute("src", /kariz-panel-tutorial\.mp4$/);
+  await expect(video.locator("source")).toHaveAttribute("src", /sortun-panel-tutorial\.mp4$/);
   await page.locator("[data-seek]").nth(3).click();
   await expect.poll(() => video.evaluate((v: HTMLVideoElement) => Math.round(v.currentTime))).toBeGreaterThanOrEqual(30);
 });
@@ -214,7 +214,7 @@ test("the panel demo runs in the page, in the page's language", async ({ page })
   await open(page, "/fa/try/");
   const demo = page.frameLocator("iframe");
   await expect(demo.locator("html")).toHaveAttribute("dir", "rtl");
-  await expect(demo.getByRole("button", { name: /kariz|ورود/i }).first()).toBeVisible();
+  await expect(demo.getByRole("button", { name: /sortun|ورود/i }).first()).toBeVisible();
 });
 
 test("a page that is not there says so, with a way out", async ({ page }) => {

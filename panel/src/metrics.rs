@@ -17,7 +17,7 @@ use crate::hub::{ServerView, TunnelView};
 /// The hash of the scrape token; empty or missing while `/metrics` is off.
 const TOKEN_KEY: &str = "metrics_token";
 /// What every metric's name starts with.
-const PREFIX: &str = "kariz";
+const PREFIX: &str = "sortun";
 
 pub fn enabled(db: &Db) -> Result<bool> {
     Ok(db.meta(TOKEN_KEY)?.is_some_and(|h| !h.is_empty()))
@@ -289,7 +289,7 @@ mod tests {
         assert!(!allowed(&db, &bearer(&second)));
     }
 
-    fn server(tunnel_status: Option<kariz::stats::Status>) -> ServerView {
+    fn server(tunnel_status: Option<sortun::stats::Status>) -> ServerView {
         use crate::wire::{Health, TunnelInfo};
         ServerView {
             id: "s1".into(),
@@ -355,26 +355,26 @@ mod tests {
         let who = r#"server="Frankfurt \"1\"",server_id="s1""#;
         let tunnel = format!(r#"{who},tunnel="web",role="exit",transport="tcpmux""#);
         for line in [
-            format!("kariz_server_up{{{who}}} 1"),
-            format!("kariz_server_cpu_percent{{{who}}} 12.5"),
-            format!("kariz_server_memory_used_bytes{{{who}}} 1024"),
-            format!("kariz_tunnel_active{{{tunnel}}} 1"),
-            format!("kariz_tunnel_connected{{{tunnel}}} 1"),
-            format!("kariz_tunnel_rtt_seconds{{{tunnel}}} 0.04"),
-            format!("kariz_tunnel_sent_bytes_total{{{tunnel}}} 5000"),
+            format!("sortun_server_up{{{who}}} 1"),
+            format!("sortun_server_cpu_percent{{{who}}} 12.5"),
+            format!("sortun_server_memory_used_bytes{{{who}}} 1024"),
+            format!("sortun_tunnel_active{{{tunnel}}} 1"),
+            format!("sortun_tunnel_connected{{{tunnel}}} 1"),
+            format!("sortun_tunnel_rtt_seconds{{{tunnel}}} 0.04"),
+            format!("sortun_tunnel_sent_bytes_total{{{tunnel}}} 5000"),
             // It runs on a fallback: not tunnel.remote.
-            format!("kariz_tunnel_on_fallback{{{tunnel}}} 1"),
+            format!("sortun_tunnel_on_fallback{{{tunnel}}} 1"),
         ] {
             assert!(text.lines().any(|l| l == line), "{line} not in:\n{text}");
         }
-        assert!(text.contains("# TYPE kariz_tunnel_sent_bytes_total counter"));
+        assert!(text.contains("# TYPE sortun_tunnel_sent_bytes_total counter"));
         // Nothing is said that is not known: no transmit rate, no rows without samples.
         assert!(!text.contains("transmit"));
-        assert!(!text.contains("kariz_tunnel_sessions"), "{text}");
+        assert!(!text.contains("sortun_tunnel_sessions"), "{text}");
         // A tunnel whose daemon does not answer has only its service state.
         let text = render(&[server(None)]);
-        assert!(text.contains("kariz_tunnel_active{"));
-        assert!(!text.contains("kariz_tunnel_connected"));
+        assert!(text.contains("sortun_tunnel_active{"));
+        assert!(!text.contains("sortun_tunnel_connected"));
     }
 
     #[test]

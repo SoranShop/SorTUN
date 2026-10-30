@@ -3,7 +3,7 @@
 //! exact bytes. Signing the file binds the archive's name to its hash, so an archive cannot
 //! be swapped for another one of the same release (another CPU, say).
 //!
-//! The public key is built into the program (and into `scripts/kariz.sh`, which checks it
+//! The public key is built into the program (and into `scripts/sortun.sh`, which checks it
 //! with `openssl`); the private key is a repository secret that only the release workflow
 //! sees. A file whose signature does not verify is never run.
 
@@ -13,7 +13,7 @@ use ring::digest;
 use ring::rand::SystemRandom;
 use ring::signature::{self, Ed25519KeyPair, KeyPair, UnparsedPublicKey};
 
-/// The release public key: 32 raw bytes, hex. (`kariz-panel release-key` makes a pair.)
+/// The release public key: 32 raw bytes, hex. (`sortun-panel release-key` makes a pair.)
 pub const RELEASE_KEY_HEX: &str =
     "e0671779e366f9609ce3c66b4b569cf448470c14ce4330541e3f7d5a09fb4234";
 
@@ -130,7 +130,7 @@ mod tests {
         let (private, public) = generate().unwrap();
         let archive = b"pretend this is a tar.gz".to_vec();
         let sha = format!(
-            "{}  kariz-v0.11.0-x86_64-linux.tar.gz\n",
+            "{}  sortun-v0.11.0-x86_64-linux.tar.gz\n",
             sha256_hex(&archive)
         )
         .into_bytes();
@@ -144,7 +144,7 @@ mod tests {
         assert_eq!(sig.len(), 64);
         verify_archive(
             &public,
-            "kariz-v0.11.0-x86_64-linux.tar.gz",
+            "sortun-v0.11.0-x86_64-linux.tar.gz",
             &archive,
             &sha,
             &sig,
@@ -155,7 +155,7 @@ mod tests {
     #[test]
     fn every_kind_of_tampering_is_refused_with_its_own_reason() {
         let (_, public, archive, sha, sig) = release();
-        let name = "kariz-v0.11.0-x86_64-linux.tar.gz";
+        let name = "sortun-v0.11.0-x86_64-linux.tar.gz";
         let code = |r: Result<()>| format!("{:#}", r.unwrap_err());
 
         // another key
@@ -186,7 +186,7 @@ mod tests {
         assert_eq!(
             code(verify_archive(
                 &public,
-                "kariz-v0.11.0-aarch64-linux.tar.gz",
+                "sortun-v0.11.0-aarch64-linux.tar.gz",
                 &archive,
                 &sha,
                 &sig

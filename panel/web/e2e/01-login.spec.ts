@@ -3,8 +3,8 @@ import { newLink, readStack, setPassword } from "./stack";
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.setItem("kariz.lang", "en");
-    localStorage.setItem("kariz.low", "1");
+    localStorage.setItem("sortun.lang", "en");
+    localStorage.setItem("sortun.low", "1");
   });
 });
 
@@ -19,7 +19,7 @@ test("a one-time link signs in, disappears from the address, and works only once
   // the same link again, in a browser that has nothing: refused
   const other = await browser.newContext({ ignoreHTTPSErrors: true });
   const second = await other.newPage();
-  await second.addInitScript(() => localStorage.setItem("kariz.lang", "en"));
+  await second.addInitScript(() => localStorage.setItem("sortun.lang", "en"));
   await second.goto(link);
   await expect(second.locator("#login")).toBeVisible({ timeout: 30_000 });
   await expect(second.locator("#pw-err")).toContainText(/wrong|used up|expired/i, { timeout: 15_000 });

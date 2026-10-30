@@ -1,34 +1,34 @@
 //! The agent's tunnel requests through `Agent::handle`, the
 //! same path the panel's link uses: check, write, read back, edit, delete, ports.
 
-use kariz_panel::agent::{Agent, AgentConfig};
-use kariz_panel::wire::{Ack, CheckReply, ForwardInfo, PortOwner, Request, Spec};
+use sortun_panel::agent::{Agent, AgentConfig};
+use sortun_panel::wire::{Ack, CheckReply, ForwardInfo, PortOwner, Request, Spec};
 
 fn dir(tag: &str) -> std::path::PathBuf {
     let mut b = [0u8; 6];
     getrandom::fill(&mut b).unwrap();
     let p = std::env::temp_dir().join(format!(
-        "kariz-req-{tag}-{}",
+        "sortun-req-{tag}-{}",
         b.iter().map(|x| format!("{x:02x}")).collect::<String>()
     ));
     std::fs::create_dir_all(&p).unwrap();
     p
 }
 
-fn agent(kariz_dir: &std::path::Path) -> std::sync::Arc<Agent> {
+fn agent(sortun_dir: &std::path::Path) -> std::sync::Arc<Agent> {
     let config = AgentConfig {
         panel: "127.0.0.1:1".into(),
         link_token: "t".into(),
         join: None,
         id: Some("id".into()),
         key: Some("00".repeat(32)),
-        kariz_dir: kariz_dir.to_path_buf(),
+        sortun_dir: sortun_dir.to_path_buf(),
         services: Default::default(),
         release_key: None,
         transport: None,
         listen: None,
     };
-    Agent::new(&kariz_dir.join("agent.toml"), config)
+    Agent::new(&sortun_dir.join("agent.toml"), config)
 }
 
 fn spec() -> Spec {

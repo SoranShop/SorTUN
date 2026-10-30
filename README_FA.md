@@ -21,7 +21,7 @@
 
 <div dir="rtl">
 
-**SorTUN** مثل کاریزهای ایران کار می‌کند: کانال‌هایی که زیر کویر کنده‌اند و آب را از دل کوه، از میان ردیفی از چاه‌ها، بی‌آن‌که به سطح زمین بیاید به آبادی می‌رسانند. این برنامه همین کار را برای ترافیک می‌کند. دو سرور را با یک تانل سریع و رمزنگاری‌شده به هم وصل می‌کند؛ کاربرها به **ورودی** (entry) وصل می‌شوند و SorTUN ترافیک TCP و UDP‌شان را به **خروجی** (exit) می‌رساند، همان سروری که به مقصدهای واقعی دسترسی دارد.
+**SorTUN** مثل قنات‌های ایران کار می‌کند: کانال‌هایی که زیر کویر کنده‌اند و آب را از دل کوه، از میان ردیفی از چاه‌ها، بی‌آن‌که به سطح زمین بیاید به آبادی می‌رسانند. این برنامه همین کار را برای ترافیک می‌کند. دو سرور را با یک تانل سریع و رمزنگاری‌شده به هم وصل می‌کند؛ کاربرها به **ورودی** (entry) وصل می‌شوند و SorTUN ترافیک TCP و UDP‌شان را به **خروجی** (exit) می‌رساند، همان سروری که به مقصدهای واقعی دسترسی دارد.
 
 </div>
 
@@ -58,7 +58,7 @@ flowchart LR
 </div>
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh)
 ```
 
 <div dir="rtl">
@@ -99,7 +99,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/script
 </div>
 
 ```bash
-cargo build --release                         # target/release/kariz
+cargo build --release                         # target/release/sortun
 cargo test                                    # اگر nginx نصب باشد تست‌های nginx هم اجرا می‌شوند
 cargo build --release --no-default-features   # بدون quic و kcp
 ```

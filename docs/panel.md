@@ -10,16 +10,16 @@ a walk through the screens in the order you need them.
 On the server that will run the panel, as root:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh) install
-kariz-manager panel install
+bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh) install
+sortun-manager panel install
 ```
 
 `panel install` first asks how you will open the panel and gets a certificate for it (below),
-then writes the settings, makes the database, starts the service `kariz-panel`, and prints:
+then writes the settings, makes the database, starts the service `sortun-panel`, and prints:
 
 ```text
   address       https://203.0.113.5:28443/k-7f3a9c2e/
-  certificate   /etc/letsencrypt/live/kariz-panel-203-0-113-5/fullchain.pem
+  certificate   /etc/letsencrypt/live/sortun-panel-203-0-113-5/fullchain.pem
   agents        port 22230: TCP and UDP, and TCP and UDP 22231 (open them for the servers you add)
   sign in       https://203.0.113.5:28443/k-7f3a9c2e/#t=...
 ```
@@ -30,9 +30,9 @@ then writes the settings, makes the database, starts the service `kariz-panel`, 
   Safari keeps the sign-in cookie). See *The certificate* below.
 - **The sign-in link** works once, for 60 minutes. Open it in the browser: it signs you in
   and disappears from the address bar. Make another any time with
-  `kariz-manager panel link`.
+  `sortun-manager panel link`.
 - **The ports** are random (above 20000). The installer asks for the panel's (Enter keeps a
-  random one), and `--port N` gives it; `kariz-manager panel port` (menu item 7, *Panel port*)
+  random one), and `--port N` gives it; `sortun-manager panel port` (menu item 7, *Panel port*)
   changes it later. Only the address you open changes: the servers connected to the panel use
   the agents' port, which stays as it is. Open both the
   panel's port (for you) and the agents' port (for your other servers: TCP and UDP, and TCP and UDP on the next port
@@ -40,7 +40,7 @@ then writes the settings, makes the database, starts the service `kariz-panel`, 
 
 The installer asks for an admin password of your own (at least 12 characters, three of: lower
 case, UPPER CASE, digits, symbols); or choose the one-time sign-in link only. Change it in *Settings*
-(10 characters or more), or from the server: `kariz-manager panel password` (asks the same way;
+(10 characters or more), or from the server: `sortun-manager panel password` (asks the same way;
 `--random` makes one and shows it, `--stdin` reads yours).
 
 ## The certificate
@@ -54,28 +54,28 @@ asks which of two you want (or uses a certificate you have, below):
   `192.168.x` and so on).
 
 ```bash
-kariz-manager panel install --domain panel.example.com      # or: --ip 203.0.113.5
-kariz-manager panel cert --domain other.example.com         # change it later; --ip ADDRESS too
+sortun-manager panel install --domain panel.example.com      # or: --ip 203.0.113.5
+sortun-manager panel cert --domain other.example.com         # change it later; --ip ADDRESS too
 ```
 
 `panel cert` (also in the manager's menu) gets the new certificate, points the panel at it and
 removes the old one; run it any time to change the domain, or to move from an IP address to a
 domain. Add `--email you@example.com` to be told before a certificate expires.
 
-- **Renewal is automatic:** a timer (`kariz-cert-renew.timer`) checks twice a day, and the panel
+- **Renewal is automatic:** a timer (`sortun-cert-renew.timer`) checks twice a day, and the panel
   loads the new certificate without a restart.
 - **A new IP address is followed by itself.** When the server's IP address changes (the old one
   was filtered and the provider gave a new one) and the certificate was for the old address,
-  `kariz-manager panel heal` gets one for the new address and switches the panel to it, within
-  10 minutes of the change and with no browser warning. A timer runs it (`kariz-panel-heal.timer`:
+  `sortun-manager panel heal` gets one for the new address and switches the panel to it, within
+  10 minutes of the change and with no browser warning. A timer runs it (`sortun-panel-heal.timer`:
   a minute after boot, then every 10 minutes); it asks Let's Encrypt for nothing unless the
   address changed, and after a failure (port 80 closed) it tries again an hour later. Open the
-  panel at `https://NEW-IP:PORT/PATH/`, as before; the menu and `kariz-manager panel link` show
+  panel at `https://NEW-IP:PORT/PATH/`, as before; the menu and `sortun-manager panel link` show
   the new address. It cannot see a change behind NAT (the server only has a private address, and
   the public one was typed at install) or for a domain: there, run `panel cert` (for a domain,
   change its A record first, and the certificate keeps working). A panel set up before this gets
   the timer when it is updated (from the panel or with the manager).
-- **A filtered domain or a new certificate:** run `kariz-manager panel cert` (menu item 6, *New IP,
+- **A filtered domain or a new certificate:** run `sortun-manager panel cert` (menu item 6, *New IP,
   domain or certificate*). It says what the certificate is for now and whether that still fits
   this server, and gets one for the new domain or for the IP address.
 - **Port 80.** Let's Encrypt has to reach port 80 for a few seconds, at the first request and at
@@ -84,12 +84,12 @@ domain. Add `--email you@example.com` to be told before a certificate expires.
   itself. A process that is not a systemd service (a Docker container) cannot be stopped for you:
   free the port yourself. Open port 80 in the firewall.
 - **certbot 5.4 or later** does this (IP address certificates need it). If the system has none
-  that new, the manager installs one for itself in `/opt/kariz-certbot` with pip.
+  that new, the manager installs one for itself in `/opt/sortun-certbot` with pip.
 - **A certificate of your own:** choose *with a certificate I have already* when the installer
   or `panel cert` asks, and give the paths of its full chain and its key (PEM, not in `/tmp`); or
-  `kariz-manager panel cert --cert-file F --key-file K`. The manager checks that the key is the
+  `sortun-manager panel cert --cert-file F --key-file K`. The manager checks that the key is the
   certificate's, and if the panel does not start with it, the panel keeps the one it had. SorTUN
-  does not renew it: after you do, send the panel a SIGHUP (`systemctl kill -s HUP kariz-panel`).
+  does not renew it: after you do, send the panel a SIGHUP (`systemctl kill -s HUP sortun-panel`).
 
 ## Connect another server
 
@@ -98,7 +98,7 @@ In the panel: *Servers*, *Add server*. Give it a name if you like, and check the
 command. On the other server, as root:
 
 ```bash
-kariz-manager --agent kz1_...
+sortun-manager --agent kz1_...
 ```
 
 (If SorTUN is not installed there yet, this installs it first.) The server appears in the
@@ -137,12 +137,12 @@ panel within seconds.
   nothing that was not made with the token; there is no setting for it, it is never plain
   QUIC). With *Auto*, an agent tries them in that order, moves on after two links in a row that carry no
   requests (it drops a link the panel has been quiet on for 20 s), and remembers the one
-  that worked in `/etc/kariz-panel/link-transport`. Pick *TCP*, *KCP*, *WSS* or *QUIC* instead to
+  that worked in `/etc/sortun-panel/link-transport`. Pick *TCP*, *KCP*, *WSS* or *QUIC* instead to
   make the code use only that one (the agent must be 1.4 or newer, and newer than 1.6 for
   *QUIC*). *Servers* shows which one each server uses.
 - **A code works once**, for 10 minutes. It carries a token, so keep it as secret as a
   password until it is used.
-- The agent runs as the service `kariz-agent`: `kariz-manager agent status | logs | remove`.
+- The agent runs as the service `sortun-agent`: `sortun-manager agent status | logs | remove`.
 - **Remove a server** in the panel (*Servers*, *Remove*): it leaves the panel and its link
   closes. Nothing is deleted on it; its tunnels keep running.
 
@@ -173,7 +173,7 @@ A backup keeps where the panel dials each such server.
 **Across a private link.** When only GRE (or only UDP) gets through between the two servers,
 tick **Across a private link (GRE or VXLAN)**, pick GRE or VXLAN, and type the new server's
 public IPv4 address instead of an address to dial. As with
-*Over a GRE link*, the panel gives the link a `/30` of a private network (it makes `kariz`,
+*Over a GRE link*, the panel gives the link a `/30` of a private network (it makes `sortun`,
 `10.77.0.0/16`, when there is none) and makes its own end at once; the code carries the other
 end, which the command makes on the new server before its agent starts listening. The panel then
 dials the server's private address on the link, so only GRE (IP protocol 47), or for VXLAN UDP to
@@ -192,11 +192,11 @@ The agent's link to the panel and the tunnels are separate things: when a server
 says so, with when the panel last heard from it and, if it knows, why the link ended, and has a
 **Reconnect** button (an online server has **Edit** instead). It opens a dialog that:
 
-- tells you what to look at on that server first: `kariz-manager agent status`, and
-  `systemctl restart kariz-agent` if the agent is stopped;
+- tells you what to look at on that server first: `sortun-manager agent status`, and
+  `systemctl restart sortun-agent` if the agent is stopped;
 - lets you **choose how the agent reaches the panel** (*Auto*, *TCP*, *KCP*, *WSS* or *QUIC*),
   for a network that filters one of them;
-- makes a **join code for that same server**: run `kariz-manager --agent kz1_...` on it and the
+- makes a **join code for that same server**: run `sortun-manager --agent kz1_...` on it and the
   new agent *is* that server again, with the same name, the same tunnels and the same private
   network links (nothing is deleted or made twice). The old agent's key stops working, so it
   is also the way out when an agent was reinstalled, lost its settings, or the panel says an
@@ -311,15 +311,15 @@ hours. Both servers need this release (`POST /api/bench`, `GET /api/bench?id=`,
 - **Servers:** CPU, memory, network, uptime and the number of tunnels of each server. (On
   Linux; nothing is shown where there is no `/proc`.) The two buttons beside *Arrange* show them
   as **cards** or as **rows** (one line each, the actions in a menu); the browser remembers it.
-- **Tunnels** come from the `*.toml` files in `/etc/kariz` on each server, with systemd's
-  state and the running daemon's `kariz status`. A tunnel is drawn when its entry and exit
+- **Tunnels** come from the `*.toml` files in `/etc/sortun` on each server, with systemd's
+  state and the running daemon's `sortun status`. A tunnel is drawn when its entry and exit
   have **the same name**, which is how the panel names the two sides. Each tunnel's page
   has charts of its throughput and round trip over 1 hour, 24 hours, 7 days and 30 days. The
   last hour is kept in memory; five-minute averages are stored in the database for 30 days.
   The list and the tunnel's page say **how long it has been up** (since its link last came up).
 - **Renaming a tunnel:** the pencil beside its name (or *More actions*, *Rename*) gives it a
   name to be shown by, in any language and with spaces, up to 48 characters. Its own name stays
-  under it: its files and services (`kariz@NAME`) keep it, so nothing restarts. *Use its own
+  under it: its files and services (`sortun@NAME`) keep it, so nothing restarts. *Use its own
   name* takes the label away.
 - **Arranging tunnels:** *Arrange* on the Tunnels page, like the one for servers: drag a tunnel
   by its handle, or move it with its buttons or Alt+↑ / Alt+↓. New tunnels come after the
@@ -348,15 +348,15 @@ token as `Authorization: Bearer <token>`; without it, or while this is off, the 
 like any unknown one. Only the token's hash is kept: lost it, make a new one (the old one stops
 working). It is not in the backup.
 
-Every server has `kariz_server_up`, `kariz_server_cpu_percent`,
-`kariz_server_memory_used_bytes` and `_total_bytes`, `kariz_server_network_receive_bytes_per_second`
-and `_transmit_`, `kariz_server_load1` and `kariz_server_uptime_seconds`, labelled `server` and
+Every server has `sortun_server_up`, `sortun_server_cpu_percent`,
+`sortun_server_memory_used_bytes` and `_total_bytes`, `sortun_server_network_receive_bytes_per_second`
+and `_transmit_`, `sortun_server_load1` and `sortun_server_uptime_seconds`, labelled `server` and
 `server_id`. Every side of a tunnel adds `tunnel`, `role` and `transport` to those labels and has
-`kariz_tunnel_active`, `kariz_tunnel_connected`, `kariz_tunnel_sessions`, `kariz_tunnel_rtt_seconds`,
-`kariz_tunnel_streams`, `kariz_tunnel_tcp_connections`, `kariz_tunnel_udp_flows`,
-`kariz_tunnel_uptime_seconds`, the counters `kariz_tunnel_sent_bytes_total`,
-`kariz_tunnel_received_bytes_total` and `kariz_tunnel_handshakes_failed_total` (from the
-tunnel's start: use `rate()`), and, with fallback addresses, `kariz_tunnel_on_fallback`.
+`sortun_tunnel_active`, `sortun_tunnel_connected`, `sortun_tunnel_sessions`, `sortun_tunnel_rtt_seconds`,
+`sortun_tunnel_streams`, `sortun_tunnel_tcp_connections`, `sortun_tunnel_udp_flows`,
+`sortun_tunnel_uptime_seconds`, the counters `sortun_tunnel_sent_bytes_total`,
+`sortun_tunnel_received_bytes_total` and `sortun_tunnel_handshakes_failed_total` (from the
+tunnel's start: use `rate()`), and, with fallback addresses, `sortun_tunnel_on_fallback`.
 
 Persian and English, Night and Dawn, and a low-power mode (also on when your browser asks for
 less motion) are in the top bar and in *Settings*. `Ctrl+K` opens commands.
@@ -366,7 +366,7 @@ less motion) are in the top bar and in *Settings*. `Ctrl+K` opens commands.
 - Everything is over TLS, under a secret path; plain HTTP gets nothing.
 - The password is stored as an Argon2id hash. Login links, session cookies and the CSRF
   values are random 32-byte tokens stored as hashes only, so the database alone opens
-  nothing. The cookie is `__Host-kariz` (`Secure`, `HttpOnly`, `SameSite=Strict`).
+  nothing. The cookie is `__Host-sortun` (`Secure`, `HttpOnly`, `SameSite=Strict`).
 - Five failed tries from one address (wrong password, wrong or spent link) lock it out for
   15 minutes.
 - Agents talk to the panel over SorTUN's own link (the tunnels' handshake, encryption and
@@ -376,26 +376,26 @@ less motion) are in the top bar and in *Settings*. `Ctrl+K` opens commands.
   the log, the speed test. **There is no remote shell:** a request carries data (a tunnel's
   settings as typed fields, which the agent turns into the file itself, refusing anything with a
   control character in it), never a command or a path, and the programs an agent runs
-  (`systemctl`, `journalctl`, `kariz speedtest`) get fixed arguments and a checked name.
+  (`systemctl`, `journalctl`, `sortun speedtest`) get fixed arguments and a checked name.
 - A tunnel's token is made by the panel, sent once to its two servers inside the encrypted
   link, and written there with mode 0600. The panel does not keep it and never shows it.
-- The database (`/var/lib/kariz-panel`, root only) holds the agents' keys, because the
+- The database (`/var/lib/sortun-panel`, root only) holds the agents' keys, because the
   panel needs them to check the proofs. Guard it like the tunnel configs.
 
 ## Commands
 
 ```bash
-kariz-manager panel install [--port N] [--host H]   # settings, service, address and a link
-kariz-manager panel link [--host H]                 # a new one-time login link
-kariz-manager panel password [--stdin | --random]  # a new admin password (asked twice, hidden)
-kariz-manager panel status | logs                   # the service, its address / follow the log
-kariz-manager panel uninstall [--yes]
-kariz-manager --agent CODE                          # connect this server to a panel
-kariz-manager agent status | logs | remove
+sortun-manager panel install [--port N] [--host H]   # settings, service, address and a link
+sortun-manager panel link [--host H]                 # a new one-time login link
+sortun-manager panel password [--stdin | --random]  # a new admin password (asked twice, hidden)
+sortun-manager panel status | logs                   # the service, its address / follow the log
+sortun-manager panel uninstall [--yes]
+sortun-manager --agent CODE                          # connect this server to a panel
+sortun-manager agent status | logs | remove
 ```
 
-The menu has the same (items 3 to 10). Without the manager: `kariz-panel init`, `serve`,
-`login-link`, `reset-password`, `agent --join CODE` (see `kariz-panel --help`).
+The menu has the same (items 3 to 10). Without the manager: `sortun-panel init`, `serve`,
+`login-link`, `reset-password`, `agent --join CODE` (see `sortun-panel --help`).
 
 ## Backup and restore
 
@@ -411,9 +411,9 @@ passphrase: without it the file cannot be opened. A backup from an older panel r
 has and leaves the rest of the new panel as it is.
 
 To move to a new server: install the panel there, sign in, *Restore a backup*, then
-`systemctl restart kariz-panel` so the agents can connect with the restored token and the bot
+`systemctl restart sortun-panel` so the agents can connect with the restored token and the bot
 starts. They dial the panel's address, so point that name at the new server (or run
-`kariz-panel agent` again on each server with a new join code if the address changed). A server
+`sortun-panel agent` again on each server with a new join code if the address changed). A server
 whose agent reaches the panel **over a private network link** dials the old panel's end of that
 link: give it a new code (*Reconnect*) after the move.
 
@@ -427,10 +427,10 @@ key_file  = "/etc/ssl/panel.key"
 ```
 
 ```bash
-systemctl kill -s HUP kariz-panel    # loads the new files for the next connections
+systemctl kill -s HUP sortun-panel    # loads the new files for the next connections
 ```
 
-A file that cannot be read is refused and the old certificate stays. `kariz-manager panel cert`
+A file that cannot be read is refused and the old certificate stays. `sortun-manager panel cert`
 does all of this for Let's Encrypt, with renewal (see *The certificate* above); with your own
 tool (certbot, acme.sh) reload as above after each renewal.
 
@@ -438,18 +438,18 @@ tool (certbot, acme.sh) reload as above after each renewal.
 
 In a container there is no systemd to start the tunnels. Set `services = "process"` in
 `panel.toml` (or `agent.toml`): the panel or the agent then runs each tunnel as a child process
-(`kariz run`), which stops when it stops. Tunnels then do not come back after a reboot by
+(`sortun run`), which stops when it stops. Tunnels then do not come back after a reboot by
 themselves; that is the price of having no service manager.
 
 ## Files
 
 | Path | What |
 |---|---|
-| `/etc/kariz-panel/panel.toml` | the panel's settings: `listen`, `path`, `agent_listen`, `data_dir`, `kariz_dir`, `services`, `cert_file`, `key_file`, `release_api`, `release_key` |
-| `/etc/kariz-panel/agent.toml` | an agent's identity (id and key), the panel's address, `kariz_dir`, `services`, `release_key` |
-| `/var/lib/kariz-panel/updates/` | the releases the panel downloaded, and the result of the last update |
-| `/var/lib/kariz-panel/` | the database, the certificate and its key |
-| `kariz-panel.service`, `kariz-agent.service` | the systemd units |
+| `/etc/sortun-panel/panel.toml` | the panel's settings: `listen`, `path`, `agent_listen`, `data_dir`, `sortun_dir`, `services`, `cert_file`, `key_file`, `release_api`, `release_key` |
+| `/etc/sortun-panel/agent.toml` | an agent's identity (id and key), the panel's address, `sortun_dir`, `services`, `release_key` |
+| `/var/lib/sortun-panel/updates/` | the releases the panel downloaded, and the result of the last update |
+| `/var/lib/sortun-panel/` | the database, the certificate and its key |
+| `sortun-panel.service`, `sortun-agent.service` | the systemd units |
 
 ## Updating
 
@@ -460,7 +460,7 @@ it looks (once a day, or *Check now*), and updating is your button.
 - **Update the panel:** the panel downloads the release for its own CPU **once**, checks its
   signature and checksum (see below), and hands over to a helper that runs as a service of its
   own, so that it lives on while the panel is replaced. The helper keeps the old programs as
-  `kariz-panel.previous` and `kariz.previous`, puts the new ones in place with a rename (never
+  `sortun-panel.previous` and `sortun.previous`, puts the new ones in place with a rename (never
   half written), restarts the panel, and asks it over TLS (its certificate pinned) for its
   version. **If the new panel does not answer as the new version within 30 seconds, the old
   programs are put back and the panel restarted**; the result is kept, shown in *Updates*, and
@@ -480,19 +480,19 @@ it looks (once a day, or *Check now*), and updating is your button.
   drops for a moment; choose your time.
 - **Channel:** *Stable* (the default) or *Beta*, which also offers prereleases.
 - A server whose agent is too old to be updated this way (before 0.11) shows an error for that
-  server; update it once by hand with `kariz-manager update`, and it can be updated from the
+  server; update it once by hand with `sortun-manager update`, and it can be updated from the
   panel from then on.
 
 ### The releases are signed
 
 Every release archive has a checksum file and a signature (`.sha256` and `.sig`): an Ed25519
 signature over the checksum file, which also names the archive, so an archive cannot be swapped
-for another of the same release. The public key is built into `kariz-panel` and into
-`kariz-manager`; the private key is a repository secret that only the release workflow sees. A
+for another of the same release. The public key is built into `sortun-panel` and into
+`sortun-manager`; the private key is a repository secret that only the release workflow sees. A
 file whose signature does not verify is never run, and is deleted. The checksum alone would only
 prove the download was not damaged: it comes from the same place as the file.
 
-To check a download by hand: `kariz-panel release-verify kariz-v0.11.0-x86_64-linux.tar.gz`
+To check a download by hand: `sortun-panel release-verify sortun-v0.11.0-x86_64-linux.tar.gz`
 (with its `.sha256` and `.sig` beside it). To pin a key of your own (a fork), set
 `release_key = "HEX"` in `panel.toml` (and in `agent.toml` for agents), and `release_api =
 "https://api.github.com/repos/OWNER/REPO"` to look somewhere else.
@@ -500,17 +500,17 @@ To check a download by hand: `kariz-panel release-verify kariz-v0.11.0-x86_64-li
 ### If the panel cannot reach GitHub
 
 The panel needs to reach `api.github.com` and GitHub's download addresses to find and fetch a
-release. If it cannot, update by hand on each server with `kariz-manager update` (the manager
+release. If it cannot, update by hand on each server with `sortun-manager update` (the manager
 checks the signature too).
 
 ## Removing
 
-`kariz-manager panel uninstall` removes the panel (and asks before deleting its database);
-`kariz-manager agent remove` removes the agent.
+`sortun-manager panel uninstall` removes the panel (and asks before deleting its database);
+`sortun-manager agent remove` removes the agent.
 
 ## Troubleshooting
 
-- **A server does not show up:** `kariz-manager agent logs` on it. "could not connect"
+- **A server does not show up:** `sortun-manager agent logs` on it. "could not connect"
   usually means the panel's agents ports (TCP and UDP, and TCP and UDP on the next port) are closed
   in a firewall between them; "connected" repeating every 20 s or so means the path stalls
   TCP: with *Auto* the agent moves to `kcp`, then `wss`, then `quic`, by itself; a join
@@ -519,7 +519,7 @@ checks the signature too).
   same name on both. A tunnel with one side connected is listed in the table as
   "one side only".
 - **A tunnel shows as broken:** the panel reports what the entry side's daemon says
-  (`kariz status`): not connected, or no daemon running. Run `kariz status -c /etc/kariz/NAME.toml`
+  (`sortun status`): not connected, or no daemon running. Run `sortun status -c /etc/sortun/NAME.toml`
   on the server for the details ([Status](status.md)).
 - **The wizard says a port is in use:** it names the program (`sshd`, `nginx`, another
   tunnel). Pick another port, or stop that program. The check is done on the server itself, so
@@ -527,7 +527,7 @@ checks the signature too).
 - **A new tunnel did not connect:** the wizard shows the reason each side reported (for
   example *connection refused*: the accepting server's port is not reachable from the other, a
   firewall in between; or a timeout). Nothing is left behind; fix the cause and try again.
-- **Logs are empty:** they come from `journalctl -u kariz@NAME`, so they need systemd; with
+- **Logs are empty:** they come from `journalctl -u sortun@NAME`, so they need systemd; with
   `services = "process"` the daemons' output is not kept.
 - **Locked out:** wait 15 minutes, or make a link on the server with
-  `kariz-manager panel link`.
+  `sortun-manager panel link`.

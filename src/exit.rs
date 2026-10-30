@@ -91,7 +91,7 @@ pub async fn run(config: Config) -> Result<()> {
     let sessions = SessionConfig::new(&mux);
     let mut tasks = JoinSet::new();
 
-    // `kariz status` reads the counters through this (Unix only).
+    // `sortun status` reads the counters through this (Unix only).
     #[cfg(unix)]
     if let Some(socket) = config.control_socket() {
         let serve =

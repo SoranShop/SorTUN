@@ -8,7 +8,7 @@ profile = "balanced"
 [tunnel]
 transport = "quic"
 listen = "0.0.0.0:443"             # UDP port
-token = "CHANGE-ME-run-kariz-token"
+token = "CHANGE-ME-run-sortun-token"
 
 # [tunnel.quic]
 # obfs = true                      # same on both sides: seals every UDP packet, so it does

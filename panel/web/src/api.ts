@@ -150,7 +150,7 @@ export interface Rate {
   bytes: number;
 }
 
-/** What a speed test measured (`kariz::speedtest::Report`). */
+/** What a speed test measured (`sortun::speedtest::Report`). */
 /** One thing a benchmark measures: a transport, over a path, in a direction. */
 export interface BenchCandidate {
   key: string;
@@ -223,7 +223,7 @@ export interface SpeedStart {
 export interface SpeedPoll {
   ok: boolean;
   error: string | null;
-  /** The progress lines of `kariz::speedtest::run`, after the ones already seen. */
+  /** The progress lines of `sortun::speedtest::run`, after the ones already seen. */
   lines: string[];
   next: number;
   done: boolean;
@@ -610,7 +610,7 @@ export function setCsrf(value: string | undefined) {
 async function call<T>(method: string, path: string, body?: unknown): Promise<T> {
   const headers: Record<string, string> = {};
   if (body !== undefined) headers["Content-Type"] = "application/json";
-  if (method !== "GET" && csrf) headers["X-Kariz-CSRF"] = csrf;
+  if (method !== "GET" && csrf) headers["X-SorTUN-CSRF"] = csrf;
   const response = await fetch(`./api/${path}`, {
     method,
     headers,

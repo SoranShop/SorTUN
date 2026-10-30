@@ -75,4 +75,4 @@ fec_parity = 0
 keepalive_secs = 20
 ```
 
-`kariz check` prints the values in effect after the profile and the overrides.
+`sortun check` prints the values in effect after the profile and the overrides.

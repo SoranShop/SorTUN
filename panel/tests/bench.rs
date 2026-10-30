@@ -6,11 +6,11 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 
-use kariz_panel::agent::{self, Agent};
-use kariz_panel::bench::{self, Ask, Bench};
-use kariz_panel::db::Db;
-use kariz_panel::hub::{Hub, LOCAL};
-use kariz_panel::manage::Systemd;
+use sortun_panel::agent::{self, Agent};
+use sortun_panel::bench::{self, Ask, Bench};
+use sortun_panel::db::Db;
+use sortun_panel::hub::{Hub, LOCAL};
+use sortun_panel::manage::Systemd;
 
 async fn ended(hub: &Hub, id: &str) -> Bench {
     for _ in 0..1200 {
@@ -28,14 +28,14 @@ async fn two_servers_are_benchmarked_scored_and_the_result_kept() {
     let root = tempfile::tempdir().unwrap();
     let hub = Hub::with_options(
         Db::in_memory().unwrap(),
-        root.path().join("kariz"),
+        root.path().join("sortun"),
         Arc::new(Systemd),
         Duration::from_secs(5),
         Some(root.path().join("panel")),
         None,
     );
     std::fs::create_dir_all(root.path().join("panel")).unwrap();
-    let acceptor = kariz::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
+    let acceptor = sortun::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
         .await
         .unwrap();
     let addr = acceptor.local_addr().unwrap().to_string();

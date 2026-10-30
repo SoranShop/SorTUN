@@ -1,7 +1,7 @@
-//! How `kariz speedtest` shows its result.
+//! How `sortun speedtest` shows its result.
 
-use kariz::config::{mode_name, role_name, Config};
-use kariz::speedtest::{Latency, Rate, Report};
+use sortun::config::{mode_name, role_name, Config};
+use sortun::speedtest::{Latency, Rate, Report};
 
 use crate::logging::{Style, AQUA, BOLD, DIM, RED, SAND, TEAL, YELLOW};
 

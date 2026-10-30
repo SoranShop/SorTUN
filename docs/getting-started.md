@@ -31,7 +31,7 @@ configs, a token, a systemd service, a check that it connected) and undoes it al
 fails:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh)
 ```
 
 In the menu choose **3** (Install the web panel here) and open the link it prints. Then read
@@ -48,7 +48,7 @@ newer:
 
 ```bash
 cargo build --release
-sudo cp target/release/kariz /usr/local/bin/
+sudo cp target/release/sortun /usr/local/bin/
 ```
 
 Do this on both servers.
@@ -56,7 +56,7 @@ Do this on both servers.
 ## 2. Make a token
 
 ```bash
-kariz token
+sortun token
 ```
 
 The token is the tunnel's only secret: both sides use the same one, and anyone who has
@@ -81,7 +81,7 @@ Start from a pair in [`configs/`](../configs):
 A minimal reverse-mode pair:
 
 ```toml
-# /etc/kariz/config.toml on the entry
+# /etc/sortun/config.toml on the entry
 role = "entry"
 mode = "reverse"
 
@@ -96,7 +96,7 @@ target = "127.0.0.1:443"           # dialed by the exit
 ```
 
 ```toml
-# /etc/kariz/config.toml on the exit
+# /etc/sortun/config.toml on the exit
 role = "exit"
 mode = "reverse"
 
@@ -112,8 +112,8 @@ the exit server itself.
 ## 4. Check and run
 
 ```bash
-kariz check -c /etc/kariz/config.toml    # validates, prints a summary and warnings
-kariz run -c /etc/kariz/config.toml
+sortun check -c /etc/sortun/config.toml    # validates, prints a summary and warnings
+sortun run -c /etc/sortun/config.toml
 ```
 
 Start the listening side first; the dialing side retries until it can connect either
@@ -122,12 +122,12 @@ way.
 ## 5. Run it as a service
 
 ```bash
-sudo cp systemd/kariz.service /etc/systemd/system/
-sudo systemctl enable --now kariz
-journalctl -u kariz -f
+sudo cp systemd/sortun.service /etc/systemd/system/
+sudo systemctl enable --now sortun
+journalctl -u sortun -f
 ```
 
-The unit reads `/etc/kariz/config.toml`, restarts SorTUN if it stops, and grants the
+The unit reads `/etc/sortun/config.toml`, restarts SorTUN if it stops, and grants the
 capabilities for ports below 1024.
 
 ## Next

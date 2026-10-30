@@ -1,4 +1,4 @@
-//! How `kariz run` looks: the startup banner and the log lines.
+//! How `sortun run` looks: the startup banner and the log lines.
 //!
 //! On a terminal, lines carry the local time, a coloured level badge and highlighted
 //! fields. Under systemd (stdout going to the journal) they carry no colours and no time
@@ -16,7 +16,7 @@ use tracing_subscriber::fmt::format::{FormatEvent, FormatFields, Writer};
 use tracing_subscriber::fmt::FmtContext;
 use tracing_subscriber::registry::LookupSpan;
 
-use kariz::config::{mode_name, role_name, Config, LogColor};
+use sortun::config::{mode_name, role_name, Config, LogColor};
 
 /// Who made it; shown in the banner.
 const AUTHOR: &str = "ErfanXRay";
@@ -193,7 +193,7 @@ fn line(style: &Style, level: Level, fields: &Fields, (h, m, s): (u8, u8, u8)) -
     out
 }
 
-/// The banner `kariz run` prints first: the name, the version, the author, and what this
+/// The banner `sortun run` prints first: the name, the version, the author, and what this
 /// side is about to do.
 pub fn banner(style: &Style, config: &Config) -> String {
     const ART: [&str; 4] = [

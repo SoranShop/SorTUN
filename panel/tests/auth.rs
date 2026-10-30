@@ -7,9 +7,9 @@ use axum::body::Body;
 use axum::extract::ConnectInfo;
 use axum::http::{header, Request, StatusCode};
 use axum::Router;
-use kariz_panel::auth;
-use kariz_panel::db::Db;
-use kariz_panel::http::{self, AppState};
+use sortun_panel::auth;
+use sortun_panel::db::Db;
+use sortun_panel::http::{self, AppState};
 use serde_json::{json, Value};
 use tower::ServiceExt;
 
@@ -60,11 +60,11 @@ impl Browser {
             .uri(format!("/{PATH}{path}"))
             .header(header::USER_AGENT, "test browser");
         if let Some(cookie) = &self.cookie {
-            request = request.header(header::COOKIE, format!("__Host-kariz={cookie}"));
+            request = request.header(header::COOKIE, format!("__Host-sortun={cookie}"));
         }
         if csrf {
             if let Some(csrf) = &self.csrf {
-                request = request.header("x-kariz-csrf", csrf);
+                request = request.header("x-sortun-csrf", csrf);
             }
         }
         let request = match body {
@@ -92,7 +92,7 @@ impl Browser {
                 .split(';')
                 .next()
                 .unwrap()
-                .trim_start_matches("__Host-kariz=");
+                .trim_start_matches("__Host-sortun=");
             self.cookie = (!value.is_empty()).then(|| value.to_owned());
         }
         if let Some(csrf) = value.get("csrf").and_then(Value::as_str) {
@@ -139,7 +139,7 @@ async fn a_password_signs_in_and_the_cookie_is_hardened() {
     assert_eq!(status, StatusCode::OK, "{doc}");
     let cookie = cookie.expect("a cookie");
     for part in [
-        "__Host-kariz=",
+        "__Host-sortun=",
         "Path=/",
         "Secure",
         "HttpOnly",

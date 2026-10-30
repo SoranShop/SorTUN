@@ -1,8 +1,8 @@
 # Configuration reference
 
-One TOML file per side, `/etc/kariz/config.toml` by default. Only `role`, `mode` and
+One TOML file per side, `/etc/sortun/config.toml` by default. Only `role`, `mode` and
 `[tunnel]` (with its `token`) are required; everything else has a default, and most
-defaults come from the [profile](profiles.md). `kariz check -c <file>` validates a file
+defaults come from the [profile](profiles.md). `sortun check -c <file>` validates a file
 and prints the values in effect.
 
 Unknown keys are errors, so a typo is caught rather than ignored.
@@ -22,11 +22,11 @@ Unknown keys are errors, so a typo is caught rather than ignored.
 | `transport` | `tcp`, `tcpmux`, `ws`, `wss`, `quic`, `kcp` | `tcp` | Same on both sides. See [Transports](transports.md). |
 | `listen` | `host:port` | | Listening side: entry in reverse mode, exit in direct mode. |
 | `remote` | `host:port` | | Dialing side: the other side's address (or a CDN edge). Resolved on every attempt. |
-| `fallback` | list of `host:port`, at most 8 | `[]` | Dialing side, with mux or `quic`: other addresses of the other side (another IP or route of the same server, or another server with the same tunnel and token). While `remote` is down they are tried in order and the first that answers is used; while on one, sessions are renewed every minute and `remote` is tried first, so the tunnel goes back to it once it is up. `kariz status` shows the address in use. 2.8.0 and newer. |
-| `token` | at least 16 characters | required | Same on both sides. Generate with `kariz token`. |
+| `fallback` | list of `host:port`, at most 8 | `[]` | Dialing side, with mux or `quic`: other addresses of the other side (another IP or route of the same server, or another server with the same tunnel and token). While `remote` is down they are tried in order and the first that answers is used; while on one, sessions are renewed every minute and `remote` is tried first, so the tunnel goes back to it once it is up. `sortun status` shows the address in use. 2.8.0 and newer. |
+| `token` | at least 16 characters | required | Same on both sides. Generate with `sortun token`. |
 | `encryption` | `auto`, `chacha20-poly1305`, `aes-256-gcm`, `none` | `auto` | `auto` dials with AES-256-GCM on CPUs with AES instructions, else ChaCha20-Poly1305, and accepts either. `none` only authenticates; set it on both sides or neither. `quic` always uses TLS 1.3: leave `auto`. |
 | `pool` | at least 1 | `8` | Reverse mode without mux: idle connections the exit keeps open. |
-| `speedtest` | `true`, `false` | `true` | The exit answers speed test streams from `kariz speedtest` on the entry side (at most 32 at once). They only produce, read and echo data. See [Speed test](speedtest.md). |
+| `speedtest` | `true`, `false` | `true` | The exit answers speed test streams from `sortun speedtest` on the entry side (at most 32 at once). They only produce, read and echo data. See [Speed test](speedtest.md). |
 
 ## `[tunnel.mux]`
 
@@ -62,7 +62,7 @@ or off on both sides.
 |---|---|---|
 | `cert`, `key` | listener | PEM certificate chain and private key. Reloaded when the files change, so certificate renewals need no restart. |
 | `sni` | dialer | Server name in the TLS handshake. Default: `ws.host`, then the host in `remote`. |
-| `pin_sha256` | dialer | Accept only this certificate (for self-signed ones). Print it with `kariz pin cert.pem`. |
+| `pin_sha256` | dialer | Accept only this certificate (for self-signed ones). Print it with `sortun pin cert.pem`. |
 | `insecure` | dialer | Accept any certificate. Warned; prefer `pin_sha256`. |
 
 Without `pin_sha256` or `insecure`, the dialer checks the certificate against the Mozilla
@@ -159,13 +159,13 @@ Overrides of the profile's values.
 
 ## `[control]`
 
-A local socket on each side, through which `kariz status` reads the running daemon's
-counters (both sides, see [Status](status.md)) and `kariz speedtest` uses its sessions
+A local socket on each side, through which `sortun status` reads the running daemon's
+counters (both sides, see [Status](status.md)) and `sortun speedtest` uses its sessions
 (the entry side, see [Speed test](speedtest.md)). Linux only.
 
 | Key | Default | Notes |
 |---|---|---|
-| `socket` | the config file's path with `.sock` (`/etc/kariz/main.toml` gives `/etc/kariz/main.sock`) | Owner only. If it cannot be made, the tunnel runs without it and logs a warning. |
+| `socket` | the config file's path with `.sock` (`/etc/sortun/main.toml` gives `/etc/sortun/main.sock`) | Owner only. If it cannot be made, the tunnel runs without it and logs a warning. |
 
 ## `[log]`
 
@@ -174,14 +174,14 @@ counters (both sides, see [Status](status.md)) and `kariz speedtest` uses its se
 | `level` | `error`, `warn`, `info`, `debug`, `trace` | `info` |
 | `color` | `auto`, `always`, `never` | `auto` |
 
-`RUST_LOG=kariz=debug` in the environment overrides `level`. With `color = "auto"`, log
+`RUST_LOG=sortun=debug` in the environment overrides `level`. With `color = "auto"`, log
 lines are coloured on a terminal unless `NO_COLOR` is set.
 
-`kariz run` starts with a banner: the version, and what this side is about to do (its
+`sortun run` starts with a banner: the version, and what this side is about to do (its
 role and mode, transport, profile, addresses and forward rules). On a terminal, each
 line then shows the local time, a coloured level badge and the fields. Under systemd,
 lines carry systemd's priority prefix instead, so `journalctl` highlights warnings and
-errors itself and `journalctl -u kariz -p warning` shows only those.
+errors itself and `journalctl -u sortun -p warning` shows only those.
 
 ## Settings that must match on both sides
 

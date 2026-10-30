@@ -15,7 +15,7 @@ export interface Stack {
   pids: number[];
 }
 
-const FILE = path.join(os.tmpdir(), "kariz-e2e-stack.json");
+const FILE = path.join(os.tmpdir(), "sortun-e2e-stack.json");
 
 export const exe = process.platform === "win32" ? ".exe" : "";
 
@@ -87,12 +87,12 @@ export function startAgent(code: string): Agent {
   const s = readStack();
   const dir = fs.mkdtempSync(path.join(s.root, "agent-"));
   const cfg = path.join(dir, "agent.toml");
-  const kariz = path.join(dir, "kariz");
-  fs.mkdirSync(kariz, { recursive: true });
+  const sortun = path.join(dir, "sortun");
+  fs.mkdirSync(sortun, { recursive: true });
   execFileSync(s.bin, ["agent", "-c", cfg, "--join", code, "--no-run"]);
   const text = fs
     .readFileSync(cfg, "utf8")
-    .replace(/^kariz_dir = .*$/m, `kariz_dir = ${JSON.stringify(kariz)}`)
+    .replace(/^sortun_dir = .*$/m, `sortun_dir = ${JSON.stringify(sortun)}`)
     .replace(/^services = .*$/m, 'services = "process"');
   fs.writeFileSync(cfg, text);
   const child = spawn(s.bin, ["agent", "-c", cfg], { stdio: ["ignore", fs.openSync(path.join(dir, "agent.log"), "a"), "inherit"] });

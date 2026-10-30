@@ -10,7 +10,7 @@ profile = "gaming"
 [tunnel]
 transport = "kcp"
 listen = "0.0.0.0:4000"            # UDP port
-token = "CHANGE-ME-run-kariz-token"
+token = "CHANGE-ME-run-sortun-token"
 
 [log]
 level = "info"

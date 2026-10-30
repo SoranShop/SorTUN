@@ -4,8 +4,8 @@ import { readStack, setPassword } from "./stack";
 // Last of all, because it locks this machine's address out for 15 minutes.
 test("five wrong passwords lock the address out, even for the right one", async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.setItem("kariz.lang", "en");
-    localStorage.setItem("kariz.low", "1");
+    localStorage.setItem("sortun.lang", "en");
+    localStorage.setItem("sortun.low", "1");
   });
   setPassword("a long enough panel password");
   await page.goto(readStack().base);

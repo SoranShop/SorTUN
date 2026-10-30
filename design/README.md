@@ -1,13 +1,13 @@
-# Kariz panel design system
+# SorTUN panel design system
 
-The visual language of the web panel: "Kariz at night". This document is the reference for
+The visual language of the web panel: "SorTUN at night". This document is the reference for
 building it.
 The tokens are in [tokens.css](tokens.css); the interactive prototype is in
 [prototype/](prototype/).
 
 ## 1. The metaphor, applied
 
-| Thing in Kariz | On screen |
+| Thing in SorTUN | On screen |
 |---|---|
 | A server | A well: a shaft from the horizon down, with a spoil mound on top |
 | A tunnel | An underground channel between two wells |

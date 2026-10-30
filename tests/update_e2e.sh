@@ -5,15 +5,15 @@
 # the version it claims: the swap must be rolled back and the old panel must be back. Then a
 # good one: the panel must come back as the new version, with the old programs kept.
 #
-# usage: update_e2e.sh NEWER-kariz-panel KARIZ   (the first built with KARIZ_BUILD_VERSION=99.0.0)
+# usage: update_e2e.sh NEWER-sortun-panel SORTUN   (the first built with SORTUN_BUILD_VERSION=99.0.0)
 set -euo pipefail
 
-NEW=$(readlink -f "${1:?usage: update_e2e.sh NEWER-kariz-panel KARIZ}")
-CORE=$(readlink -f "${2:?usage: update_e2e.sh NEWER-kariz-panel KARIZ}")
+NEW=$(readlink -f "${1:?usage: update_e2e.sh NEWER-sortun-panel SORTUN}")
+CORE=$(readlink -f "${2:?usage: update_e2e.sh NEWER-sortun-panel SORTUN}")
 WORK=$(mktemp -d)
 PORT=18999
 arch=$(uname -m)
-conf=/etc/kariz-panel/panel.toml
+conf=/etc/sortun-panel/panel.toml
 cleanup() {
     if [[ -n "${SERVER_PID:-}" ]]; then kill "$SERVER_PID" 2>/dev/null || true; fi
     rm -rf "$WORK"
@@ -26,15 +26,15 @@ hexkey=$(sed -n 's/^public key (hex): //p' <<<"$out")
 mkdir -p "$WORK/www/repos/x/y" "$WORK/www/dl"
 
 make_release() { # tag: a release of the newer program under that tag (a prerelease with a dash)
-    local tag=$1 name="kariz-$1-$arch-linux" pre=false
+    local tag=$1 name="sortun-$1-$arch-linux" pre=false
     [[ $tag == *-* ]] && pre=true
     rm -rf "$WORK/www/dl"/* "$WORK/pack"
     mkdir -p "$WORK/pack/$name"
-    cp "$NEW" "$WORK/pack/$name/kariz-panel"
-    cp "$CORE" "$WORK/pack/$name/kariz"
+    cp "$NEW" "$WORK/pack/$name/sortun-panel"
+    cp "$CORE" "$WORK/pack/$name/sortun"
     tar -czf "$WORK/www/dl/$name.tar.gz" -C "$WORK/pack" "$name"
     (cd "$WORK/www/dl" && sha256sum "$name.tar.gz" >"$name.tar.gz.sha256")
-    KARIZ_SIGNING_KEY=$(cat "$WORK/key") "$NEW" release-sign "$WORK/www/dl/$name.tar.gz.sha256"
+    SORTUN_SIGNING_KEY=$(cat "$WORK/key") "$NEW" release-sign "$WORK/www/dl/$name.tar.gz.sha256"
     local assets=""
     for f in "$name.tar.gz" "$name.tar.gz.sha256" "$name.tar.gz.sig"; do
         assets+="{\"name\":\"$f\",\"browser_download_url\":\"http://127.0.0.1:$PORT/dl/$f\"},"
@@ -51,22 +51,22 @@ SERVER_PID=$!
     echo "release_api = \"http://127.0.0.1:$PORT/repos/x/y\""
     echo "release_key = \"$hexkey\""
 } >>"$conf"
-systemctl restart kariz-panel
+systemctl restart sortun-panel
 # the agent checks a release again itself, with its own copy of the key: here the test key.
 # (It is restarted now, while it is still the old program: a restart after the update
 # would already start the new one.)
-echo "release_key = \"$hexkey\"" >>/etc/kariz-panel/agent.toml
-systemctl restart kariz-agent
+echo "release_key = \"$hexkey\"" >>/etc/sortun-panel/agent.toml
+systemctl restart sortun-agent
 sleep 2
 
-link=$(kariz-manager panel link --host 127.0.0.1 | grep -o 'https://[^ ]*#t=[0-9a-f]*')
+link=$(sortun-manager panel link --host 127.0.0.1 | grep -o 'https://[^ ]*#t=[0-9a-f]*')
 base=${link%%#*}
 token=${link##*#t=}
 curl -skf -c "$WORK/jar" -H 'Content-Type: application/json' -d "{\"token\":\"$token\"}" "${base}api/link" >"$WORK/signin.json"
 csrf=$(sed -n 's/.*"csrf":"\([0-9a-f]*\)".*/\1/p' "$WORK/signin.json")
 # While the panel restarts these get "connection refused": that is not a failure of the
 # test, the loops below just ask again.
-api() { curl -sk -b "$WORK/jar" -H "X-Kariz-CSRF: $csrf" -H 'Content-Type: application/json' "$@" || true; }
+api() { curl -sk -b "$WORK/jar" -H "X-SorTUN-CSRF: $csrf" -H 'Content-Type: application/json' "$@" || true; }
 version() { { curl -sk "${base}api/version" || true; } | sed -n 's/.*"version":"\([^"]*\)".*/\1/p'; }
 original=$(version)
 echo "the panel is $original"
@@ -97,8 +97,8 @@ test "$(jq -r .ok <<<"$result")" = false
 test "$(jq -r .rolled_back <<<"$result")" = true
 sleep 3
 test "$(version)" = "$original"
-systemctl is-active --quiet kariz-panel
-test ! -e /usr/local/bin/kariz-panel.previous
+systemctl is-active --quiet sortun-panel
+test ! -e /usr/local/bin/sortun-panel.previous
 echo "the failed update was rolled back and the old panel is running"
 
 # ---- a good release ----
@@ -117,9 +117,9 @@ for _ in $(seq 1 30); do
 done
 echo "result: $result"
 test "$(jq -r .ok <<<"$result")" = true
-systemctl is-active --quiet kariz-panel
-test -x /usr/local/bin/kariz-panel.previous
-test -x /usr/local/bin/kariz.previous
+systemctl is-active --quiet sortun-panel
+test -x /usr/local/bin/sortun-panel.previous
+test -x /usr/local/bin/sortun.previous
 # the session survived the restart (sessions are in the database)
 test "$(api "${base}api/update" | jq -r .current)" = 99.0.0
 echo "the update to 99.0.0 worked"
@@ -130,7 +130,7 @@ echo "the update to 99.0.0 worked"
 agent_version() { api "${base}api/servers" | jq -r '.servers[] | select(.local == false) | .version' | head -n1; }
 test "$(api "${base}api/update" | jq -r '.outdated | length')" = 1
 echo "the agent is $(agent_version), the panel 99.0.0"
-before=$(systemctl show kariz@plain -p ActiveEnterTimestampMonotonic --value)
+before=$(systemctl show sortun@plain -p ActiveEnterTimestampMonotonic --value)
 op=$(api -X POST "${base}api/update/servers" -d '{"restart_tunnels":true}' | jq -r .op)
 test -n "$op"
 for _ in $(seq 1 120); do
@@ -142,8 +142,8 @@ api "${base}api/op?id=$op" | jq -c '{state, error, steps: [.steps[].id]}'
 test "$state" = "done"
 test "$(agent_version)" = 99.0.0
 test "$(api "${base}api/update" | jq -r '.outdated | length')" = 0
-after=$(systemctl show kariz@plain -p ActiveEnterTimestampMonotonic --value)
+after=$(systemctl show sortun@plain -p ActiveEnterTimestampMonotonic --value)
 test "$before" != "$after"
-systemctl is-active --quiet kariz-agent
-systemctl is-active --quiet kariz@plain
+systemctl is-active --quiet sortun-agent
+systemctl is-active --quiet sortun@plain
 echo "the agent was updated over the link and its tunnels were restarted one at a time"

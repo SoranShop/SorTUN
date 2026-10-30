@@ -4,14 +4,14 @@ use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use tracing_subscriber::EnvFilter;
 
-use kariz_panel::agent::{self, AgentConfig, DEFAULT_AGENT_CONFIG};
-use kariz_panel::auth;
-use kariz_panel::config::{Config, DEFAULT_CONFIG, DEFAULT_DATA_DIR};
-use kariz_panel::db::Db;
-use kariz_panel::http::{self, AppState};
+use sortun_panel::agent::{self, AgentConfig, DEFAULT_AGENT_CONFIG};
+use sortun_panel::auth;
+use sortun_panel::config::{Config, DEFAULT_CONFIG, DEFAULT_DATA_DIR};
+use sortun_panel::db::Db;
+use sortun_panel::http::{self, AppState};
 
 #[derive(Parser)]
-#[command(name = "kariz-panel", version, about = "The SorTUN web panel")]
+#[command(name = "sortun-panel", version, about = "The SorTUN web panel")]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -77,7 +77,7 @@ enum Command {
         stdin: bool,
     },
     /// Make a release signing key pair. The private key goes to a file (keep it secret: it
-    /// becomes the repository secret KARIZ_SIGNING_KEY); the public key is printed.
+    /// becomes the repository secret SORTUN_SIGNING_KEY); the public key is printed.
     ReleaseKey {
         /// Where to write the private key (must not exist).
         #[arg(long)]
@@ -87,7 +87,7 @@ enum Command {
     /// with `.sig`). The private key is read from the environment variable.
     ReleaseSign {
         file: PathBuf,
-        #[arg(long, default_value = "KARIZ_SIGNING_KEY")]
+        #[arg(long, default_value = "SORTUN_SIGNING_KEY")]
         key_env: String,
     },
     /// Check a downloaded archive against its `.sha256` and `.sig` beside it.
@@ -110,7 +110,7 @@ enum Command {
         #[arg(long)]
         panel_bin: PathBuf,
         #[arg(long)]
-        kariz_bin: PathBuf,
+        sortun_bin: PathBuf,
         /// Seconds the new panel has to answer.
         #[arg(long, default_value_t = 30)]
         wait: u64,
@@ -133,7 +133,7 @@ enum Command {
         #[arg(long)]
         panel_bin: PathBuf,
         #[arg(long)]
-        kariz_bin: PathBuf,
+        sortun_bin: PathBuf,
         /// Seconds to wait before starting, so the agent can still answer the panel.
         #[arg(long, default_value_t = 0)]
         delay: u64,
@@ -181,14 +181,14 @@ fn main() -> Result<()> {
         } => {
             if let Some(name) = name.as_deref() {
                 anyhow::ensure!(
-                    kariz_panel::join::valid_name(name),
+                    sortun_panel::join::valid_name(name),
                     "the name is letters, digits, - _ . and at most 40 characters"
                 );
             }
             let done =
-                kariz_panel::init_with_cert(&config, &data_dir, port, cert_file.zip(key_file))?;
+                sortun_panel::init_with_cert(&config, &data_dir, port, cert_file.zip(key_file))?;
             if let Some(name) = name {
-                kariz_panel::db::Db::open(&done.config.database())?
+                sortun_panel::db::Db::open(&done.config.database())?
                     .set_meta("local_name", &name)?;
             }
             println!("panel set up");
@@ -205,23 +205,23 @@ fn main() -> Result<()> {
             version,
             config,
             panel_bin,
-            kariz_bin,
+            sortun_bin,
             wait,
             delay,
         } => {
             std::thread::sleep(std::time::Duration::from_secs(delay));
-            update_apply(&stage, &version, &config, panel_bin, kariz_bin, wait)
+            update_apply(&stage, &version, &config, panel_bin, sortun_bin, wait)
         }
         Command::AgentUpdateApply {
             stage,
             version,
             stamp,
             panel_bin,
-            kariz_bin,
+            sortun_bin,
             delay,
         } => {
             std::thread::sleep(std::time::Duration::from_secs(delay));
-            agent_update_apply(&stage, &version, stamp, panel_bin, kariz_bin)
+            agent_update_apply(&stage, &version, stamp, panel_bin, sortun_bin)
         }
         Command::ReleaseKey { out } => release_key(&out),
         Command::ReleaseSign { file, key_env } => release_sign(&file, &key_env),
@@ -259,7 +259,7 @@ fn main() -> Result<()> {
                 std::io::stdin().read_line(&mut line)?;
                 (line.trim_end_matches(&['\r', '\n'][..]).to_owned(), false)
             } else {
-                (kariz_panel::config::random_hex(10)?, true)
+                (sortun_panel::config::random_hex(10)?, true)
             };
             auth::set_password(&db, &password, None)?;
             db.audit("cli", None, "reset the password")?;
@@ -279,20 +279,20 @@ fn update_apply(
     version: &str,
     config: &std::path::Path,
     panel: PathBuf,
-    kariz: PathBuf,
+    sortun: PathBuf,
     wait: u64,
 ) -> Result<()> {
-    use kariz_panel::update::{self, SystemHost, Targets};
+    use sortun_panel::update::{self, SystemHost, Targets};
     let config = Config::load(config)?;
     let host = SystemHost {
-        unit: "kariz-panel".into(),
+        unit: "sortun-panel".into(),
         listen: config.listen.clone(),
         path: config.path.clone(),
-        pin: kariz_panel::cert::fingerprint(&config.cert())?,
+        pin: sortun_panel::cert::fingerprint(&config.cert())?,
     };
     let outcome = update::apply(
         stage,
-        &Targets { panel, kariz },
+        &Targets { panel, sortun },
         version,
         &host,
         std::time::Duration::from_secs(wait),
@@ -325,18 +325,18 @@ fn agent_update_apply(
     version: &str,
     stamp: PathBuf,
     panel: PathBuf,
-    kariz: PathBuf,
+    sortun: PathBuf,
 ) -> Result<()> {
-    use kariz_panel::agent_update::{AgentHost, WAIT};
-    use kariz_panel::update::{self, Targets};
+    use sortun_panel::agent_update::{AgentHost, WAIT};
+    use sortun_panel::update::{self, Targets};
     let host = AgentHost {
-        unit: "kariz-agent".into(),
+        unit: "sortun-agent".into(),
         stamp,
         since: std::time::SystemTime::now(),
     };
     let outcome = update::apply(
         stage,
-        &Targets { panel, kariz },
+        &Targets { panel, sortun },
         version,
         &host,
         WAIT,
@@ -352,7 +352,7 @@ fn agent_update_apply(
 }
 
 fn release_key(out: &std::path::Path) -> Result<()> {
-    use kariz_panel::sign;
+    use sortun_panel::sign;
     if out.exists() {
         anyhow::bail!("{} exists already; it would be overwritten", out.display());
     }
@@ -381,7 +381,7 @@ fn release_sign(file: &std::path::Path, key_env: &str) -> Result<()> {
         anyhow::anyhow!("the signing key is not in the environment variable {key_env}")
     })?;
     let message = std::fs::read(file)?;
-    let signature = kariz_panel::sign::sign(&key, &message)?;
+    let signature = sortun_panel::sign::sign(&key, &message)?;
     let name = file
         .to_str()
         .and_then(|n| n.strip_suffix(".sha256"))
@@ -392,7 +392,7 @@ fn release_sign(file: &std::path::Path, key_env: &str) -> Result<()> {
 }
 
 fn release_verify(archive: &std::path::Path, key: Option<&str>) -> Result<()> {
-    use kariz_panel::sign;
+    use sortun_panel::sign;
     let public = sign::release_key(key)?;
     let name = archive
         .file_name()
@@ -414,14 +414,14 @@ fn release_verify(archive: &std::path::Path, key: Option<&str>) -> Result<()> {
 }
 
 fn net_command(command: NetCommand) -> Result<()> {
-    use kariz_panel::net::Net;
+    use sortun_panel::net::Net;
     let runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()?;
     runtime.block_on(async move {
         match command {
             NetCommand::Up { file, state } => {
-                let spec: kariz_panel::wire::NetSpec =
+                let spec: sortun_panel::wire::NetSpec =
                     toml::from_str(&std::fs::read_to_string(&file)?)?;
                 let name = spec.name.clone();
                 Net::new(state).up(spec).await?;
@@ -462,38 +462,38 @@ fn serve(config: Config, config_path: &std::path::Path) -> Result<()> {
         // The manager script of this release (an update from the panel does not swap it), and
         // for a panel set up before `panel heal`, its timer (a new IP address of the server
         // then gets the panel a certificate for it by itself).
-        kariz_panel::manage::manager_in_place(config.services);
-        if config.services == kariz_panel::manage::ServiceKind::Systemd {
+        sortun_panel::manage::manager_in_place(config.services);
+        if config.services == sortun_panel::manage::ServiceKind::Systemd {
             let path = config_path.to_path_buf();
-            tokio::spawn(async move { kariz_panel::manage::ensure_heal_timer(&path).await });
+            tokio::spawn(async move { sortun_panel::manage::ensure_heal_timer(&path).await });
         }
         let listener = tokio::net::TcpListener::bind(&config.listen)
             .await
             .with_context(|| format!("failed to listen on {}", config.listen))?;
-        let hub = kariz_panel::hub::Hub::with_state_dir(
+        let hub = sortun_panel::hub::Hub::with_state_dir(
             db.clone(),
-            config.kariz_dir.clone(),
-            config.services.services(&config.kariz_dir),
+            config.sortun_dir.clone(),
+            config.services.services(&config.sortun_dir),
             config.data_dir.clone(),
         );
         // Where updating finds its releases and the programs it replaces.
-        hub.set_update_settings(kariz_panel::updater::UpdateSettings {
+        hub.set_update_settings(sortun_panel::updater::UpdateSettings {
             api: config
                 .release_api
                 .clone()
-                .unwrap_or_else(|| kariz_panel::update::DEFAULT_API.to_owned()),
+                .unwrap_or_else(|| sortun_panel::update::DEFAULT_API.to_owned()),
             key: config.release_key.clone(),
             dir: config.data_dir.join("updates"),
             config: config_path.to_path_buf(),
             panel_bin: std::env::current_exe()?,
-            kariz_bin: std::env::current_exe()?.with_file_name("kariz"),
+            sortun_bin: std::env::current_exe()?.with_file_name("sortun"),
         });
         tokio::spawn(hub.clone().run_local());
         // The servers the panel connects to (reverse) are dialed whether or not it takes
         // agents itself.
         hub.start_reverse_links();
-        tokio::spawn(kariz_panel::telegram::run(hub.clone()));
-        tokio::spawn(kariz_panel::schedule::run(hub.clone()));
+        tokio::spawn(sortun_panel::telegram::run(hub.clone()));
+        tokio::spawn(sortun_panel::schedule::run(hub.clone()));
         tokio::spawn(hub.usage.clone().run());
         let mut state = AppState::new(db);
         state.hub = hub.clone();
@@ -503,11 +503,11 @@ fn serve(config: Config, config_path: &std::path::Path) -> Result<()> {
             // (UDP, always sealed) on the next.
             let token = hub.link_token()?;
             let (cert, key) = (config.cert(), config.key());
-            for acceptor in kariz_panel::agent_ports::bind(listen, &token, &cert, &key).await? {
+            for acceptor in sortun_panel::agent_ports::bind(listen, &token, &cert, &key).await? {
                 tokio::spawn(hub.clone().serve_agents(acceptor));
             }
             // Servers with an agents port of their own: the panel listens there too.
-            hub.set_agent_listen(kariz_panel::agent_ports::AgentListen {
+            hub.set_agent_listen(sortun_panel::agent_ports::AgentListen {
                 listen: listen.clone(),
                 web_port: config
                     .listen
@@ -584,12 +584,12 @@ fn run_agent(path: &std::path::Path, join: Option<&str>, no_run: bool) -> Result
         return Ok(());
     }
     // The manager script of this release: an update from the panel does not swap it.
-    kariz_panel::manage::manager_in_place(config.services);
+    sortun_panel::manage::manager_in_place(config.services);
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()?;
     runtime.block_on(async move {
-        let services = config.services.services(&config.kariz_dir);
+        let services = config.services.services(&config.sortun_dir);
         let agent = agent::Agent::with_services(path, config, services);
         tokio::select! {
             result = agent.run() => result,

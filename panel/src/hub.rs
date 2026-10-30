@@ -16,8 +16,8 @@ use std::time::{Duration, Instant};
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
-use kariz::mux::Side;
-use kariz::session::Session;
+use sortun::mux::Side;
+use sortun::session::Session;
 use rusqlite::{params, OptionalExtension};
 use serde::Serialize;
 use tracing::{debug, info, warn};
@@ -269,7 +269,7 @@ struct Live {
 
 pub struct Hub {
     pub(crate) db: Db,
-    kariz_dir: PathBuf,
+    sortun_dir: PathBuf,
     live: Mutex<HashMap<String, Live>>,
     /// Servers the panel dials (reverse): the generation of each one's dialing loop. A loop
     /// whose number is no longer the server's stops (`crate::reverse`).
@@ -327,15 +327,15 @@ const NEXT_POSITION: &str = "(SELECT max(
  ) + 1)";
 
 impl Hub {
-    pub fn new(db: Db, kariz_dir: PathBuf) -> Arc<Self> {
-        Self::with_services(db, kariz_dir, Arc::new(Systemd))
+    pub fn new(db: Db, sortun_dir: PathBuf) -> Arc<Self> {
+        Self::with_services(db, sortun_dir, Arc::new(Systemd))
     }
 
     /// A hub whose own server runs its tunnels through `services`.
-    pub fn with_services(db: Db, kariz_dir: PathBuf, services: Arc<dyn Services>) -> Arc<Self> {
+    pub fn with_services(db: Db, sortun_dir: PathBuf, services: Arc<dyn Services>) -> Arc<Self> {
         Self::with_options(
             db,
-            kariz_dir,
+            sortun_dir,
             services,
             crate::pair::CONNECT_WAIT,
             None,
@@ -347,13 +347,13 @@ impl Hub {
     /// `state_dir`, so they come back after a reboot.
     pub fn with_state_dir(
         db: Db,
-        kariz_dir: PathBuf,
+        sortun_dir: PathBuf,
         services: Arc<dyn Services>,
         state_dir: PathBuf,
     ) -> Arc<Self> {
         Self::with_options(
             db,
-            kariz_dir,
+            sortun_dir,
             services,
             crate::pair::CONNECT_WAIT,
             Some(state_dir),
@@ -364,7 +364,7 @@ impl Hub {
     /// Also sets how long a new tunnel has to connect.
     pub fn with_options(
         db: Db,
-        kariz_dir: PathBuf,
+        sortun_dir: PathBuf,
         services: Arc<dyn Services>,
         connect_wait: Duration,
         state_dir: Option<PathBuf>,
@@ -376,7 +376,7 @@ impl Hub {
             join: None,
             id: None,
             key: None,
-            kariz_dir: kariz_dir.clone(),
+            sortun_dir: sortun_dir.clone(),
             services: Default::default(),
             release_key: None,
             transport: None,
@@ -401,7 +401,7 @@ impl Hub {
             checked: Mutex::new(crate::updater::Checked::default()),
             telegram: crate::telegram::State::default(),
             ports: crate::agent_ports::Ports::default(),
-            kariz_dir,
+            sortun_dir,
             live: Mutex::new(HashMap::new()),
             reverse_gen: Mutex::new(HashMap::new()),
         })
@@ -641,8 +641,8 @@ impl Hub {
         Ok(())
     }
 
-    /// What the panel's own server is called: the name chosen at install (`kariz-manager panel
-    /// install`, or `kariz-panel init --name`), else its host name.
+    /// What the panel's own server is called: the name chosen at install (`sortun-manager panel
+    /// install`, or `sortun-panel init --name`), else its host name.
     pub fn local_name(&self) -> String {
         self.db
             .meta("local_name")
@@ -881,7 +881,7 @@ impl Hub {
     }
 
     /// [`Self::create_gre_join`] with the kind of link asked for: without a `network`, the
-    /// first network of that kind, else a new one (`kariz`, or `kariz-vxlan` on UDP 4789).
+    /// first network of that kind, else a new one (`sortun`, or `sortun-vxlan` on UDP 4789).
     pub async fn create_link_join(
         self: &Arc<Self>,
         name: Option<&str>,
@@ -1220,8 +1220,8 @@ impl Hub {
     }
 
     /// The private network a server added over a link takes its addresses from: the one
-    /// asked for, else the first of `kind` there is, else a new one of that kind (`kariz` for
-    /// GRE, `kariz-vxlan` on UDP 4789 for VXLAN, on a pool no server routes).
+    /// asked for, else the first of `kind` there is, else a new one of that kind (`sortun` for
+    /// GRE, `sortun-vxlan` on UDP 4789 for VXLAN, on a pool no server routes).
     fn network_for_join(&self, wanted: Option<&str>, kind: LinkKind) -> Result<String> {
         let all = self.networks.networks()?;
         if let Some(id) = wanted {
@@ -1235,8 +1235,8 @@ impl Hub {
             return Ok(first.id.clone());
         }
         let base = match kind {
-            LinkKind::Gre => "kariz",
-            LinkKind::Vxlan => "kariz-vxlan",
+            LinkKind::Gre => "sortun",
+            LinkKind::Vxlan => "sortun-vxlan",
         };
         // A name taken by a network of the other kind gets a number.
         let name = (1..)
@@ -1563,7 +1563,7 @@ impl Hub {
 
     /// Accepts agents for ever. Each connection gets its own task, so a slow or hostile
     /// peer never holds up the others.
-    pub async fn serve_agents(self: Arc<Self>, acceptor: kariz::link::Acceptor) {
+    pub async fn serve_agents(self: Arc<Self>, acceptor: sortun::link::Acceptor) {
         self.serve_agents_as(acceptor, None).await;
     }
 
@@ -1571,7 +1571,7 @@ impl Hub {
     /// port of that server's own): another agent there is let go.
     pub async fn serve_agents_as(
         self: Arc<Self>,
-        acceptor: kariz::link::Acceptor,
+        acceptor: sortun::link::Acceptor,
         expected: Option<String>,
     ) {
         let link = acceptor.kind().name();
@@ -2013,7 +2013,7 @@ impl Hub {
             }
             round = round.wrapping_add(1);
             let health = sampler.sample();
-            let tunnels = collect::tunnels(&self.kariz_dir, &*self.services).await;
+            let tunnels = collect::tunnels(&self.sortun_dir, &*self.services).await;
             {
                 let mut live = self.live();
                 let entry = live.entry(LOCAL.to_owned()).or_default();
@@ -2238,7 +2238,7 @@ mod tests {
     fn the_panels_own_server_is_called_what_was_chosen_at_install() {
         let hub = Hub::new(
             Db::in_memory().unwrap(),
-            std::env::temp_dir().join("kariz-none"),
+            std::env::temp_dir().join("sortun-none"),
         );
         // Not chosen: the host name.
         assert_eq!(hub.local_name(), collect::hostname());
@@ -2254,7 +2254,7 @@ mod tests {
     fn servers_stand_where_they_were_put_and_a_new_one_comes_last() {
         let hub = Hub::new(
             Db::in_memory().unwrap(),
-            std::env::temp_dir().join("kariz-none"),
+            std::env::temp_dir().join("sortun-none"),
         );
         let ids = |hub: &Hub| -> Vec<String> {
             hub.snapshot().unwrap().into_iter().map(|s| s.id).collect()
@@ -2297,7 +2297,7 @@ mod tests {
     fn after_a_restart_a_link_is_not_dropped_for_a_server_that_has_not_connected_yet() {
         let hub = Hub::new(
             Db::in_memory().unwrap(),
-            std::env::temp_dir().join("kariz-none"),
+            std::env::temp_dir().join("sortun-none"),
         );
         let net = hub
             .networks
@@ -2358,7 +2358,7 @@ mod tests {
         }
         let hub = Hub::with_options(
             Db::in_memory().unwrap(),
-            std::env::temp_dir().join("kariz-none"),
+            std::env::temp_dir().join("sortun-none"),
             Arc::new(Systemd),
             crate::pair::CONNECT_WAIT,
             None,
@@ -2466,7 +2466,7 @@ mod tests {
     fn a_delete_for_a_server_that_is_away_is_kept_and_hides_the_tunnel() {
         let hub = Hub::new(
             Db::in_memory().unwrap(),
-            std::env::temp_dir().join("kariz-none"),
+            std::env::temp_dir().join("sortun-none"),
         );
         assert!(hub.is_online(LOCAL) && !hub.is_online("a1"));
         assert!(!hub.delete_pending_for("main"));

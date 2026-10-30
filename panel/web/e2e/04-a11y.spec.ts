@@ -44,8 +44,8 @@ for (const [lang, theme] of [
 
 test("the sign-in page passes axe, both ways of signing in", async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.setItem("kariz.lang", "en");
-    localStorage.setItem("kariz.low", "1");
+    localStorage.setItem("sortun.lang", "en");
+    localStorage.setItem("sortun.low", "1");
   });
   await page.goto("about:blank");
   const { readStack } = await import("./stack");
@@ -143,7 +143,7 @@ test("everything can be reached with the keyboard, and moving parts stop when as
 test("with the browser asking for less motion, the page does not animate", async ({ browser }) => {
   const context = await browser.newContext({ ignoreHTTPSErrors: true, reducedMotion: "reduce" });
   const page = await context.newPage();
-  await page.addInitScript(() => localStorage.setItem("kariz.lang", "en"));
+  await page.addInitScript(() => localStorage.setItem("sortun.lang", "en"));
   const { newLink } = await import("./stack");
   await page.goto(newLink());
   await expect(page.locator("#app .rail")).toBeVisible({ timeout: 30_000 });

@@ -16,7 +16,7 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use anyhow::{anyhow, bail, Result};
-use kariz::mux::Side;
+use sortun::mux::Side;
 use rusqlite::{params, OptionalExtension};
 use serde::Serialize;
 use tracing::{debug, info, warn};
@@ -201,7 +201,7 @@ impl Hub {
             let Some(target) = self.reverse_of(&server) else {
                 return;
             };
-            let kinds: Vec<_> = kariz::link::LINK_TRANSPORTS
+            let kinds: Vec<_> = sortun::link::LINK_TRANSPORTS
                 .into_iter()
                 .filter(|k| !matches!(target.transport.as_deref(), Some(t) if t != k.name()))
                 .collect();
@@ -256,15 +256,15 @@ impl Hub {
         self: &Arc<Self>,
         server: &str,
         target: &Reverse,
-        kind: kariz::config::TransportKind,
+        kind: sortun::config::TransportKind,
     ) -> Result<bool> {
-        let addr = kariz::link::address_for(&target.addr(), kind)?;
+        let addr = sortun::link::address_for(&target.addr(), kind)?;
         let peer = tokio::net::lookup_host(addr.as_str())
             .await
             .ok()
             .and_then(|mut a| a.next())
             .map_or(IpAddr::V4(Ipv4Addr::UNSPECIFIED), |a| a.ip().to_canonical());
-        let dialer = kariz::link::Dialer::via(&addr, &self.link_token()?, kind)?;
+        let dialer = sortun::link::Dialer::via(&addr, &self.link_token()?, kind)?;
         let session = dialer
             .connect(Side::Client)
             .await

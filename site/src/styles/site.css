@@ -1,4 +1,4 @@
-/* Kariz site. Tokens and fonts come from the panel (./panel/tokens.css); this file uses only
+/* SorTUN site. Tokens and fonts come from the panel (./panel/tokens.css); this file uses only
    the semantic tokens, never raw colours (except the canvas, which reads them). */
 *,
 *::before,

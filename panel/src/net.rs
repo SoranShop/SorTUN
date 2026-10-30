@@ -343,7 +343,7 @@ impl Net {
     fn save(&self, state: &State) -> Result<()> {
         if let Some(path) = &self.state {
             let text = format!(
-                "# The private network links of this server (kariz-panel). The agent makes them\n# again when it starts.\n{}",
+                "# The private network links of this server (sortun-panel). The agent makes them\n# again when it starts.\n{}",
                 toml::to_string_pretty(state)?
             );
             crate::agent::write_private(path, text.as_bytes())?;

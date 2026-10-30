@@ -2,12 +2,12 @@
 
 [English](../troubleshooting.md) · **فارسی**
 
-روی هر دو سمت با `kariz check -c /etc/kariz/config.toml` شروع کنید: فایل را بررسی می‌کند، مقدارهای مؤثر را چاپ می‌کند و هشدارها را می‌گوید. روی تانلی که در حال اجراست، `kariz status -c ...` می‌گوید سمت دیگر وصل است یا نه، و اگر نیست، آخرین خطا چه بوده ([وضعیت](status.md)). بعد سراغ لاگ‌ها بروید:
+روی هر دو سمت با `sortun check -c /etc/sortun/config.toml` شروع کنید: فایل را بررسی می‌کند، مقدارهای مؤثر را چاپ می‌کند و هشدارها را می‌گوید. روی تانلی که در حال اجراست، `sortun status -c ...` می‌گوید سمت دیگر وصل است یا نه، و اگر نیست، آخرین خطا چه بوده ([وضعیت](status.md)). بعد سراغ لاگ‌ها بروید:
 
 ```bash
-journalctl -u kariz -f                      # with systemd
-journalctl -u kariz -p warning              # warnings and errors only
-RUST_LOG=kariz=debug kariz run -c ...       # more detail
+journalctl -u sortun -f                      # with systemd
+journalctl -u sortun -p warning              # warnings and errors only
+RUST_LOG=sortun=debug sortun run -c ...       # more detail
 ```
 
 اگر پنل وب دارید، صفحهٔ **لاگ** لاگ هر دو سمت یک تانل را به ترتیب زمان کنار هم نشان می‌دهد ([پنل](panel.md)).
@@ -28,7 +28,7 @@ RUST_LOG=kariz=debug kariz run -c ...       # more detail
 
 **کاربرها وصل می‌شوند و بلافاصله قطع می‌شوند.** خروجی به مقصد نرسیده است. خروجی `could not connect to target` را لاگ می‌کند. `target` از روی خروجی وصل می‌شود، پس `127.0.0.1:443` یعنی پورت ۴۴۳ خود سرور خروجی.
 
-**UDP کار نمی‌کند.** ببینید قانون `protocol = "udp"` یا `"tcp+udp"` دارد و mux روشن است (`kariz check` در غیر این صورت هشدار می‌دهد). خروجی نسخهٔ ۰٫۲ اصلاً UDP را پشتیبانی نمی‌کند، و قانونی که `duplicate` دارد خروجی نسخهٔ ۰٫۵ یا جدیدتر می‌خواهد.
+**UDP کار نمی‌کند.** ببینید قانون `protocol = "udp"` یا `"tcp+udp"` دارد و mux روشن است (`sortun check` در غیر این صورت هشدار می‌دهد). خروجی نسخهٔ ۰٫۲ اصلاً UDP را پشتیبانی نمی‌کند، و قانونی که `duplicate` دارد خروجی نسخهٔ ۰٫۵ یا جدیدتر می‌خواهد.
 
 **کند است.**
 
@@ -44,7 +44,7 @@ RUST_LOG=kariz=debug kariz run -c ...       # more detail
 
 **سروری که با *QUIC* به پنل اضافه کرده‌اید ظاهر نمی‌شود.** این لینک روی UDP و روی پورتِ بعد از پورت agentهای پنل است؛ آن پورت UDP باید روی سرور پنل و در هر فایروال ابری باز باشد. اگر UDP روی کل مسیر بسته است، در *افزودن سرور* *خودکار* (یا *TCP* یا *WSS*) را انتخاب کنید. توضیح بیشتر در [پنل وب](panel.md#عیبیابی).
 
-## هشدارهای `kariz check`
+## هشدارهای `sortun check`
 
 | هشدار | معنی |
 |---|---|

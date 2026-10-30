@@ -46,7 +46,7 @@ impl AppState {
     /// A panel with no agent listener and no tunnels of its own directory (tests, and
     /// panels set up before agents existed).
     pub fn new(db: Db) -> Self {
-        let hub = crate::hub::Hub::new(db.clone(), std::path::PathBuf::from("/etc/kariz"));
+        let hub = crate::hub::Hub::new(db.clone(), std::path::PathBuf::from("/etc/sortun"));
         Self {
             db,
             hub,
@@ -147,7 +147,7 @@ async fn security_headers(
 }
 
 async fn version(State(_): State<AppState>) -> impl IntoResponse {
-    Json(json!({ "name": "kariz-panel", "version": crate::version() }))
+    Json(json!({ "name": "sortun-panel", "version": crate::version() }))
 }
 
 /// A file of the web app, or its index page for a path the app handles itself.
@@ -252,7 +252,7 @@ pub async fn serve_with(
     limits: Limits,
 ) -> Result<()> {
     let load = || {
-        kariz::transport::tls::acceptor(&config.cert(), &config.key())
+        sortun::transport::tls::acceptor(&config.cert(), &config.key())
             .context("failed to load the certificate")
     };
     // The certificate can be replaced while the panel runs: SIGHUP loads it again, and
@@ -265,7 +265,7 @@ pub async fn serve_with(
             let (shared, cert, key) = (acceptor.clone(), config.cert(), config.key());
             tokio::spawn(async move {
                 while hup.recv().await.is_some() {
-                    match kariz::transport::tls::acceptor(&cert, &key) {
+                    match sortun::transport::tls::acceptor(&cert, &key) {
                         Ok(a) => {
                             *shared.lock().unwrap_or_else(|e| e.into_inner()) = a;
                             info!("the certificate was loaded again");
@@ -401,8 +401,8 @@ mod tests {
         let (status, body) = scrape(Some(&token)).await;
         assert_eq!(status, StatusCode::OK);
         // The panel's own server is always there.
-        assert!(body.contains("# TYPE kariz_server_up gauge"), "{body}");
-        assert!(body.contains(r#"kariz_server_up{server="#), "{body}");
+        assert!(body.contains("# TYPE sortun_server_up gauge"), "{body}");
+        assert!(body.contains(r#"sortun_server_up{server="#), "{body}");
     }
 
     #[tokio::test]
@@ -493,7 +493,7 @@ mod tests {
         let (status, body, _) = get_path("/k-7f3a9c/api/version").await;
         assert_eq!(status, StatusCode::OK);
         let doc: serde_json::Value = serde_json::from_str(&body).unwrap();
-        assert_eq!(doc["name"], "kariz-panel");
+        assert_eq!(doc["name"], "sortun-panel");
         // An unknown API path and a missing file are 404s, not the app's page.
         for path in ["/k-7f3a9c/api/nothing", "/k-7f3a9c/assets/missing.js"] {
             assert_eq!(get_path(path).await.0, StatusCode::NOT_FOUND, "{path}");

@@ -473,7 +473,7 @@ async fn probes_get_an_nginx_404() {
             "{request:?} got {answer:?}"
         );
         assert!(answer.ends_with("<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n"));
-        assert!(!answer.to_ascii_lowercase().contains("kariz"));
+        assert!(!answer.to_ascii_lowercase().contains("sortun"));
     }
     // Not HTTP at all, or an oversized head: 400, like nginx.
     for request in [

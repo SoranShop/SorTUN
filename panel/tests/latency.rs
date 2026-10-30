@@ -4,9 +4,9 @@
 
 use std::time::Duration;
 
-use kariz_panel::agent::{self, Agent};
-use kariz_panel::db::Db;
-use kariz_panel::hub::Hub;
+use sortun_panel::agent::{self, Agent};
+use sortun_panel::db::Db;
+use sortun_panel::hub::Hub;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::time::Instant;
@@ -62,13 +62,13 @@ async fn proxy(target: String, delay: Duration) -> String {
 #[tokio::test]
 async fn a_server_joins_across_a_slow_link() {
     let _ = tracing_subscriber::fmt()
-        .with_env_filter("kariz_panel=debug,kariz=warn")
+        .with_env_filter("sortun_panel=debug,sortun=warn")
         .with_test_writer()
         .try_init();
     let panel_dir = tempfile::tempdir().unwrap();
     let dir = tempfile::tempdir().unwrap();
     let hub = Hub::new(Db::in_memory().unwrap(), panel_dir.path().to_path_buf());
-    let acceptor = kariz::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
+    let acceptor = sortun::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
         .await
         .unwrap();
     let real = acceptor.local_addr().unwrap().to_string();
@@ -79,7 +79,7 @@ async fn a_server_joins_across_a_slow_link() {
     let code = hub.create_join(Some("far-away"), &slow).unwrap();
     let path = dir.path().join("agent.toml");
     let mut config = agent::enroll_from_code(&code, &path).unwrap();
-    config.kariz_dir = dir.path().join("kariz");
+    config.sortun_dir = dir.path().join("sortun");
     config.save(&path).unwrap();
     let running = tokio::spawn(Agent::new(&path, config).run());
 
@@ -134,7 +134,7 @@ async fn stalling_proxy(listener: TcpListener, target: String) {
 #[tokio::test]
 async fn an_agent_moves_to_kcp_when_tcp_is_stalled() {
     let _ = tracing_subscriber::fmt()
-        .with_env_filter("kariz_panel=debug,kariz=warn")
+        .with_env_filter("sortun_panel=debug,sortun=warn")
         .with_test_writer()
         .try_init();
     let panel_dir = tempfile::tempdir().unwrap();
@@ -143,16 +143,16 @@ async fn an_agent_moves_to_kcp_when_tcp_is_stalled() {
     let token = hub.link_token().unwrap();
     // The hub's real tcpmux listener sits behind the stalling proxy; its kcp listener is on
     // the proxy's port number (UDP), as a panel's two listeners are.
-    let tcp = kariz::link::Acceptor::bind("127.0.0.1:0", &token)
+    let tcp = sortun::link::Acceptor::bind("127.0.0.1:0", &token)
         .await
         .unwrap();
     let real = tcp.local_addr().unwrap().to_string();
     tokio::spawn(hub.clone().serve_agents(tcp));
     let (kcp, front) = loop {
-        let kcp = kariz::link::Acceptor::bind_via(
+        let kcp = sortun::link::Acceptor::bind_via(
             "127.0.0.1:0",
             &token,
-            kariz::config::TransportKind::Kcp,
+            sortun::config::TransportKind::Kcp,
         )
         .await
         .unwrap();
@@ -168,7 +168,7 @@ async fn an_agent_moves_to_kcp_when_tcp_is_stalled() {
     let code = hub.create_join(Some("behind-a-filter"), &addr).unwrap();
     let path = dir.path().join("agent.toml");
     let mut config = agent::enroll_from_code(&code, &path).unwrap();
-    config.kariz_dir = dir.path().join("kariz");
+    config.sortun_dir = dir.path().join("sortun");
     config.save(&path).unwrap();
     let running = tokio::spawn(Agent::new(&path, config).run());
 

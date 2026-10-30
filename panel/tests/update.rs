@@ -7,11 +7,11 @@ use std::io::{Read, Write};
 use std::net::TcpListener;
 use std::sync::Arc;
 
-use kariz_panel::db::Db;
-use kariz_panel::hub::Hub;
-use kariz_panel::sign;
-use kariz_panel::update::{self, arch_name};
-use kariz_panel::updater::{self, UpdateSettings};
+use sortun_panel::db::Db;
+use sortun_panel::hub::Hub;
+use sortun_panel::sign;
+use sortun_panel::update::{self, arch_name};
+use sortun_panel::updater::{self, UpdateSettings};
 
 /// Serves `files` (path to bytes) on a free loopback port; returns its address.
 fn serve(files: HashMap<String, Vec<u8>>) -> String {
@@ -54,8 +54,8 @@ type Tweak = Box<dyn FnOnce(&mut HashMap<String, Vec<u8>>)>;
 fn archive() -> Vec<u8> {
     let mut builder = tar::Builder::new(Vec::new());
     for (name, data) in [
-        ("kariz-v99.0.0/kariz", &b"the core"[..]),
-        ("kariz-v99.0.0/kariz-panel", &b"the panel"[..]),
+        ("sortun-v99.0.0/sortun", &b"the core"[..]),
+        ("sortun-v99.0.0/sortun-panel", &b"the panel"[..]),
     ] {
         let mut header = tar::Header::new_gnu();
         header.set_size(data.len() as u64);
@@ -104,14 +104,14 @@ fn repo(tag: &str, tweak: impl FnOnce(&mut HashMap<String, Vec<u8>>)) -> (String
 }
 
 fn hub_for(api: &str, key: &str, dir: &std::path::Path) -> Arc<Hub> {
-    let hub = Hub::new(Db::in_memory().unwrap(), dir.join("kariz"));
+    let hub = Hub::new(Db::in_memory().unwrap(), dir.join("sortun"));
     hub.set_update_settings(UpdateSettings {
         api: api.to_owned(),
         key: Some(key.to_owned()),
         dir: dir.join("updates"),
         config: dir.join("panel.toml"),
-        panel_bin: dir.join("bin/kariz-panel"),
-        kariz_bin: dir.join("bin/kariz"),
+        panel_bin: dir.join("bin/sortun-panel"),
+        sortun_bin: dir.join("bin/sortun"),
     });
     hub
 }
@@ -124,7 +124,7 @@ async fn a_newer_release_is_found_downloaded_verified_and_staged() {
 
     let before = hub.update_status();
     assert_eq!(before["state"], "none");
-    assert_eq!(before["current"], kariz_panel::version());
+    assert_eq!(before["current"], sortun_panel::version());
     hub.check_update().await.unwrap();
     let status = hub.update_status();
     assert_eq!(status["state"], "newer", "{status}");
@@ -149,10 +149,10 @@ async fn a_newer_release_is_found_downloaded_verified_and_staged() {
         ["upd_download", "upd_verify", "upd_stage"]
     );
     assert_eq!(
-        std::fs::read(staged.join("kariz-panel")).unwrap(),
+        std::fs::read(staged.join("sortun-panel")).unwrap(),
         b"the panel"
     );
-    assert_eq!(std::fs::read(staged.join("kariz")).unwrap(), b"the core");
+    assert_eq!(std::fs::read(staged.join("sortun")).unwrap(), b"the core");
     let arch = arch_name().unwrap();
     let names = update::asset_names("v99.0.0", arch);
     for n in &names {
@@ -235,11 +235,11 @@ async fn a_release_that_is_not_the_one_the_key_signed_is_refused_and_nothing_is_
 #[tokio::test]
 async fn the_same_or_an_older_release_is_not_an_update_and_a_dead_repository_is_reported() {
     let dir = tempfile::tempdir().unwrap();
-    let (api, key) = repo(&format!("v{}", kariz_panel::version()), |_| {});
+    let (api, key) = repo(&format!("v{}", sortun_panel::version()), |_| {});
     let hub = hub_for(&api, &key, dir.path());
     // A beta of the panel is only seen on the beta channel (the stable one leaves
     // prereleases out).
-    if kariz_panel::version().contains('-') {
+    if sortun_panel::version().contains('-') {
         hub.set_update_options(Some(update::Channel::Beta), None)
             .unwrap();
     }

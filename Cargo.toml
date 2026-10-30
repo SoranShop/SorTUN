@@ -1,6 +1,6 @@
 [package]
-name = "kariz"
-version = "2.8.0"
+name = "sortun"
+version = "3.0.0"
 edition = "2021"
 rust-version = "1.80"
 description = "High-performance, resource-efficient tunnel core for server-to-server links, built to resist DPI."
@@ -8,7 +8,7 @@ publish = false
 license-file = "LICENSE"
 
 # The web panel is a separate crate that uses this one as a library.
-# A plain `cargo build` at the root still builds only `kariz`.
+# A plain `cargo build` at the root still builds only `sortun`.
 [workspace]
 members = ["panel"]
 
@@ -22,7 +22,7 @@ opt-level = 3
 path = "src/lib.rs"
 
 [[bin]]
-name = "kariz"
+name = "sortun"
 path = "src/main.rs"
 
 [dependencies]
@@ -65,7 +65,7 @@ default = ["quic", "kcp", "mimalloc"]
 quic = ["dep:quinn", "dep:quinn-proto", "dep:rcgen"]
 # transport = "kcp", with FEC.
 kcp = ["dep:kcp", "dep:reed-solomon-simd"]
-# mimalloc as the global allocator of the kariz binary (musl's own is slow).
+# mimalloc as the global allocator of the sortun binary (musl's own is slow).
 mimalloc = ["dep:mimalloc", "dep:libmimalloc-sys"]
 
 [dev-dependencies]

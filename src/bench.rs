@@ -273,7 +273,7 @@ mod tests {
     #[tokio::test]
     async fn wss_is_measured_with_any_certificate() {
         let c = rcgen::generate_simple_self_signed(vec!["bench.example".to_owned()]).unwrap();
-        let dir = std::env::temp_dir().join(format!("kariz-bench-wss-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sortun-bench-wss-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let (cert, key) = (dir.join("cert.pem"), dir.join("key.pem"));
         std::fs::write(&cert, c.cert.pem()).unwrap();

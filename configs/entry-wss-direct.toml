@@ -8,7 +8,7 @@ profile = "balanced"
 [tunnel]
 transport = "wss"
 remote = "EXIT_SERVER_IP:443"
-token = "CHANGE-ME-run-kariz-token"
+token = "CHANGE-ME-run-sortun-token"
 
 [tunnel.ws]
 path = "/ws"
@@ -16,7 +16,7 @@ host = "www.example.com"           # Host header and TLS server name to present
 early_data = true
 
 [tunnel.tls]
-# On the exit server: kariz pin /etc/kariz/cert.pem
+# On the exit server: sortun pin /etc/sortun/cert.pem
 pin_sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
 
 [[forward]]

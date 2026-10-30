@@ -8,7 +8,7 @@ profile = "gaming"
 [tunnel]
 transport = "tcpmux"
 remote = "ENTRY_SERVER_IP:3080"
-token = "CHANGE-ME-run-kariz-token"
+token = "CHANGE-ME-run-sortun-token"
 
 [log]
 level = "info"

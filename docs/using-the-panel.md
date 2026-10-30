@@ -14,7 +14,7 @@ link: it signs you in and vanishes from the address bar. The certificate is a re
 the browser shows no warning.
 
 - Want a password instead of links? *Settings*, set one (10 characters or more).
-- Lost the link? On the server, `kariz-manager panel link` makes another.
+- Lost the link? On the server, `sortun-manager panel link` makes another.
 
 ## 2. Add your servers
 
@@ -26,7 +26,7 @@ Open **Servers**, then **Add server**.
    gets through. *QUIC* is always sealed, so it is the one to try where plain QUIC is filtered; it
    needs UDP open on the panel's port after the agents port.
 3. The panel shows a **join code** and a command. On the other server, as root, run it:
-   `kariz-manager --agent kz1_...`
+   `sortun-manager --agent kz1_...`
 4. Within seconds the server appears in the list, with its CPU, memory and network.
 
 The new server opens no port: it connects to the panel. Codes work once, for 10 minutes.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Kariz panel prototype</title>
+  <title>SorTUN panel prototype</title>
   <link rel="icon" href="../../assets/logo.svg">
   <link rel="stylesheet" href="../tokens.css">
   <link rel="stylesheet" href="app.css">
@@ -107,7 +107,7 @@
       <path class="water" pathLength="1" d="M26 142 L186 172" stroke="url(#bw)" stroke-width="16" stroke-linecap="round" fill="none"/>
       <path class="arrow" d="M190 154 L226 176 L190 198 Z" fill="#7ef0e4" stroke="#7ef0e4" stroke-width="6" stroke-linejoin="round"/>
     </svg>
-    <div class="boot-word">Kariz<small data-i18n="boot.sub">tunnel panel</small></div>
+    <div class="boot-word">SorTUN<small data-i18n="boot.sub">tunnel panel</small></div>
   </div>
 </section>
 
@@ -116,7 +116,7 @@
   <canvas id="login-scene" aria-hidden="true"></canvas>
 
   <div class="login-top">
-    <div class="brand"><img src="../../assets/logo.svg" alt=""><span>Kariz</span></div>
+    <div class="brand"><img src="../../assets/logo.svg" alt=""><span>SorTUN</span></div>
     <div class="chip-group">
       <button class="chip" data-act="lang" type="button">English</button>
       <button class="chip" data-act="theme" type="button" data-i18n="theme.toDawn">Dawn</button>
@@ -124,7 +124,7 @@
   </div>
 
   <form class="login-form" id="login-form" novalidate>
-    <h1 class="login-title" id="login-title" data-i18n="login.title">کاریز</h1>
+    <h1 class="login-title" id="login-title" data-i18n="login.title">SorTUN</h1>
     <p class="login-sub" data-i18n="login.sub">Water finds its way underground.</p>
 
     <div class="login-fields">
@@ -138,7 +138,7 @@
         <button class="btn btn-primary" type="submit"><span class="shine"></span><span data-i18n="login.enter">Enter</span></button>
         <div class="divider" data-i18n="login.or">or</div>
         <button class="btn btn-ghost" type="button" id="link-login" data-i18n="login.link">I have a one-time link</button>
-        <p class="login-foot"><span data-i18n="login.foot">Make a one-time link on the server:</span> <span class="mono" dir="ltr">kariz-panel login-link</span></p>
+        <p class="login-foot"><span data-i18n="login.foot">Make a one-time link on the server:</span> <span class="mono" dir="ltr">sortun-panel login-link</span></p>
       </div>
     </div>
 
@@ -152,9 +152,9 @@
 
 
 <!-- ============================================================ app -->
-<section id="app" class="screen" aria-label="Kariz panel">
+<section id="app" class="screen" aria-label="SorTUN panel">
   <nav class="rail" aria-label="Main">
-    <div class="brand"><img src="../../assets/logo.svg" alt="Kariz"></div>
+    <div class="brand"><img src="../../assets/logo.svg" alt="SorTUN"></div>
     <button class="rail-item" data-page="map" aria-current="page"><svg><use href="#i-map"/></svg><span data-i18n="nav.map">Map</span></button>
     <button class="rail-item" data-page="servers"><svg><use href="#i-servers"/></svg><span data-i18n="nav.servers">Servers</span></button>
     <button class="rail-item" data-page="tunnels"><svg><use href="#i-tunnels"/></svg><span data-i18n="nav.tunnels">Tunnels</span></button>
@@ -213,7 +213,7 @@
           <div class="metric">
             <div class="label" data-i18n="m.servers">Servers online</div>
             <div class="value num"><span class="odo" id="m-srv"></span><span class="unit" id="m-srv-of"></span></div>
-            <div class="note" data-i18n="m.serversNote">all on Kariz 0.6.1</div>
+            <div class="note" data-i18n="m.serversNote">all on SorTUN 0.6.1</div>
           </div>
         </div>
       </div>
@@ -258,7 +258,7 @@
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
 <div class="proto-bar" id="proto-bar">
-  <span data-i18n="proto.label">Prototype · password: kariz</span>
+  <span data-i18n="proto.label">Prototype · password: sortun</span>
   <button type="button" data-act="replay" data-i18n="proto.replay">Replay intro</button>
 </div>
 

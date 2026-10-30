@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Memory of a Kariz pair on localhost (direct mode): resident set size (RSS) of each side
+# Memory of a SorTUN pair on localhost (direct mode): resident set size (RSS) of each side
 # when idle, and with N idle user connections (TCP) or flows (UDP) open through the
 # tunnel.
 #
-# Usage: scripts/rss.sh [transport] [connections] [kariz binary] [tcp|udp]
+# Usage: scripts/rss.sh [transport] [connections] [sortun binary] [tcp|udp]
 #   transport: tcp | tcpmux (default) | ws | quic | kcp
 # Needs python3 (it plays the target server, which accepts and holds connections, and
 # takes UDP packets).
@@ -11,7 +11,7 @@ set -euo pipefail
 
 transport=${1:-tcpmux}
 n=${2:-100}
-kariz=${3:-target/release/kariz}
+sortun=${3:-target/release/sortun}
 proto=${4:-tcp}
 dir=$(mktemp -d)
 pids=()
@@ -45,7 +45,7 @@ while True:
     held.append(s.accept()[0])' "$p_target" &
 pids+=($!)
 
-token=$("$kariz" token)
+token=$("$sortun" token)
 cat > "$dir/exit.toml" <<CONF
 role = "exit"
 mode = "direct"
@@ -71,11 +71,11 @@ protocol = "$proto"
 level = "warn"
 CONF
 
-"$kariz" run -c "$dir/exit.toml" &
+"$sortun" run -c "$dir/exit.toml" &
 exit_pid=$!
 pids+=("$exit_pid")
 sleep 0.5
-"$kariz" run -c "$dir/entry.toml" &
+"$sortun" run -c "$dir/entry.toml" &
 entry_pid=$!
 pids+=("$entry_pid")
 sleep 1.5

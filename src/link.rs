@@ -1,4 +1,4 @@
-//! A management link: one authenticated, encrypted mux session between two Kariz programs,
+//! A management link: one authenticated, encrypted mux session between two SorTUN programs,
 //! made the way a tunnel's connections are (the token handshake, the encrypted records,
 //! the mux), so it resists DPI like a tunnel does. The web panel uses it to talk to its
 //! agents; nothing in the tunnel core uses it.
@@ -614,7 +614,7 @@ mod tests {
     async fn a_link_works_over_wss_with_any_certificate() {
         // A self-signed certificate for another name: the dialing end does not check it.
         let c = rcgen::generate_simple_self_signed(vec!["panel.example".to_owned()]).unwrap();
-        let dir = std::env::temp_dir().join(format!("kariz-link-wss-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sortun-link-wss-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let (cert, key) = (dir.join("cert.pem"), dir.join("key.pem"));
         std::fs::write(&cert, c.cert.pem()).unwrap();

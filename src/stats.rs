@@ -500,7 +500,7 @@ impl Stats {
         });
         Status {
             status_version: STATUS_VERSION,
-            kariz: env!("CARGO_PKG_VERSION").to_string(),
+            sortun: env!("CARGO_PKG_VERSION").to_string(),
             role: self.role.to_string(),
             mode: self.mode.to_string(),
             transport: self.transport.to_string(),
@@ -520,7 +520,9 @@ impl Stats {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Status {
     pub status_version: u32,
-    pub kariz: String,
+    /// The version (`kariz` from daemons before 3.0).
+    #[serde(alias = "kariz")]
+    pub sortun: String,
     pub role: String,
     pub mode: String,
     pub transport: String,
@@ -536,7 +538,7 @@ pub struct Status {
     /// Entry side, once the first probe is done.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub probe: Option<ProbeStatus>,
-    /// Everything this side's sockets moved, headers and resends included (Kariz 2.7.0-beta.2
+    /// Everything this side's sockets moved, headers and resends included (SorTUN 2.7.0-beta.2
     /// and newer).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub wire: Option<crate::wire::WireStatus>,

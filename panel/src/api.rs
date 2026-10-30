@@ -1,8 +1,8 @@
 //! The panel's JSON API for sign-in and sessions.
 //!
-//! * The session cookie is `__Host-kariz` (`Secure`, `HttpOnly`, `SameSite=Strict`,
+//! * The session cookie is `__Host-sortun` (`Secure`, `HttpOnly`, `SameSite=Strict`,
 //!   `Path=/`); its value is a random token of which only a hash is stored.
-//! * Every request that changes something needs the header `X-Kariz-CSRF` with the value
+//! * Every request that changes something needs the header `X-SorTUN-CSRF` with the value
 //!   the session was given (`GET /api/session` shows it to the page). Sign-in requests
 //!   have no session yet; they need `Content-Type: application/json`, which a page on
 //!   another site cannot send without the browser asking first.
@@ -27,8 +27,8 @@ use crate::http::AppState;
 use crate::pair::{self, PairRequest};
 use crate::wire::LinkKind;
 
-const COOKIE: &str = "__Host-kariz";
-const CSRF_HEADER: &str = "x-kariz-csrf";
+const COOKIE: &str = "__Host-sortun";
+const CSRF_HEADER: &str = "x-sortun-csrf";
 
 pub fn routes() -> Router<AppState> {
     Router::new()
@@ -2905,12 +2905,12 @@ mod tests {
         assert_eq!(code("the agent did not answer in time"), "spec_slow:fra");
         assert_eq!(code("no_such_tunnel"), "spec_missing:fra");
         assert_eq!(
-            code("failed to read config file /etc/kariz/a.toml: No such file or directory (os error 2)"),
+            code("failed to read config file /etc/sortun/a.toml: No such file or directory (os error 2)"),
             "spec_missing:fra"
         );
         assert_eq!(
-            code("invalid config file /etc/kariz/a.toml: unknown field `mtu`"),
-            "spec_failed:fra:invalid config file /etc/kariz/a.toml: unknown field `mtu`"
+            code("invalid config file /etc/sortun/a.toml: unknown field `mtu`"),
+            "spec_failed:fra:invalid config file /etc/sortun/a.toml: unknown field `mtu`"
         );
     }
 }

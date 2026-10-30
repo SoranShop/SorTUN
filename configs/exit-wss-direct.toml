@@ -2,8 +2,8 @@
 # Make a certificate, for example:
 #   openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes -days 3650 \
 #     -subj "/CN=www.example.com" -addext "subjectAltName=DNS:www.example.com" \
-#     -keyout /etc/kariz/key.pem -out /etc/kariz/cert.pem
-# then put the output of `kariz pin /etc/kariz/cert.pem` into the entry's pin_sha256.
+#     -keyout /etc/sortun/key.pem -out /etc/sortun/cert.pem
+# then put the output of `sortun pin /etc/sortun/cert.pem` into the entry's pin_sha256.
 role = "exit"
 mode = "direct"
 profile = "balanced"
@@ -11,14 +11,14 @@ profile = "balanced"
 [tunnel]
 transport = "wss"
 listen = "0.0.0.0:443"
-token = "CHANGE-ME-run-kariz-token"
+token = "CHANGE-ME-run-sortun-token"
 
 [tunnel.ws]
 path = "/ws"
 
 [tunnel.tls]
-cert = "/etc/kariz/cert.pem"
-key = "/etc/kariz/key.pem"
+cert = "/etc/sortun/cert.pem"
+key = "/etc/sortun/key.pem"
 
 [log]
 level = "info"

@@ -42,7 +42,7 @@ export function MetricsSection() {
     else toast(t("met.copyFailed"));
   };
 
-  const config = `- job_name: kariz
+  const config = `- job_name: sortun
   metrics_path: ${new URL(url).pathname}
   scheme: ${new URL(url).protocol.replace(":", "")}
   authorization:

@@ -11,7 +11,7 @@ profile = "balanced"
 [tunnel]
 transport = "kcp"                  # handshake, encryption and mux run on top, as over tcp
 listen = "0.0.0.0:4000"            # UDP port
-token = "CHANGE-ME-run-kariz-token"
+token = "CHANGE-ME-run-sortun-token"
 
 [tunnel.kcp]
 mode = "fast2"                     # normal | fast | fast2 | fast3 | manual

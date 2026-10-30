@@ -42,7 +42,7 @@ pub fn cert_sha256(der: &[u8]) -> String {
     digest.as_ref().iter().map(|b| format!("{b:02x}")).collect()
 }
 
-/// `tls.pin_sha256` for the first certificate in a PEM file (`kariz pin`).
+/// `tls.pin_sha256` for the first certificate in a PEM file (`sortun pin`).
 pub fn pin_of_file(path: &Path) -> io::Result<String> {
     let cert = CertificateDer::from_pem_file(path).map_err(|e| pem_error(path, e))?;
     Ok(cert_sha256(&cert))
@@ -289,7 +289,7 @@ mod tests {
     fn temp_dir() -> PathBuf {
         static NEXT: AtomicUsize = AtomicUsize::new(0);
         let dir = std::env::temp_dir().join(format!(
-            "kariz-tls-{}-{}",
+            "sortun-tls-{}-{}",
             std::process::id(),
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));

@@ -12,7 +12,7 @@ profile = "gaming"
 [tunnel]
 transport = "kcp"
 remote = "EXIT_SERVER_IP:4000"     # UDP port
-token = "CHANGE-ME-run-kariz-token"
+token = "CHANGE-ME-run-sortun-token"
 
 [tunnel.kcp]
 # fec_data = 0                     # the gaming profile sets FEC 10 / 3; 0 and 0 turn it off

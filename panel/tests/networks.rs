@@ -7,13 +7,13 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use kariz_panel::agent::{self, Agent};
-use kariz_panel::db::Db;
-use kariz_panel::hub::{GreWay, Hub, LOCAL};
-use kariz_panel::manage::{Fut, Systemd};
-use kariz_panel::net::Exec;
-use kariz_panel::netops;
-use kariz_panel::pair::{self, PairRequest};
+use sortun_panel::agent::{self, Agent};
+use sortun_panel::db::Db;
+use sortun_panel::hub::{GreWay, Hub, LOCAL};
+use sortun_panel::manage::{Fut, Systemd};
+use sortun_panel::net::Exec;
+use sortun_panel::netops;
+use sortun_panel::pair::{self, PairRequest};
 
 #[derive(Default)]
 struct Fake {
@@ -61,7 +61,7 @@ impl Exec for Fake {
     }
 }
 
-async fn finished(hub: &Hub, id: &str) -> kariz_panel::pair::Op {
+async fn finished(hub: &Hub, id: &str) -> sortun_panel::pair::Op {
     for _ in 0..300 {
         let op = hub.ops.get(id).expect("the operation is known");
         if op.state != "running" {
@@ -78,14 +78,14 @@ async fn links_are_made_on_both_servers_reused_undone_and_protected() {
     let (local_fake, agent_fake) = (Arc::new(Fake::default()), Arc::new(Fake::default()));
     let hub = Hub::with_options(
         Db::in_memory().unwrap(),
-        root.path().join("kariz"),
+        root.path().join("sortun"),
         Arc::new(Systemd),
         Duration::from_secs(5),
         Some(root.path().join("panel")),
         Some(local_fake.clone()),
     );
     std::fs::create_dir_all(root.path().join("panel")).unwrap();
-    let acceptor = kariz::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
+    let acceptor = sortun::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
         .await
         .unwrap();
     let addr = acceptor.local_addr().unwrap().to_string();
@@ -334,14 +334,14 @@ async fn a_server_added_over_gre_makes_its_end_from_the_code_and_comes_in() {
     let (local_fake, agent_fake) = (Arc::new(Fake::default()), Arc::new(Fake::default()));
     let hub = Hub::with_options(
         Db::in_memory().unwrap(),
-        root.path().join("kariz"),
+        root.path().join("sortun"),
         Arc::new(Systemd),
         Duration::from_secs(5),
         Some(root.path().join("panel")),
         Some(local_fake.clone()),
     );
     std::fs::create_dir_all(root.path().join("panel")).unwrap();
-    let acceptor = kariz::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
+    let acceptor = sortun::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
         .await
         .unwrap();
     let addr = acceptor.local_addr().unwrap().to_string();
@@ -349,7 +349,7 @@ async fn a_server_added_over_gre_makes_its_end_from_the_code_and_comes_in() {
     tokio::spawn(hub.clone().serve_agents(acceptor));
 
     // The panel must know its own public address: GRE runs between the two.
-    let why = |r: anyhow::Result<kariz_panel::hub::GreJoin>| format!("{:#}", r.unwrap_err());
+    let why = |r: anyhow::Result<sortun_panel::hub::GreJoin>| format!("{:#}", r.unwrap_err());
     assert_eq!(hub.addr_of(LOCAL), None);
     assert_eq!(
         why(hub
@@ -406,7 +406,7 @@ async fn a_server_added_over_gre_makes_its_end_from_the_code_and_comes_in() {
         .unwrap();
     assert_eq!(
         (made.name.as_str(), made.network.as_str()),
-        ("behind-gre", "kariz")
+        ("behind-gre", "sortun")
     );
     // A network was made for it, and the link took a /30 of it.
     let nets = hub.networks.networks().unwrap();
@@ -435,7 +435,7 @@ async fn a_server_added_over_gre_makes_its_end_from_the_code_and_comes_in() {
     };
     let waiting = listed(&hub);
     assert!(!waiting.online && waiting.last_seen.is_none());
-    assert_eq!(waiting.gre.map(|g| g.network).as_deref(), Some("kariz"));
+    assert_eq!(waiting.gre.map(|g| g.network).as_deref(), Some("sortun"));
     assert_eq!(waiting.addr.as_deref(), Some("192.0.2.2"));
     // The same address cannot be added twice: that server is reconnected instead.
     assert_eq!(
@@ -455,7 +455,7 @@ async fn a_server_added_over_gre_makes_its_end_from_the_code_and_comes_in() {
     );
 
     // The code: the panel's private address, and the new server's end of the link.
-    let code = kariz_panel::join::decode(&made.code).unwrap();
+    let code = sortun_panel::join::decode(&made.code).unwrap();
     assert_eq!(code.p, format!("{}:{port}", made.panel_addr));
     let theirs = code.g.clone().expect("the code carries the link");
     assert_eq!(
@@ -507,12 +507,12 @@ async fn a_server_added_over_gre_makes_its_end_from_the_code_and_comes_in() {
     let again = hub
         .create_rejoin(&made.id, &format!("{}:{port}", made.panel_addr), None)
         .unwrap();
-    assert_eq!(kariz_panel::join::decode(&again).unwrap().g, Some(theirs));
+    assert_eq!(sortun_panel::join::decode(&again).unwrap().g, Some(theirs));
     // One through a public address does not.
     let public = hub
         .create_rejoin(&made.id, "192.0.2.1:29001", None)
         .unwrap();
-    assert_eq!(kariz_panel::join::decode(&public).unwrap().g, None);
+    assert_eq!(sortun_panel::join::decode(&public).unwrap().g, None);
 
     // ---- removing the server takes the link, and the panel's end of it, with it ----
     assert!(hub.remove(&made.id).unwrap());
@@ -541,7 +541,7 @@ async fn a_reverse_server_is_reached_across_a_gre_link() {
     let local_fake = Arc::new(Fake::default());
     let hub = Hub::with_options(
         Db::in_memory().unwrap(),
-        root.path().join("kariz"),
+        root.path().join("sortun"),
         Arc::new(Systemd),
         Duration::from_secs(5),
         Some(root.path().join("panel")),
@@ -549,7 +549,7 @@ async fn a_reverse_server_is_reached_across_a_gre_link() {
     );
     std::fs::create_dir_all(root.path().join("panel")).unwrap();
     hub.set_addr(LOCAL, "192.0.2.1").unwrap();
-    let why = |r: anyhow::Result<kariz_panel::hub::GreJoin>| format!("{:#}", r.unwrap_err());
+    let why = |r: anyhow::Result<sortun_panel::hub::GreJoin>| format!("{:#}", r.unwrap_err());
     for port in [0, u16::MAX] {
         assert_eq!(
             why(hub
@@ -585,7 +585,7 @@ async fn a_reverse_server_is_reached_across_a_gre_link() {
         (made.server_addr.as_str(), 29501, Some("kcp"))
     );
     // The code makes the agent make its end, then listen; it dials nothing.
-    let code = kariz_panel::join::decode(&made.code).unwrap();
+    let code = sortun_panel::join::decode(&made.code).unwrap();
     assert_eq!(code.p, "");
     assert_eq!(code.l.as_deref(), Some("0.0.0.0:29501"));
     assert_eq!(code.x.as_deref(), Some("kcp"));
@@ -619,23 +619,23 @@ async fn a_reverse_server_is_reached_across_a_gre_link() {
     let again = hub
         .create_reverse_rejoin(
             &made.id,
-            kariz_panel::reverse::Reverse::new(&made.server_addr, 29501, None).unwrap(),
+            sortun_panel::reverse::Reverse::new(&made.server_addr, 29501, None).unwrap(),
         )
         .unwrap();
-    assert_eq!(kariz_panel::join::decode(&again).unwrap().g, Some(theirs));
+    assert_eq!(sortun_panel::join::decode(&again).unwrap().g, Some(theirs));
     let public = hub
         .create_reverse_rejoin(
             &made.id,
-            kariz_panel::reverse::Reverse::new("192.0.2.2", 29501, None).unwrap(),
+            sortun_panel::reverse::Reverse::new("192.0.2.2", 29501, None).unwrap(),
         )
         .unwrap();
-    assert_eq!(kariz_panel::join::decode(&public).unwrap().g, None);
+    assert_eq!(sortun_panel::join::decode(&public).unwrap().g, None);
 
     // ---- Edit: a server the panel dials at its public address moves onto a new link ----
     let plain = hub
         .create_reverse_join(
             Some("plain"),
-            kariz_panel::reverse::Reverse::new("192.0.2.3", 29001, None).unwrap(),
+            sortun_panel::reverse::Reverse::new("192.0.2.3", 29001, None).unwrap(),
         )
         .await
         .unwrap();
@@ -683,7 +683,7 @@ async fn a_reverse_server_is_reached_across_a_gre_link() {
         (target.host.as_str(), target.port),
         (moved.server_addr.as_str(), 29002)
     );
-    let code = kariz_panel::join::decode(&moved.code).unwrap();
+    let code = sortun_panel::join::decode(&moved.code).unwrap();
     assert_eq!(code.l.as_deref(), Some("0.0.0.0:29002"));
     assert_eq!(code.g.map(|g| g.address), Some(moved.server_addr.clone()));
     // Asked again, the link it has is taken, not a second one.
@@ -705,14 +705,14 @@ async fn two_servers(root: &std::path::Path) -> (Arc<Hub>, String, Arc<Fake>, Ar
     let (local_fake, agent_fake) = (Arc::new(Fake::default()), Arc::new(Fake::default()));
     let hub = Hub::with_options(
         Db::in_memory().unwrap(),
-        root.join("kariz"),
+        root.join("sortun"),
         Arc::new(Systemd),
         Duration::from_secs(5),
         Some(root.join("panel")),
         Some(local_fake.clone()),
     );
     std::fs::create_dir_all(root.join("panel")).unwrap();
-    let acceptor = kariz::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
+    let acceptor = sortun::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
         .await
         .unwrap();
     let addr = acceptor.local_addr().unwrap().to_string();
@@ -746,7 +746,7 @@ async fn two_servers(root: &std::path::Path) -> (Arc<Hub>, String, Arc<Fake>, Ar
 
 #[tokio::test]
 async fn a_vxlan_network_makes_vxlan_links_on_its_port_with_a_vni_of_their_own() {
-    use kariz_panel::wire::LinkKind;
+    use sortun_panel::wire::LinkKind;
     let root = tempfile::tempdir().unwrap();
     let (hub, remote, local_fake, agent_fake) = two_servers(root.path()).await;
     let both = vec![LOCAL.to_owned(), remote.clone()];
@@ -821,7 +821,7 @@ async fn a_vxlan_network_makes_vxlan_links_on_its_port_with_a_vni_of_their_own()
 
 #[tokio::test]
 async fn a_server_that_cannot_make_vxlan_is_named_and_nothing_is_made() {
-    use kariz_panel::wire::LinkKind;
+    use sortun_panel::wire::LinkKind;
     let root = tempfile::tempdir().unwrap();
     let (hub, remote, _local_fake, agent_fake) = two_servers(root.path()).await;
     // The far server's kernel refuses VXLAN (no module, a container).
@@ -843,23 +843,23 @@ async fn a_server_that_cannot_make_vxlan_is_named_and_nothing_is_made() {
 }
 
 /// *Add server*, over a VXLAN link: with only a GRE network there, the panel makes a VXLAN one
-/// (`kariz-vxlan`, UDP 4789) for it, brings up its own end as a VXLAN interface, and the code
+/// (`sortun-vxlan`, UDP 4789) for it, brings up its own end as a VXLAN interface, and the code
 /// carries the other end as VXLAN, which the agent makes before it dials.
 #[tokio::test]
 async fn a_server_added_over_vxlan_gets_a_vxlan_network_and_link() {
-    use kariz_panel::wire::LinkKind;
+    use sortun_panel::wire::LinkKind;
     let root = tempfile::tempdir().unwrap();
     let (local_fake, agent_fake) = (Arc::new(Fake::default()), Arc::new(Fake::default()));
     let hub = Hub::with_options(
         Db::in_memory().unwrap(),
-        root.path().join("kariz"),
+        root.path().join("sortun"),
         Arc::new(Systemd),
         Duration::from_secs(5),
         Some(root.path().join("panel")),
         Some(local_fake.clone()),
     );
     std::fs::create_dir_all(root.path().join("panel")).unwrap();
-    let acceptor = kariz::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
+    let acceptor = sortun::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
         .await
         .unwrap();
     let addr = acceptor.local_addr().unwrap().to_string();
@@ -868,11 +868,11 @@ async fn a_server_added_over_vxlan_gets_a_vxlan_network_and_link() {
     hub.set_addr(LOCAL, "192.0.2.1").unwrap();
     let gre = hub
         .networks
-        .create_network("kariz", "10.77.0.0/16", &[])
+        .create_network("sortun", "10.77.0.0/16", &[])
         .unwrap();
 
     // A GRE network asked for by id with VXLAN asked for too is a mistake of the page.
-    let why = |r: anyhow::Result<kariz_panel::hub::GreJoin>| format!("{:#}", r.unwrap_err());
+    let why = |r: anyhow::Result<sortun_panel::hub::GreJoin>| format!("{:#}", r.unwrap_err());
     assert_eq!(
         why(hub
             .create_link_join(
@@ -905,7 +905,7 @@ async fn a_server_added_over_vxlan_gets_a_vxlan_network_and_link() {
         .await
         .unwrap();
     assert_eq!(made.kind, LinkKind::Vxlan);
-    assert_eq!(made.network, "kariz-vxlan");
+    assert_eq!(made.network, "sortun-vxlan");
     let vx = hub
         .networks
         .networks()
@@ -913,7 +913,7 @@ async fn a_server_added_over_vxlan_gets_a_vxlan_network_and_link() {
         .into_iter()
         .find(|n| n.kind == LinkKind::Vxlan)
         .expect("a VXLAN network was made");
-    assert_eq!((vx.name.as_str(), vx.port), ("kariz-vxlan", 4789));
+    assert_eq!((vx.name.as_str(), vx.port), ("sortun-vxlan", 4789));
     assert_eq!(vx.cidr, "10.88.0.0/16", "the next pool, beside the GRE one");
     let link = hub.networks.links(Some(&vx.id)).unwrap().remove(0);
     assert!(
@@ -927,7 +927,7 @@ async fn a_server_added_over_vxlan_gets_a_vxlan_network_and_link() {
     );
 
     // The code carries the server's end as VXLAN.
-    let code = kariz_panel::join::decode(&made.code).unwrap();
+    let code = sortun_panel::join::decode(&made.code).unwrap();
     let theirs = code.g.clone().expect("the code carries the link");
     assert_eq!(
         (theirs.kind, theirs.port, theirs.mtu),
@@ -981,19 +981,19 @@ async fn a_server_added_over_gre_dials_an_agents_port_of_its_own() {
     let local_fake = Arc::new(Fake::default());
     let hub = Hub::with_options(
         Db::in_memory().unwrap(),
-        root.path().join("kariz"),
+        root.path().join("sortun"),
         Arc::new(Systemd),
         Duration::from_secs(5),
         Some(root.path().join("panel")),
         Some(local_fake.clone()),
     );
     std::fs::create_dir_all(root.path().join("panel")).unwrap();
-    let acceptor = kariz::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
+    let acceptor = sortun::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
         .await
         .unwrap();
     let main = acceptor.local_addr().unwrap().port();
     tokio::spawn(hub.clone().serve_agents(acceptor));
-    hub.set_agent_listen(kariz_panel::agent_ports::AgentListen {
+    hub.set_agent_listen(sortun_panel::agent_ports::AgentListen {
         listen: format!("127.0.0.1:{main}"),
         web_port: 1,
         cert: root.path().join("none.pem"),
@@ -1035,7 +1035,7 @@ async fn a_server_added_over_gre_dials_an_agents_port_of_its_own() {
         }
     }
     let (made, own) = made.expect("a free port was found");
-    let code = kariz_panel::join::decode(&made.code).unwrap();
+    let code = sortun_panel::join::decode(&made.code).unwrap();
     assert_eq!(code.p, format!("{}:{own}", made.panel_addr));
     assert!(code.g.is_some(), "the code carries the link");
     assert_eq!(hub.agent_port_of(&made.id), Some(own));
@@ -1053,7 +1053,7 @@ async fn a_server_added_over_gre_dials_an_agents_port_of_its_own() {
         .await
         .unwrap();
     assert_eq!(
-        kariz_panel::join::decode(&again.code).unwrap().p,
+        sortun_panel::join::decode(&again.code).unwrap().p,
         format!("{}:{own}", made.panel_addr)
     );
     let cleared = hub
@@ -1061,7 +1061,7 @@ async fn a_server_added_over_gre_dials_an_agents_port_of_its_own() {
         .await
         .unwrap();
     assert_eq!(
-        kariz_panel::join::decode(&cleared.code).unwrap().p,
+        sortun_panel::join::decode(&cleared.code).unwrap().p,
         format!("{}:{main}", made.panel_addr)
     );
     assert_eq!(hub.agent_port_of(&made.id), None);
@@ -1101,14 +1101,14 @@ async fn a_link_and_a_network_are_deleted_while_a_server_is_offline_and_it_clean
     let (local_fake, agent_fake) = (Arc::new(Fake::default()), Arc::new(Fake::default()));
     let hub = Hub::with_options(
         Db::in_memory().unwrap(),
-        root.path().join("kariz"),
+        root.path().join("sortun"),
         Arc::new(Systemd),
         Duration::from_secs(5),
         Some(root.path().join("panel")),
         Some(local_fake.clone()),
     );
     std::fs::create_dir_all(root.path().join("panel")).unwrap();
-    let acceptor = kariz::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
+    let acceptor = sortun::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
         .await
         .unwrap();
     let addr = acceptor.local_addr().unwrap().to_string();
@@ -1280,7 +1280,7 @@ async fn a_server_that_does_not_answer_does_not_hold_up_a_delete() {
 /// at once.
 #[tokio::test]
 async fn a_links_mtu_is_changed_in_place_on_both_servers() {
-    use kariz_panel::netops::MtuChoice;
+    use sortun_panel::netops::MtuChoice;
     let root = tempfile::tempdir().unwrap();
     let (hub, remote, local_fake, agent_fake) = two_servers(root.path()).await;
     let net = hub
@@ -1357,7 +1357,7 @@ async fn a_links_mtu_is_changed_in_place_on_both_servers() {
 /// later; a server without an IPv6 address is named before anything is made.
 #[tokio::test]
 async fn links_run_over_ipv6_and_move_between_ipv4_and_ipv6() {
-    use kariz_panel::wire::LinkKind;
+    use sortun_panel::wire::LinkKind;
     let root = tempfile::tempdir().unwrap();
     let (hub, remote, local_fake, agent_fake) = two_servers(root.path()).await;
     let both = vec![LOCAL.to_owned(), remote.clone()];

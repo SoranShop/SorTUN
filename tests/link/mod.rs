@@ -529,7 +529,7 @@ const MSS: usize = 1448;
 const TCP_OVERHEAD: usize = 52;
 /// Largest window the receiver offers (Linux autotuning goes up to about 6 MB).
 const RECEIVE_WINDOW: f64 = 4.0 * 1024.0 * 1024.0;
-/// Data the sender holds that is not yet in the window. Kariz sets `TCP_NOTSENT_LOWAT`
+/// Data the sender holds that is not yet in the window. SorTUN sets `TCP_NOTSENT_LOWAT`
 /// to 16 KiB on connections that carry mux, so a real sender holds no more than that;
 /// the rest waits in the tunnel, where datagrams can go ahead of it.
 const UNSENT_LIMIT: usize = 16 * 1024;

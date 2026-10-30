@@ -9,15 +9,15 @@ profile = "balanced"
 [tunnel]
 transport = "wss"
 listen = "0.0.0.0:443"             # a port the CDN proxies (443, 2053, 2083, 2087, 2096, 8443)
-token = "CHANGE-ME-run-kariz-token"
+token = "CHANGE-ME-run-sortun-token"
 
 [tunnel.ws]
 path = "/api/v1/stream"            # every other path gets nginx's 404 page
 host = "tunnel.example.com"        # optional: also reject requests for other hosts
 
 [tunnel.tls]
-cert = "/etc/kariz/origin.pem"     # Cloudflare Origin CA or Let's Encrypt certificate chain
-key = "/etc/kariz/origin.key"      # reloaded automatically when the files change
+cert = "/etc/sortun/origin.pem"     # Cloudflare Origin CA or Let's Encrypt certificate chain
+key = "/etc/sortun/origin.key"      # reloaded automatically when the files change
 
 [log]
 level = "info"

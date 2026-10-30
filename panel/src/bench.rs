@@ -23,8 +23,8 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use anyhow::{anyhow, bail, Result};
-use kariz::config::TransportKind;
-use kariz::speedtest::Latency;
+use sortun::config::TransportKind;
+use sortun::speedtest::Latency;
 use rusqlite::{params, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use tracing::debug;
@@ -59,7 +59,7 @@ const BUDGET: Duration = Duration::from_secs(60);
 pub struct Listeners(Arc<AtomicUsize>);
 
 fn kind_of(name: &str) -> Option<TransportKind> {
-    kariz::bench::TRANSPORTS
+    sortun::bench::TRANSPORTS
         .into_iter()
         .find(|k| k.name() == name)
 }
@@ -138,7 +138,7 @@ pub async fn listen(
     if port != 0 {
         for _ in 0..10 {
             bound =
-                kariz::bench::listen(&format!("{host}:{port}"), token, kind, profile, tls).await;
+                sortun::bench::listen(&format!("{host}:{port}"), token, kind, profile, tls).await;
             if bound.is_ok() {
                 break;
             }
@@ -146,10 +146,10 @@ pub async fn listen(
         }
     }
     if bound.is_err() {
-        bound = kariz::bench::listen(&format!("{host}:0"), token, kind, profile, tls).await;
+        bound = sortun::bench::listen(&format!("{host}:0"), token, kind, profile, tls).await;
     }
     if bound.is_err() && ip.is_some_and(|ip| ip.is_ipv6()) {
-        bound = kariz::bench::listen("[::]:0", token, kind, profile, tls).await;
+        bound = sortun::bench::listen("[::]:0", token, kind, profile, tls).await;
     }
     let acceptor = match bound {
         Ok(a) => a,
@@ -162,7 +162,7 @@ pub async fn listen(
     let port = local.map(|a| a.port()).unwrap_or(0);
     tokio::spawn(async move {
         let result =
-            kariz::bench::answer(acceptor, Duration::from_millis(u64::from(wait_ms))).await;
+            sortun::bench::answer(acceptor, Duration::from_millis(u64::from(wait_ms))).await;
         if let Err(e) = result {
             debug!(error = %e, "a benchmark listener ended");
         }
@@ -204,7 +204,7 @@ pub async fn dial(
         return failed("bad_input".into());
     }
     let (session, connect_ms) =
-        match kariz::bench::dial(addr, token, kind, profile, sni, DIAL_LIMIT).await {
+        match sortun::bench::dial(addr, token, kind, profile, sni, DIAL_LIMIT).await {
             Ok(v) => v,
             Err(e) => return failed(e.to_string()),
         };
@@ -215,7 +215,7 @@ pub async fn dial(
         ..Default::default()
     };
     if ping_ms > 0 {
-        match kariz::bench::probe(&session, Duration::from_millis(u64::from(ping_ms))).await {
+        match sortun::bench::probe(&session, Duration::from_millis(u64::from(ping_ms))).await {
             Ok(latency) if latency.received > 0 => out.latency = Some(latency),
             Ok(_) => {
                 out.ok = false;
@@ -228,7 +228,7 @@ pub async fn dial(
         }
     }
     if out.ok && seconds > 0 {
-        match kariz::bench::speed(&session, u64::from(seconds), SPEED_STREAMS).await {
+        match sortun::bench::speed(&session, u64::from(seconds), SPEED_STREAMS).await {
             Ok(speed) => {
                 out.download_mbps = Some(speed.download.mbps);
                 out.upload_mbps = Some(speed.upload.mbps);
@@ -440,7 +440,7 @@ fn candidates(
         (_, None) => format!("missing:{}", ask.exit),
         _ => "tested".to_owned(),
     };
-    let gre_transports: Vec<&str> = kariz::bench::TRANSPORTS
+    let gre_transports: Vec<&str> = sortun::bench::TRANSPORTS
         .iter()
         .map(|k| k.name())
         .filter(|t| matches!(*t, "tcpmux" | "kcp" | "quic"))
@@ -500,7 +500,7 @@ fn candidates(
             }
         }
         for (path, host) in paths {
-            for kind in kariz::bench::TRANSPORTS {
+            for kind in sortun::bench::TRANSPORTS {
                 add(kind.name(), path, host.clone(), None, None);
                 if kind == TransportKind::Wss && ask.sni.is_some() {
                     add(kind.name(), path, host.clone(), None, ask.sni.clone());
@@ -1032,7 +1032,7 @@ mod tests {
     fn a_gre_and_a_vxlan_link_are_each_a_path_of_their_own() {
         let hub = Hub::new(
             crate::db::Db::in_memory().unwrap(),
-            std::env::temp_dir().join("kariz-none"),
+            std::env::temp_dir().join("sortun-none"),
         );
         let (a, b) = ("aaa".to_owned(), "bbb".to_owned());
         let ask = Ask {

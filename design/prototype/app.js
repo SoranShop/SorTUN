@@ -1,4 +1,4 @@
-/* Kariz panel prototype: boot, login, the descent, the live map. No dependencies. */
+/* SorTUN panel prototype: boot, login, the descent, the live map. No dependencies. */
 (() => {
   "use strict";
 
@@ -9,7 +9,7 @@
       "boot.sub": "پنل تانل",
       "theme.toDawn": "سحر",
       "theme.toNight": "شب",
-      "login.title": "کاریز",
+      "login.title": "SorTUN",
       "login.sub": "آب، راهش را از زیر زمین پیدا می‌کند.",
       "login.password": "رمز مدیر",
       "login.enter": "ورود",
@@ -43,7 +43,7 @@
       "m.connsNote": "استریم TCP و جریان UDP",
       "m.tunnels": "تانل‌های جاری",
       "m.servers": "سرورهای آنلاین",
-      "m.serversNote": "همه روی کاریز 0.6.1",
+      "m.serversNote": "همه روی SorTUN 0.6.1",
       "m.of": "از",
       "m.rateNote": "۱۲٪ بیشتر از یک ساعت پیش",
       "m.broken": "قطع:",
@@ -68,7 +68,7 @@
       "role.entry": "ورودی",
       "role.exit": "خروجی",
       placeholder: "این صفحه در مرحلهٔ ۹.۳ طراحی می‌شود.",
-      "proto.label": "نمونهٔ اولیه · رمز: kariz",
+      "proto.label": "نمونهٔ اولیه · رمز: sortun",
       "proto.replay": "پخش دوباره",
       "pal.placeholder": "دستور یا صفحه…",
       "pal.new": "تانل جدید",
@@ -92,7 +92,7 @@
       "boot.sub": "tunnel panel",
       "theme.toDawn": "Dawn",
       "theme.toNight": "Night",
-      "login.title": "Kariz",
+      "login.title": "SorTUN",
       "login.sub": "Water finds its way underground.",
       "login.password": "Admin password",
       "login.enter": "Enter",
@@ -126,7 +126,7 @@
       "m.connsNote": "TCP streams and UDP flows",
       "m.tunnels": "Tunnels flowing",
       "m.servers": "Servers online",
-      "m.serversNote": "all on Kariz 0.6.1",
+      "m.serversNote": "all on SorTUN 0.6.1",
       "m.of": "of",
       "m.rateNote": "12% more than an hour ago",
       "m.broken": "Broken:",
@@ -151,7 +151,7 @@
       "role.entry": "entry",
       "role.exit": "exit",
       placeholder: "This screen is designed in step 9.3.",
-      "proto.label": "Prototype · password: kariz",
+      "proto.label": "Prototype · password: sortun",
       "proto.replay": "Replay intro",
       "pal.placeholder": "A command or a page…",
       "pal.new": "New tunnel",
@@ -662,7 +662,7 @@
     ev.preventDefault();
     const pw = $("#pw");
     const err = $("#pw-err");
-    if (pw.value === "kariz") {
+    if (pw.value === "sortun") {
       err.textContent = "";
       descend();
       return;

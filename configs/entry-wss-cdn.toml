@@ -8,7 +8,7 @@ profile = "balanced"
 [tunnel]
 transport = "wss"
 remote = "104.16.0.1:443"          # a clean CDN IP, or "tunnel.example.com:443"
-token = "CHANGE-ME-run-kariz-token"
+token = "CHANGE-ME-run-sortun-token"
 
 # Mux is on by default for ws / wss: a few long-lived WebSocket connections carry all
 # user connections, and its pings keep them from being cut as idle by the CDN.

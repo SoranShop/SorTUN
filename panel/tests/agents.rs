@@ -5,14 +5,14 @@ use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
 
-use kariz_panel::agent::{self, Agent, AgentConfig};
-use kariz_panel::db::Db;
-use kariz_panel::hub::{Hub, ServerView, LOCAL};
+use sortun_panel::agent::{self, Agent, AgentConfig};
+use sortun_panel::db::Db;
+use sortun_panel::hub::{Hub, ServerView, LOCAL};
 
 /// A hub taking agents on a free loopback port; returns it with that address.
-async fn start_hub(kariz_dir: &Path) -> (Arc<Hub>, String) {
-    let hub = Hub::new(Db::in_memory().unwrap(), kariz_dir.to_path_buf());
-    let acceptor = kariz::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
+async fn start_hub(sortun_dir: &Path) -> (Arc<Hub>, String) {
+    let hub = Hub::new(Db::in_memory().unwrap(), sortun_dir.to_path_buf());
+    let acceptor = sortun::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
         .await
         .unwrap();
     let addr = acceptor.local_addr().unwrap().to_string();
@@ -20,11 +20,11 @@ async fn start_hub(kariz_dir: &Path) -> (Arc<Hub>, String) {
     (hub, addr)
 }
 
-/// An agent enrolled with `code`, its settings in `dir`, its tunnel configs in `kariz_dir`.
-fn agent_for(code: &str, dir: &Path, kariz_dir: &Path) -> (Arc<Agent>, std::path::PathBuf) {
+/// An agent enrolled with `code`, its settings in `dir`, its tunnel configs in `sortun_dir`.
+fn agent_for(code: &str, dir: &Path, sortun_dir: &Path) -> (Arc<Agent>, std::path::PathBuf) {
     let path = dir.join("agent.toml");
     let mut config = agent::enroll_from_code(code, &path).unwrap();
-    config.kariz_dir = kariz_dir.to_path_buf();
+    config.sortun_dir = sortun_dir.to_path_buf();
     config.save(&path).unwrap();
     (Agent::new(&path, config), path)
 }
@@ -54,19 +54,19 @@ const TUNNEL: &str = "role = \"entry\"\nmode = \"reverse\"\n[tunnel]\ntransport 
 #[tokio::test]
 async fn a_server_joins_with_a_code_once_and_comes_back_with_its_identity() {
     let _ = tracing_subscriber::fmt()
-        .with_env_filter("kariz_panel=debug,kariz=warn")
+        .with_env_filter("sortun_panel=debug,sortun=warn")
         .with_test_writer()
         .try_init();
     let panel_dir = tempfile::tempdir().unwrap();
     let dir = tempfile::tempdir().unwrap();
-    let kariz_dir = dir.path().join("kariz");
-    std::fs::create_dir_all(&kariz_dir).unwrap();
-    std::fs::write(kariz_dir.join("main.toml"), TUNNEL).unwrap();
+    let sortun_dir = dir.path().join("sortun");
+    std::fs::create_dir_all(&sortun_dir).unwrap();
+    std::fs::write(sortun_dir.join("main.toml"), TUNNEL).unwrap();
     let (hub, addr) = start_hub(panel_dir.path()).await;
 
     // The panel makes a code, the agent joins with it.
     let code = hub.create_join(Some("istanbul-1"), &addr).unwrap();
-    let (first, path) = agent_for(&code, dir.path(), &kariz_dir);
+    let (first, path) = agent_for(&code, dir.path(), &sortun_dir);
     let running = tokio::spawn(first.run());
     wait_for("the server to join", || {
         remote(&hub).iter().any(|s| s.online)
@@ -99,7 +99,7 @@ async fn a_server_joins_with_a_code_once_and_comes_back_with_its_identity() {
 
     // The same code again (another server, or a stolen copy): nothing joins.
     let other = tempfile::tempdir().unwrap();
-    let (second, _) = agent_for(&code, other.path(), &kariz_dir);
+    let (second, _) = agent_for(&code, other.path(), &sortun_dir);
     let intruder = tokio::spawn(second.run());
     tokio::time::sleep(Duration::from_secs(4)).await;
     assert_eq!(remote(&hub).len(), 1, "a spent code must not add a server");
@@ -166,7 +166,7 @@ fn join_codes_carry_the_link_token_and_a_secret_that_is_not_stored_as_it_is() {
         Db::in_memory().unwrap(),
         std::path::PathBuf::from("/nonexistent"),
     );
-    let code = kariz_panel::join::decode(&hub.create_join(Some("a"), "203.0.113.5:29001").unwrap())
+    let code = sortun_panel::join::decode(&hub.create_join(Some("a"), "203.0.113.5:29001").unwrap())
         .unwrap();
     assert_eq!(code.p, "203.0.113.5:29001");
     assert_eq!(code.t, hub.link_token().unwrap());
@@ -180,13 +180,13 @@ fn join_codes_carry_the_link_token_and_a_secret_that_is_not_stored_as_it_is() {
 async fn enroll_once(
     addr: &str,
     token: &str,
-    hello: impl Fn(&str) -> kariz_panel::wire::HelloReply,
+    hello: impl Fn(&str) -> sortun_panel::wire::HelloReply,
     drop_enroll: bool,
 ) -> Option<(String, String)> {
     use bytes::Bytes;
-    use kariz_panel::wire::{Ack, Request};
-    let dialer = kariz::link::Dialer::new(addr, token).unwrap();
-    let session = dialer.connect(kariz::mux::Side::Server).await.unwrap();
+    use sortun_panel::wire::{Ack, Request};
+    let dialer = sortun::link::Dialer::new(addr, token).unwrap();
+    let session = dialer.connect(sortun::mux::Side::Server).await.unwrap();
     let mut got = None;
     while let Ok(Some((stream, syn))) =
         tokio::time::timeout(Duration::from_secs(5), session.accept()).await
@@ -221,11 +221,11 @@ async fn enroll_once(
 
 #[tokio::test]
 async fn an_enrollment_cut_short_is_finished_later_with_the_same_identity() {
-    use kariz_panel::wire::HelloReply;
+    use sortun_panel::wire::HelloReply;
     let panel_dir = tempfile::tempdir().unwrap();
     let (hub, addr) = start_hub(panel_dir.path()).await;
     let token = hub.link_token().unwrap();
-    let code = kariz_panel::join::decode(&hub.create_join(Some("cut"), &addr).unwrap()).unwrap();
+    let code = sortun_panel::join::decode(&hub.create_join(Some("cut"), &addr).unwrap()).unwrap();
     let new_agent = |_: &str| HelloReply {
         id: None,
         proof: None,
@@ -258,7 +258,7 @@ async fn an_enrollment_cut_short_is_finished_later_with_the_same_identity() {
     let (pid, pkey) = (id.clone(), key.clone());
     let proven = move |challenge: &str| HelloReply {
         id: Some(pid.clone()),
-        proof: kariz_panel::agent::proof(&pkey, challenge),
+        proof: sortun_panel::agent::proof(&pkey, challenge),
         join: None,
         hostname: "h".into(),
         version: "1".into(),
@@ -294,11 +294,11 @@ async fn a_code_can_pin_the_agent_to_wss() {
     std::fs::write(&key, c.signing_key.serialize_pem()).unwrap();
     // tcpmux on the agents port, wss on the next one, as a panel listens.
     let (tcp, wss) = loop {
-        let tcp = kariz::link::Acceptor::bind("127.0.0.1:0", &token)
+        let tcp = sortun::link::Acceptor::bind("127.0.0.1:0", &token)
             .await
             .unwrap();
-        let next = kariz::link::wss_addr(&tcp.local_addr().unwrap().to_string()).unwrap();
-        if let Ok(wss) = kariz::link::Acceptor::bind_wss(&next, &token, &cert, &key).await {
+        let next = sortun::link::wss_addr(&tcp.local_addr().unwrap().to_string()).unwrap();
+        if let Ok(wss) = sortun::link::Acceptor::bind_wss(&next, &token, &cert, &key).await {
             break (tcp, wss);
         }
     };
@@ -331,13 +331,13 @@ async fn a_code_can_pin_the_agent_to_wss() {
 async fn a_tunnel_deleted_while_its_server_is_away_goes_when_the_server_is_back() {
     let panel_dir = tempfile::tempdir().unwrap();
     let dir = tempfile::tempdir().unwrap();
-    let kariz_dir = dir.path().join("kariz");
-    std::fs::create_dir_all(&kariz_dir).unwrap();
-    std::fs::write(kariz_dir.join("main.toml"), TUNNEL).unwrap();
+    let sortun_dir = dir.path().join("sortun");
+    std::fs::create_dir_all(&sortun_dir).unwrap();
+    std::fs::write(sortun_dir.join("main.toml"), TUNNEL).unwrap();
     let (hub, addr) = start_hub(panel_dir.path()).await;
 
     let code = hub.create_join(Some("away"), &addr).unwrap();
-    let (agent, path) = agent_for(&code, dir.path(), &kariz_dir);
+    let (agent, path) = agent_for(&code, dir.path(), &sortun_dir);
     let running = tokio::spawn(agent.run());
     wait_for("the server to join", || {
         remote(&hub).iter().any(|s| s.online)
@@ -349,7 +349,7 @@ async fn a_tunnel_deleted_while_its_server_is_away_goes_when_the_server_is_back(
     // It goes away; the tunnel is deleted from the panel meanwhile.
     running.abort();
     wait_for("the server to show offline", || !remote(&hub)[0].online).await;
-    let op = kariz_panel::pair::delete(&hub, "main").unwrap();
+    let op = sortun_panel::pair::delete(&hub, "main").unwrap();
     wait_for("the delete to finish", || {
         hub.ops.get(&op).is_some_and(|o| o.state != "running")
     })
@@ -359,13 +359,13 @@ async fn a_tunnel_deleted_while_its_server_is_away_goes_when_the_server_is_back(
     assert_eq!(done.offline, vec![id.clone()]);
     // It is gone from the lists at once, its file is still there, and the name is kept.
     assert!(remote(&hub)[0].tunnels.is_empty());
-    assert!(kariz_dir.join("main.toml").exists());
+    assert!(sortun_dir.join("main.toml").exists());
     assert!(hub.delete_pending_for("main"));
 
     // When the agent is back, it removes the tunnel and the panel forgets the delete.
     let back = Agent::new(&path, AgentConfig::load(&path).unwrap());
     let back = tokio::spawn(back.run());
-    wait_for("the file to go", || !kariz_dir.join("main.toml").exists()).await;
+    wait_for("the file to go", || !sortun_dir.join("main.toml").exists()).await;
     wait_for("the delete to be forgotten", || {
         !hub.delete_pending_for("main")
     })
@@ -376,18 +376,18 @@ async fn a_tunnel_deleted_while_its_server_is_away_goes_when_the_server_is_back(
 #[tokio::test]
 async fn a_lost_server_is_taken_over_by_a_new_agent_and_keeps_its_name_and_tunnels() {
     let _ = tracing_subscriber::fmt()
-        .with_env_filter("kariz_panel=debug,kariz=warn")
+        .with_env_filter("sortun_panel=debug,sortun=warn")
         .with_test_writer()
         .try_init();
     let panel_dir = tempfile::tempdir().unwrap();
     let dir = tempfile::tempdir().unwrap();
-    let kariz_dir = dir.path().join("kariz");
-    std::fs::create_dir_all(&kariz_dir).unwrap();
-    std::fs::write(kariz_dir.join("main.toml"), TUNNEL).unwrap();
+    let sortun_dir = dir.path().join("sortun");
+    std::fs::create_dir_all(&sortun_dir).unwrap();
+    std::fs::write(sortun_dir.join("main.toml"), TUNNEL).unwrap();
     let (hub, addr) = start_hub(panel_dir.path()).await;
 
     let code = hub.create_join(Some("istanbul-1"), &addr).unwrap();
-    let (first, old_path) = agent_for(&code, dir.path(), &kariz_dir);
+    let (first, old_path) = agent_for(&code, dir.path(), &sortun_dir);
     let running = tokio::spawn(first.run());
     wait_for("the server to join", || {
         remote(&hub).iter().any(|s| s.online)
@@ -408,14 +408,14 @@ async fn a_lost_server_is_taken_over_by_a_new_agent_and_keeps_its_name_and_tunne
     assert!(hub.create_rejoin(&id, &addr, Some("nonsense")).is_err());
     let fresh = hub.create_rejoin(&id, &addr, Some("tcpmux")).unwrap();
     assert_eq!(
-        kariz_panel::join::decode(&fresh).unwrap().x.as_deref(),
+        sortun_panel::join::decode(&fresh).unwrap().x.as_deref(),
         Some("tcpmux")
     );
 
     // A new agent (a reinstalled server, with the same tunnel files) joins with it: the same
     // server, not a second one, with its name and its tunnel.
     let other = tempfile::tempdir().unwrap();
-    let (second, new_path) = agent_for(&fresh, other.path(), &kariz_dir);
+    let (second, new_path) = agent_for(&fresh, other.path(), &sortun_dir);
     let running = tokio::spawn(second.run());
     wait_for("the server to come back", || {
         remote(&hub).iter().any(|s| s.online)
@@ -439,7 +439,7 @@ async fn a_lost_server_is_taken_over_by_a_new_agent_and_keeps_its_name_and_tunne
 
     // The code worked once.
     let third = tempfile::tempdir().unwrap();
-    let (late, _) = agent_for(&fresh, third.path(), &kariz_dir);
+    let (late, _) = agent_for(&fresh, third.path(), &sortun_dir);
     let intruder = tokio::spawn(late.run());
     tokio::time::sleep(Duration::from_secs(3)).await;
     assert_eq!(remote(&hub).len(), 1);
@@ -515,12 +515,12 @@ struct Recorder {
     stopped: Vec<&'static str>,
 }
 
-impl kariz_panel::manage::Services for Recorder {
-    fn ctl(&self, name: String, action: String) -> kariz_panel::manage::Fut<anyhow::Result<()>> {
+impl sortun_panel::manage::Services for Recorder {
+    fn ctl(&self, name: String, action: String) -> sortun_panel::manage::Fut<anyhow::Result<()>> {
         self.calls.lock().unwrap().push((name, action));
         Box::pin(async { Ok(()) })
     }
-    fn active(&self, name: String) -> kariz_panel::manage::Fut<Option<bool>> {
+    fn active(&self, name: String) -> sortun_panel::manage::Fut<Option<bool>> {
         let stopped = self.stopped.contains(&name.as_str());
         Box::pin(async move { Some(!stopped) })
     }
@@ -540,16 +540,16 @@ fn result_of(hub: &Hub, id: &str) -> (i64, String) {
 async fn a_server_restart_timer_restarts_what_runs_and_waits_for_a_server_that_is_away() {
     let panel_dir = tempfile::tempdir().unwrap();
     let dir = tempfile::tempdir().unwrap();
-    let kariz_dir = dir.path().join("kariz");
-    std::fs::create_dir_all(&kariz_dir).unwrap();
-    std::fs::write(kariz_dir.join("main.toml"), TUNNEL).unwrap();
-    std::fs::write(kariz_dir.join("quiet.toml"), TUNNEL).unwrap();
+    let sortun_dir = dir.path().join("sortun");
+    std::fs::create_dir_all(&sortun_dir).unwrap();
+    std::fs::write(sortun_dir.join("main.toml"), TUNNEL).unwrap();
+    std::fs::write(sortun_dir.join("quiet.toml"), TUNNEL).unwrap();
     let (hub, addr) = start_hub(panel_dir.path()).await;
 
     let code = hub.create_join(Some("far"), &addr).unwrap();
     let path = dir.path().join("agent.toml");
     let mut config = agent::enroll_from_code(&code, &path).unwrap();
-    config.kariz_dir = kariz_dir.clone();
+    config.sortun_dir = sortun_dir.clone();
     config.save(&path).unwrap();
     let recorder = Arc::new(Recorder {
         calls: Default::default(),
@@ -565,7 +565,7 @@ async fn a_server_restart_timer_restarts_what_runs_and_waits_for_a_server_that_i
     let id = remote(&hub)[0].id.clone();
 
     // What is not allowed.
-    use kariz_panel::schedule::{self, NewSchedule};
+    use sortun_panel::schedule::{self, NewSchedule};
     let timer = |subject: &str, mode: &str, every: i64, daily: i64| NewSchedule {
         kind: "server".into(),
         subject: subject.into(),
@@ -591,7 +591,7 @@ async fn a_server_restart_timer_restarts_what_runs_and_waits_for_a_server_that_i
     schedule::set(&hub, &timer(&id, "every", 3600, 0)).unwrap();
     let s = hub.schedules().unwrap().remove(0);
     assert_eq!((s.last_run, s.last_result.as_str()), (0, ""));
-    assert!(s.next_run.unwrap() > kariz_panel::auth::now() + 3000);
+    assert!(s.next_run.unwrap() > sortun_panel::auth::now() + 3000);
 
     // Run now: the tunnel that runs is restarted, the stopped one is left alone.
     assert!(schedule::run_now(&hub, "server", &id));

@@ -56,8 +56,8 @@ path = "/api/v1/stream"
 host = "tunnel.example.com"        # optional: reject requests for other hosts
 
 [tunnel.tls]
-cert = "/etc/kariz/origin.pem"     # Cloudflare Origin CA or Let's Encrypt certificate
-key = "/etc/kariz/origin.key"
+cert = "/etc/sortun/origin.pem"     # Cloudflare Origin CA or Let's Encrypt certificate
+key = "/etc/sortun/origin.key"
 ```
 
 Alternative: the exit serves plain `ws` (e.g. on port 80 or 8080) and Cloudflare uses
@@ -73,7 +73,7 @@ Notes:
   own server with a self-signed certificate.
 - **Mux stays on** (the default for `ws` / `wss`). It pings every `keepalive` (30 s by
   default), which keeps the WebSocket from being cut as idle: Cloudflare cuts idle ones
-  after about 100 s. `kariz check` warns if `tuning.keepalive_secs` is above 90. Without
+  after about 100 s. `sortun check` warns if `tuning.keepalive_secs` is above 90. Without
   mux, a quiet user connection is cut by the CDN.
 - **Ports Cloudflare proxies:** HTTPS 443, 2053, 2083, 2087, 2096, 8443; HTTP 80, 8080,
   8880, 2052, 2082, 2086, 2095.
@@ -90,7 +90,7 @@ Setup:
 3. Network: **WebSockets** on (the default).
 4. The origin port is one Cloudflare proxies (list above).
 5. Optional: the origin firewall only accepts Cloudflare's IP ranges.
-6. `kariz check -c <config>` on both sides: `config OK`, no warnings.
+6. `sortun check -c <config>` on both sides: `config OK`, no warnings.
 
 Checks (tick each, and note the date and SorTUN commit):
 
@@ -98,7 +98,7 @@ Checks (tick each, and note the date and SorTUN commit):
 - [ ] `curl -s https://tunnel.example.com/api/v1/stream` (no upgrade) → `404`.
 - [ ] Start the exit, then the entry. The exit logs `mux session from the entry side
       established` once per `mux.connections`, and the entry logs no reconnects.
-- [ ] With `RUST_LOG=kariz=debug` on the exit: `websocket upgrade request accepted`
+- [ ] With `RUST_LOG=sortun=debug` on the exit: `websocket upgrade request accepted`
       shows `client=<entry IP>` (from `CF-Connecting-IP`) and `early=` above 0.
 - [ ] Traffic through a forward port works: a large download, plus many parallel
       short connections (for example a browser through a proxy served on the exit).

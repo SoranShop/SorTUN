@@ -1,11 +1,11 @@
 [Unit]
-Description=SorTUN agent (connects this server to a SorTUN panel)
+Description=SorTUN web panel
 Documentation=https://github.com/soranshop/SorTUN
 After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart=/usr/local/bin/kariz-panel agent -c /etc/kariz-panel/agent.toml
+ExecStart=/usr/local/bin/sortun-panel serve -c /etc/sortun-panel/panel.toml
 Restart=always
 RestartSec=2
 NoNewPrivileges=true

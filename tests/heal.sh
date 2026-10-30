@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# `kariz-manager panel heal`: when the server's IP address changes and the panel's certificate
+# `sortun-manager panel heal`: when the server's IP address changes and the panel's certificate
 # was for the old one, a certificate for the new address is asked for, once an hour at most
 # after a failure, and never behind NAT or for a domain. The addresses come from a stand-in for
 # `ip`, and getting the certificate is a stand-in that writes down what it was asked.
 # Usage: bash tests/heal.sh (no root, nothing on the system is touched).
 set -euo pipefail
 
-# shellcheck source=scripts/kariz.sh
-source "$(dirname "$0")/../scripts/kariz.sh"
+# shellcheck source=scripts/sortun.sh
+source "$(dirname "$0")/../scripts/sortun.sh"
 set +e
 
 dir=$(mktemp -d)

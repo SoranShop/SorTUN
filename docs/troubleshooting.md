@@ -1,14 +1,14 @@
 # Troubleshooting
 
-Start with `kariz check -c /etc/kariz/config.toml` on both sides: it validates the file,
-prints the values in effect and lists warnings. On a running tunnel, `kariz status -c ...`
+Start with `sortun check -c /etc/sortun/config.toml` on both sides: it validates the file,
+prints the values in effect and lists warnings. On a running tunnel, `sortun status -c ...`
 says whether the other side is connected and, if not, the last error
 ([Status](status.md)). Then read the logs:
 
 ```bash
-journalctl -u kariz -f                      # with systemd
-journalctl -u kariz -p warning              # warnings and errors only
-RUST_LOG=kariz=debug kariz run -c ...       # more detail
+journalctl -u sortun -f                      # with systemd
+journalctl -u sortun -p warning              # warnings and errors only
+RUST_LOG=sortun=debug sortun run -c ...       # more detail
 ```
 
 ## The sides do not connect
@@ -30,7 +30,7 @@ logs `could not connect to target`. `target` is dialed from the exit, so
 `127.0.0.1:443` is port 443 on the exit.
 
 **UDP does not work.** Check that the rule says `protocol = "udp"` or `"tcp+udp"`, and
-that mux is on (`kariz check` warns otherwise). A v0.2 exit does not support UDP at all.
+that mux is on (`sortun check` warns otherwise). A v0.2 exit does not support UDP at all.
 A rule with `duplicate` needs the exit at v0.5 or newer.
 
 **It is slow.**
@@ -59,7 +59,7 @@ panel's agents port, so that UDP port has to be open on the panel's server and i
 firewall. If UDP is blocked on the path altogether, choose *Auto* (or *TCP* or *WSS*) in *Add
 server*. More in [The web panel](panel.md#troubleshooting).
 
-## Warnings from `kariz check`
+## Warnings from `sortun check`
 
 | Warning | Meaning |
 |---|---|

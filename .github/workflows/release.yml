@@ -2,8 +2,8 @@ name: Release
 
 # Pushing a tag like v0.2.0 builds static Linux binaries for x86_64, aarch64 and armv7
 # and publishes a GitHub release with the notes of that version from CHANGELOG.md.
-# One archive per architecture, named kariz-<tag>-<arch>-linux.tar.gz, each with its
-# SHA-256 (scripts/kariz.sh downloads them by those names).
+# One archive per architecture, named sortun-<tag>-<arch>-linux.tar.gz, each with its
+# SHA-256 (scripts/sortun.sh downloads them by those names).
 on:
   push:
     tags: ["v*"]
@@ -53,27 +53,27 @@ jobs:
       - if: ${{ !matrix.cross }}
         run: sudo apt-get update && sudo apt-get install -y musl-tools
       - if: ${{ !matrix.cross }}
-        run: cargo build --release --locked --target ${{ matrix.target }} -p kariz -p kariz-panel
+        run: cargo build --release --locked --target ${{ matrix.target }} -p sortun -p sortun-panel
       - if: ${{ matrix.cross }}
         uses: taiki-e/install-action@v2
         with:
           tool: cross
       - if: ${{ matrix.cross }}
-        run: cross build --release --locked --target ${{ matrix.target }} -p kariz -p kariz-panel
+        run: cross build --release --locked --target ${{ matrix.target }} -p sortun -p sortun-panel
       - name: Package
         run: |
-          name="kariz-$GITHUB_REF_NAME-${{ matrix.arch }}-linux"
+          name="sortun-$GITHUB_REF_NAME-${{ matrix.arch }}-linux"
           mkdir "$name"
-          cp "target/${{ matrix.target }}/release/kariz" "target/${{ matrix.target }}/release/kariz-panel" README.md README_FA.md CHANGELOG.md "$name/"
+          cp "target/${{ matrix.target }}/release/sortun" "target/${{ matrix.target }}/release/sortun-panel" README.md README_FA.md CHANGELOG.md "$name/"
           cp -r configs systemd scripts assets "$name/"
           tar czf "$name.tar.gz" "$name"
           sha256sum "$name.tar.gz" > "$name.tar.gz.sha256"
       - uses: actions/upload-artifact@v4
         with:
-          name: kariz-${{ matrix.arch }}
+          name: sortun-${{ matrix.arch }}
           path: |
-            kariz-*.tar.gz
-            kariz-*.tar.gz.sha256
+            sortun-*.tar.gz
+            sortun-*.tar.gz.sha256
 
   publish:
     needs: build
@@ -82,28 +82,28 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          pattern: kariz-*
+          pattern: sortun-*
           merge-multiple: true
       - name: Three archives, each with its checksum
         run: |
-          ls -l kariz-*
-          test "$(ls kariz-*.tar.gz | wc -l)" = 3
-          for f in kariz-*.tar.gz; do sha256sum -c "$f.sha256"; done
+          ls -l sortun-*
+          test "$(ls sortun-*.tar.gz | wc -l)" = 3
+          for f in sortun-*.tar.gz; do sha256sum -c "$f.sha256"; done
       # Releases are signed: the private key is the repository secret
-      # KARIZ_SIGNING_KEY, and every signature is checked with the public key built into
+      # SORTUN_SIGNING_KEY, and every signature is checked with the public key built into
       # the program before anything is published, so a wrong secret stops the release.
       - name: Sign the checksums
         env:
-          KARIZ_SIGNING_KEY: ${{ secrets.KARIZ_SIGNING_KEY }}
+          SORTUN_SIGNING_KEY: ${{ secrets.SORTUN_SIGNING_KEY }}
         run: |
-          if [ -z "$KARIZ_SIGNING_KEY" ]; then
-            echo "::error::the repository secret KARIZ_SIGNING_KEY is not set: releases must be signed"
+          if [ -z "$SORTUN_SIGNING_KEY" ]; then
+            echo "::error::the repository secret SORTUN_SIGNING_KEY is not set: releases must be signed"
             exit 1
           fi
-          tar -xzf kariz-*-x86_64-linux.tar.gz --wildcards '*/kariz-panel' --strip-components=1
-          for f in kariz-*.tar.gz.sha256; do ./kariz-panel release-sign "$f"; done
-          for f in kariz-*.tar.gz; do ./kariz-panel release-verify "$f"; done
-          ls -l kariz-*.sig
+          tar -xzf sortun-*-x86_64-linux.tar.gz --wildcards '*/sortun-panel' --strip-components=1
+          for f in sortun-*.tar.gz.sha256; do ./sortun-panel release-sign "$f"; done
+          for f in sortun-*.tar.gz; do ./sortun-panel release-verify "$f"; done
+          ls -l sortun-*.sig
       - name: Release notes from CHANGELOG.md
         run: |
           awk -v version="${GITHUB_REF_NAME#v}" '
@@ -117,8 +117,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # A version with a dash (v0.8.0-beta) is a prerelease: GitHub's "latest release",
-          # which `kariz-manager install` and `update` use, stays on the last stable one.
+          # which `sortun-manager install` and `update` use, stays on the last stable one.
           flags=()
           case "$GITHUB_REF_NAME" in *-*) flags=(--prerelease) ;; esac
           gh release create "$GITHUB_REF_NAME" --title "SorTUN $GITHUB_REF_NAME" "${flags[@]}" \
-            --notes-file notes.md kariz-*.tar.gz kariz-*.tar.gz.sha256 kariz-*.tar.gz.sig
+            --notes-file notes.md sortun-*.tar.gz sortun-*.tar.gz.sha256 sortun-*.tar.gz.sig

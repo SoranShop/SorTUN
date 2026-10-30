@@ -3,9 +3,9 @@
 
 use std::time::{Duration, Instant};
 
-use kariz_panel::config::Config;
-use kariz_panel::db::Db;
-use kariz_panel::http::{self, AppState, Limits};
+use sortun_panel::config::Config;
+use sortun_panel::db::Db;
+use sortun_panel::http::{self, AppState, Limits};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 
@@ -16,7 +16,7 @@ async fn start(limits: Limits) -> (std::net::SocketAddr, tempfile::TempDir) {
         path: "k-7f3a9c".into(),
         data_dir: dir.path().to_path_buf(),
         agent_listen: None,
-        kariz_dir: dir.path().join("kariz"),
+        sortun_dir: dir.path().join("sortun"),
         services: Default::default(),
         cert_file: None,
         key_file: None,

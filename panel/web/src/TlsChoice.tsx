@@ -97,7 +97,7 @@ export function TlsChoice({
                 id="tls-cert"
                 dir="ltr"
                 value={value.cert}
-                placeholder="/etc/ssl/kariz/fullchain.pem"
+                placeholder="/etc/ssl/sortun/fullchain.pem"
                 aria-invalid={!!value.cert && !certPathLooksRight(value.cert)}
                 onChange={(e) => onChange({ ...value, cert: e.target.value.trim() })}
               />
@@ -110,7 +110,7 @@ export function TlsChoice({
                 id="tls-key"
                 dir="ltr"
                 value={value.key}
-                placeholder="/etc/ssl/kariz/privkey.pem"
+                placeholder="/etc/ssl/sortun/privkey.pem"
                 aria-invalid={!!value.key && !certPathLooksRight(value.key)}
                 onChange={(e) => onChange({ ...value, key: e.target.value.trim() })}
               />

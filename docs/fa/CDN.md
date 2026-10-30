@@ -52,8 +52,8 @@ path = "/api/v1/stream"
 host = "tunnel.example.com"        # optional: reject requests for other hosts
 
 [tunnel.tls]
-cert = "/etc/kariz/origin.pem"     # Cloudflare Origin CA or Let's Encrypt certificate
-key = "/etc/kariz/origin.key"
+cert = "/etc/sortun/origin.pem"     # Cloudflare Origin CA or Let's Encrypt certificate
+key = "/etc/sortun/origin.key"
 ```
 
 جایگزین: خروجی به‌جای آن `ws` ساده سرو کند (مثلاً روی پورت ۸۰ یا ۸۰۸۰) و Cloudflare حالت SSL/TLS برابر **Flexible** را بگیرد. ورودی باز هم به edge با `wss` وصل می‌شود. پای Cloudflare تا origin آن‌وقت TLS نیست، ولی رمزنگاری خودِ تانل باز هم ترافیک را می‌پوشاند.
@@ -61,7 +61,7 @@ key = "/etc/kariz/origin.key"
 نکته‌ها:
 
 - **به‌سمت CDN از `tls.pin_sha256` استفاده نکنید.** ورودی گواهی edge از CDN را می‌بیند که عمومی معتبر است و زود‌به‌زود عوض می‌شود. راستی‌آزمایی پیش‌فرض (ریشه‌های Mozilla) آنجا درست است. pin برای وصل شدن مستقیم به سرور خودتان با گواهی خودامضاست.
-- **mux روشن می‌ماند** (پیش‌فرض `ws` / `wss`). هر `keepalive` (پیش‌فرض ۳۰ ثانیه) ping می‌زند، که WebSocket را از بریده شدن به‌عنوان بی‌کار نجات می‌دهد: Cloudflare بی‌کارها را حدود ۱۰۰ ثانیه بعد می‌برد. اگر `tuning.keepalive_secs` بالای ۹۰ باشد `kariz check` هشدار می‌دهد. بدون mux، یک اتصال کاربرِ ساکت را CDN می‌برد.
+- **mux روشن می‌ماند** (پیش‌فرض `ws` / `wss`). هر `keepalive` (پیش‌فرض ۳۰ ثانیه) ping می‌زند، که WebSocket را از بریده شدن به‌عنوان بی‌کار نجات می‌دهد: Cloudflare بی‌کارها را حدود ۱۰۰ ثانیه بعد می‌برد. اگر `tuning.keepalive_secs` بالای ۹۰ باشد `sortun check` هشدار می‌دهد. بدون mux، یک اتصال کاربرِ ساکت را CDN می‌برد.
 - **پورت‌هایی که Cloudflare پروکسی می‌کند:** HTTPS ‏443، 2053، 2083، 2087، 2096، 8443؛ HTTP ‏80، 8080، 8880، 2052، 2082، 2086، 2095.
 - probeهایی که از راه CDN به origin می‌رسند برای هر مسیری جز `ws.path` صفحهٔ `404` nginx را می‌گیرند، و برای upgradeِ روی `ws.path` که early dataاش hello معتبر ندارد هم.
 
@@ -74,14 +74,14 @@ key = "/etc/kariz/origin.key"
 ۳. Network: **WebSockets** روشن (پیش‌فرض).
 ۴. پورت origin یکی از پورت‌هایی است که Cloudflare پروکسی می‌کند (فهرست بالا).
 ۵. اختیاری: فایروال origin فقط بازه‌های IP از Cloudflare را بپذیرد.
-۶. `kariz check -c <config>` روی هر دو سمت: `config OK`، بدون هشدار.
+۶. `sortun check -c <config>` روی هر دو سمت: `config OK`، بدون هشدار.
 
 بررسی‌ها (هرکدام را تیک بزنید و تاریخ و commit SorTUN را بنویسید):
 
 - [ ] `curl -sI https://tunnel.example.com/` ← `404`، `server: cloudflare`.
 - [ ] `curl -s https://tunnel.example.com/api/v1/stream` (بدون upgrade) ← `404`.
 - [ ] اول خروجی را راه بیندازید، بعد ورودی را. خروجی به تعداد `mux.connections` یک‌بار `mux session from the entry side established` لاگ می‌کند و ورودی هیچ reconnectی لاگ نمی‌کند.
-- [ ] با `RUST_LOG=kariz=debug` روی خروجی: `websocket upgrade request accepted` مقدار `client=<entry IP>` (از `CF-Connecting-IP`) و `early=` بالای ۰ را نشان می‌دهد.
+- [ ] با `RUST_LOG=sortun=debug` روی خروجی: `websocket upgrade request accepted` مقدار `client=<entry IP>` (از `CF-Connecting-IP`) و `early=` بالای ۰ را نشان می‌دهد.
 - [ ] ترافیک از پورت forward کار می‌کند: یک دانلود بزرگ، به‌علاوهٔ اتصال‌های کوتاهِ موازی زیاد (مثلاً یک مرورگر از راه پروکسی‌ای که روی خروجی سرو می‌شود).
 - [ ] بی‌کاری: یک اتصال کاربر باز کنید، تانل را ۵ دقیقه بی‌کار بگذارید، بعد دوباره از همان اتصال استفاده کنید. باز هم کار می‌کند و reconnectی لاگ نمی‌شود.
 - [ ] خروجی را دوباره راه بیندازید: ورودی ظرف چند ثانیه دوباره وصل می‌شود و اتصال‌های تازه کار می‌کنند.

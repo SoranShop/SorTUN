@@ -7,10 +7,10 @@ use std::path::Path;
 use anyhow::{Context, Result};
 
 /// Makes the certificate and key if they are not there yet. Returns the SHA-256
-/// fingerprint of the certificate (hex, as `kariz pin` prints it).
+/// fingerprint of the certificate (hex, as `sortun pin` prints it).
 pub fn ensure(cert: &Path, key: &Path) -> Result<String> {
     if !cert.exists() || !key.exists() {
-        let made = rcgen::generate_simple_self_signed(vec!["kariz-panel".to_owned()])
+        let made = rcgen::generate_simple_self_signed(vec!["sortun-panel".to_owned()])
             .context("failed to make the certificate")?;
         if let Some(dir) = cert.parent() {
             std::fs::create_dir_all(dir)?;
@@ -22,7 +22,7 @@ pub fn ensure(cert: &Path, key: &Path) -> Result<String> {
 }
 
 pub fn fingerprint(cert: &Path) -> Result<String> {
-    Ok(kariz::transport::tls::pin_of_file(cert)?)
+    Ok(sortun::transport::tls::pin_of_file(cert)?)
 }
 
 /// Writes a file only its owner can read.

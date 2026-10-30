@@ -4,7 +4,7 @@ mod link;
 
 use std::time::{Duration, Instant};
 
-use kariz::config::Config;
+use sortun::config::Config;
 use link::{Counts, Impairment, TcpLink, UdpLink};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream, UdpSocket};
@@ -136,8 +136,8 @@ struct Setup {
     duplicate: (u8, u8),
     /// `profile`, on both sides; empty keeps the default.
     profile: &'static str,
-    /// Both sides serve a control socket (`[control] socket`), for `kariz speedtest` and
-    /// `kariz status`.
+    /// Both sides serve a control socket (`[control] socket`), for `sortun speedtest` and
+    /// `sortun status`.
     control: bool,
     /// `tunnel.speedtest = false`.
     no_speedtest: bool,
@@ -158,7 +158,7 @@ impl Setup {
             transport: "tcp",
             mux: false,
             encryption: "auto",
-            ws_path: "/kariz-e2e",
+            ws_path: "/sortun-e2e",
             wrong_pin: false,
             early_data: false,
             keepalive_secs: 0,
@@ -463,7 +463,7 @@ fn test_cert() -> &'static TestCert {
         let generate =
             || rcgen::generate_simple_self_signed(vec!["tunnel.example".into()]).unwrap();
         let (c, other) = (generate(), generate());
-        let dir = std::env::temp_dir().join(format!("kariz-e2e-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sortun-e2e-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let (cert, key) = (dir.join("cert.pem"), dir.join("key.pem"));
         std::fs::write(&cert, c.cert.pem()).unwrap();
@@ -471,8 +471,8 @@ fn test_cert() -> &'static TestCert {
         TestCert {
             cert,
             key,
-            pin: kariz::transport::tls::cert_sha256(c.cert.der()),
-            other_pin: kariz::transport::tls::cert_sha256(other.cert.der()),
+            pin: sortun::transport::tls::cert_sha256(c.cert.der()),
+            other_pin: sortun::transport::tls::cert_sha256(other.cert.der()),
         }
     })
 }
@@ -486,13 +486,13 @@ struct Side {
 
 impl Side {
     fn start(text: &str) -> Self {
-        if std::env::var_os("KARIZ_TEST_LOG").is_some() {
+        if std::env::var_os("SORTUN_TEST_LOG").is_some() {
             let _ = tracing_subscriber::fmt()
                 .with_env_filter(
-                    std::env::var("KARIZ_TEST_LOG")
+                    std::env::var("SORTUN_TEST_LOG")
                         .ok()
                         .filter(|f| f.contains('='))
-                        .unwrap_or_else(|| "kariz=debug".into()),
+                        .unwrap_or_else(|| "sortun=debug".into()),
                 )
                 .with_thread_names(true)
                 .try_init();
@@ -506,7 +506,7 @@ impl Side {
                 .build()
                 .unwrap();
             rt.spawn(async move {
-                if let Err(e) = kariz::run(config).await {
+                if let Err(e) = sortun::run(config).await {
                     eprintln!("tunnel side stopped: {e:#}");
                 }
             });
@@ -612,10 +612,10 @@ async fn start_via(
     let exit_options = exit_setup.tunnel_options(!entry_listens);
     let control = setup
         .control
-        .then(|| std::env::temp_dir().join(format!("kariz-e2e-{user_port}.sock")));
+        .then(|| std::env::temp_dir().join(format!("sortun-e2e-{user_port}.sock")));
     let exit_control = setup
         .control
-        .then(|| std::env::temp_dir().join(format!("kariz-e2e-{user_port}-exit.sock")));
+        .then(|| std::env::temp_dir().join(format!("sortun-e2e-{user_port}-exit.sock")));
     let socket_table = |path: &Option<std::path::PathBuf>| {
         path.as_ref().map_or(String::new(), |path| {
             format!("[control]\nsocket = {:?}", path.display().to_string())
@@ -998,7 +998,7 @@ async fn mux_mismatch_is_rejected() {
 #[tokio::test(flavor = "multi_thread")]
 #[ignore]
 async fn throughput() {
-    kariz::allocator::tune();
+    sortun::allocator::tune();
     for &(name, setup) in ALL_SETUPS {
         let target = echo_server().await;
         let tunnel = start(setup, TOKEN, TOKEN, target).await;
@@ -1021,10 +1021,10 @@ struct Nginx {
 }
 
 impl Nginx {
-    /// The nginx binary, or `None` to skip nginx tests. `KARIZ_REQUIRE_NGINX=1` (set in
+    /// The nginx binary, or `None` to skip nginx tests. `SORTUN_REQUIRE_NGINX=1` (set in
     /// CI) turns a missing nginx into a failure instead.
     fn binary() -> Option<String> {
-        let bin = std::env::var("KARIZ_NGINX").unwrap_or_else(|_| "nginx".into());
+        let bin = std::env::var("SORTUN_NGINX").unwrap_or_else(|_| "nginx".into());
         let found = std::process::Command::new(&bin)
             .arg("-v")
             .output()
@@ -1033,16 +1033,16 @@ impl Nginx {
             return Some(bin);
         }
         assert!(
-            std::env::var_os("KARIZ_REQUIRE_NGINX").is_none(),
-            "nginx not found ({bin}) but KARIZ_REQUIRE_NGINX is set"
+            std::env::var_os("SORTUN_REQUIRE_NGINX").is_none(),
+            "nginx not found ({bin}) but SORTUN_REQUIRE_NGINX is set"
         );
-        eprintln!("nginx not found, skipping (set KARIZ_NGINX to its path)");
+        eprintln!("nginx not found, skipping (set SORTUN_NGINX to its path)");
         None
     }
 
     fn start(bin: &str, upstream: u16, path: &str, tls: bool, idle_secs: u64) -> Self {
         let port = free_port();
-        let dir = std::env::temp_dir().join(format!("kariz-nginx-{}-{port}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sortun-nginx-{}-{port}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let (listen, certs) = if tls {
             let cert = test_cert();
@@ -1605,7 +1605,7 @@ async fn udp_latency_under_load() {
 #[tokio::test(flavor = "multi_thread")]
 #[ignore]
 async fn udp_throughput() {
-    kariz::allocator::tune();
+    sortun::allocator::tune();
     const CLIENTS: usize = 8;
     const WINDOW: usize = 32;
     let run = Duration::from_secs(3);
@@ -1863,7 +1863,7 @@ async fn over_link(setup: Setup, imp: Impairment) -> LinkRun {
 /// Transports over a long, lossy path: 60 ms RTT, 50 Mbit/s each
 /// way with a 50 ms queue, random loss of 0, 1 and 5 % in both directions:
 /// `cargo test --release --test tunnel lossy_link -- --ignored --nocapture`.
-/// `KARIZ_BENCH_LOSS=1` (in percent) runs one loss rate only, `KARIZ_BENCH_ONLY=kcp` the
+/// `SORTUN_BENCH_LOSS=1` (in percent) runs one loss rate only, `SORTUN_BENCH_ONLY=kcp` the
 /// rows whose name contains `kcp`.
 ///
 /// Streams get a 4 MiB window, above the path's bandwidth-delay product plus its queue
@@ -1897,13 +1897,13 @@ async fn lossy_link() {
                 .stream_window(WINDOW),
         ),
     ];
-    let only = std::env::var("KARIZ_BENCH_ONLY").unwrap_or_default();
+    let only = std::env::var("SORTUN_BENCH_ONLY").unwrap_or_default();
     let default_window = [
         ("tcpmux, default window", tcpmux),
         ("quic cubic, default window", Setup::quic("direct")),
     ];
-    let losses: Vec<f64> = match std::env::var("KARIZ_BENCH_LOSS") {
-        Ok(percent) => vec![percent.parse::<f64>().expect("KARIZ_BENCH_LOSS") / 100.0],
+    let losses: Vec<f64> = match std::env::var("SORTUN_BENCH_LOSS") {
+        Ok(percent) => vec![percent.parse::<f64>().expect("SORTUN_BENCH_LOSS") / 100.0],
         Err(_) => vec![0.0, 0.01, 0.05],
     };
     println!(
@@ -1957,7 +1957,7 @@ struct Game {
 
 impl Game {
     /// Where the longest loss run starts, and when packets slower than `slow` were
-    /// sent (seconds into the run), for `KARIZ_BENCH_DETAIL`.
+    /// sent (seconds into the run), for `SORTUN_BENCH_DETAIL`.
     fn detail(&self, slow: Duration) -> String {
         let every = 1.0 / 64.0;
         let mut longest = (0, 0);
@@ -2075,11 +2075,11 @@ async fn downloads(port: u16, connections: usize, warmup: Duration, window: Dura
 /// of 2 % (mean burst 3). 128-byte packets at 64 Hz on an idle tunnel, then during four
 /// downloads on the same tunnel. Every row uses the gaming profile.
 /// `cargo test --release --test tunnel game_traffic -- --ignored --nocapture`;
-/// `KARIZ_BENCH_ONLY=kcp` runs the rows whose name contains `kcp`, `KARIZ_BENCH_LOSS=1`
-/// one loss rate (`b` for the bursty one), `KARIZ_BENCH_SECS` sets the length of each
-/// measurement (default 30). `KARIZ_BENCH_ONLY` starting with `=` takes exact row names
-/// separated by `|`; `KARIZ_BENCH_SEED` changes the link's random draws;
-/// `KARIZ_BENCH_DETAIL` prints where the losses and the slow packets were.
+/// `SORTUN_BENCH_ONLY=kcp` runs the rows whose name contains `kcp`, `SORTUN_BENCH_LOSS=1`
+/// one loss rate (`b` for the bursty one), `SORTUN_BENCH_SECS` sets the length of each
+/// measurement (default 30). `SORTUN_BENCH_ONLY` starting with `=` takes exact row names
+/// separated by `|`; `SORTUN_BENCH_SEED` changes the link's random draws;
+/// `SORTUN_BENCH_DETAIL` prints where the losses and the slow packets were.
 #[tokio::test(flavor = "multi_thread")]
 #[ignore]
 async fn game_traffic() {
@@ -2119,16 +2119,16 @@ async fn game_traffic() {
             gaming(Setup::quic("direct").duplicate(2, 5)),
         ),
     ];
-    let only = std::env::var("KARIZ_BENCH_ONLY").unwrap_or_default();
+    let only = std::env::var("SORTUN_BENCH_ONLY").unwrap_or_default();
     let selected = |name: &str| match only.strip_prefix('=') {
         Some(names) => names.split('|').any(|n| n == name),
         None => name.contains(only.as_str()),
     };
-    let seed = std::env::var("KARIZ_BENCH_SEED")
+    let seed = std::env::var("SORTUN_BENCH_SEED")
         .ok()
         .map(|s| s.parse().expect("seed"));
-    let detail = std::env::var_os("KARIZ_BENCH_DETAIL").is_some();
-    let secs = std::env::var("KARIZ_BENCH_SECS").map_or(30, |s| s.parse().expect("seconds"));
+    let detail = std::env::var_os("SORTUN_BENCH_DETAIL").is_some();
+    let secs = std::env::var("SORTUN_BENCH_SECS").map_or(30, |s| s.parse().expect("seconds"));
     let measure = Duration::from_secs(secs);
     let conditions = [
         ("0", "0 %", 0.0, 1.0),
@@ -2136,7 +2136,7 @@ async fn game_traffic() {
         ("5", "5 %", 0.05, 1.0),
         ("b", "2 % x3", 0.02, 3.0),
     ];
-    let loss_filter = std::env::var("KARIZ_BENCH_LOSS").ok();
+    let loss_filter = std::env::var("SORTUN_BENCH_LOSS").ok();
     println!(
         "RTT 60 ms, 50 Mbit/s, 50 ms queue; 128-byte packets at 64 Hz for {secs} s, echoed; \
          gaming profile"
@@ -2197,13 +2197,13 @@ async fn game_traffic() {
     }
 }
 
-/// `kariz speedtest` through real daemons (Unix only: the control socket is a Unix
+/// `sortun speedtest` through real daemons (Unix only: the control socket is a Unix
 /// socket): speed in both directions, latency, and UDP where the tunnel has mux, in both
 /// modes and over the transports.
 #[cfg(unix)]
 #[tokio::test(flavor = "multi_thread")]
 async fn speedtest_through_the_daemon() {
-    use kariz::speedtest::Options;
+    use sortun::speedtest::Options;
     let setups = [
         (
             "tcpmux direct",
@@ -2227,7 +2227,7 @@ async fn speedtest_through_the_daemon() {
             // The daemon binds its socket a moment after it starts.
             let mut connection = None;
             for _ in 0..50 {
-                match kariz::control::connect(&socket).await {
+                match sortun::control::connect(&socket).await {
                     Ok(c) => {
                         connection = Some(c);
                         break;
@@ -2240,7 +2240,7 @@ async fn speedtest_through_the_daemon() {
                 streams: 2,
                 udp: true,
             };
-            let report = kariz::control::request(
+            let report = sortun::control::request(
                 connection.unwrap_or_else(|| panic!("{name}: no control socket")),
                 options,
                 |_| {},
@@ -2271,10 +2271,10 @@ async fn speedtest_through_the_daemon() {
 /// Asks the daemon behind a control socket for its status; the daemon binds its socket a
 /// moment after it starts.
 #[cfg(unix)]
-async fn status_of(socket: &std::path::Path) -> kariz::stats::Status {
+async fn status_of(socket: &std::path::Path) -> sortun::stats::Status {
     for _ in 0..50 {
-        if let Ok(c) = kariz::control::connect(socket).await {
-            return kariz::control::status(c).await.unwrap();
+        if let Ok(c) = sortun::control::connect(socket).await {
+            return sortun::control::status(c).await.unwrap();
         }
         tokio::time::sleep(Duration::from_millis(100)).await;
     }
@@ -2354,7 +2354,7 @@ async fn status_counts_traffic_on_both_sides() {
 #[cfg(unix)]
 #[tokio::test(flavor = "multi_thread")]
 async fn status_reports_health_and_capacity() {
-    use kariz::stats::ProbeOutcome;
+    use sortun::stats::ProbeOutcome;
     let setups = [
         (
             "tcpmux direct",
@@ -2517,7 +2517,7 @@ async fn an_auto_tunnel_says_which_transport_it_uses() {
 #[cfg(unix)]
 #[tokio::test(flavor = "multi_thread")]
 async fn speedtest_can_be_turned_off_on_the_exit() {
-    use kariz::speedtest::Options;
+    use sortun::speedtest::Options;
     let entry = Setup::tcp("direct").transport("tcpmux").mux().control();
     let exit = Setup::tcp("direct")
         .transport("tcpmux")
@@ -2528,13 +2528,13 @@ async fn speedtest_can_be_turned_off_on_the_exit() {
     let socket = tunnel.control.clone().unwrap();
     let mut connection = None;
     for _ in 0..50 {
-        if let Ok(c) = kariz::control::connect(&socket).await {
+        if let Ok(c) = sortun::control::connect(&socket).await {
             connection = Some(c);
             break;
         }
         tokio::time::sleep(Duration::from_millis(100)).await;
     }
-    let err = kariz::control::request(
+    let err = sortun::control::request(
         connection.expect("a control socket"),
         Options {
             seconds: 1,

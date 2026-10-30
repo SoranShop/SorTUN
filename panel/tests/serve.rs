@@ -2,11 +2,11 @@
 
 use std::time::Duration;
 
-use kariz::config::TlsConfig;
-use kariz::transport::tls::Client;
-use kariz_panel::config::Config;
-use kariz_panel::db::Db;
-use kariz_panel::http::{self, AppState};
+use sortun::config::TlsConfig;
+use sortun::transport::tls::Client;
+use sortun_panel::config::Config;
+use sortun_panel::db::Db;
+use sortun_panel::http::{self, AppState};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
@@ -26,7 +26,7 @@ impl Drop for Running {
 
 async fn start() -> Running {
     let dir = tempfile::tempdir().unwrap();
-    let installed = kariz_panel::init(
+    let installed = sortun_panel::init(
         &dir.path().join("panel.toml"),
         &dir.path().join("data"),
         Some(1),
@@ -58,7 +58,7 @@ async fn get(server: &Running, pin: &str, path: &str) -> std::io::Result<(u16, S
         pin_sha256: Some(pin.to_owned()),
         ..TlsConfig::default()
     };
-    let client = Client::new(Some(&tls), "kariz-panel")?;
+    let client = Client::new(Some(&tls), "sortun-panel")?;
     let tcp = TcpStream::connect(server.addr).await?;
     let mut stream = client.connect(tcp).await?;
     let request = format!("GET {path} HTTP/1.1\r\nHost: panel\r\nConnection: close\r\n\r\n");
@@ -97,7 +97,7 @@ async fn the_panel_answers_over_tls_under_its_secret_path_only() {
     .await
     .unwrap();
     assert_eq!(status, 200, "{text}");
-    assert!(text.contains("\"kariz-panel\""), "{text}");
+    assert!(text.contains("\"sortun-panel\""), "{text}");
 
     for wrong in ["/", "/admin", "/k-000000/", "/api/version"] {
         let (status, text) = get(&server, &server.fingerprint, wrong).await.unwrap();

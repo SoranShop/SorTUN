@@ -23,7 +23,7 @@ pub enum Request {
     Enroll { id: String, key: String },
     /// CPU, memory, network, uptime, load.
     Health,
-    /// The tunnels on this server (the `/etc/kariz/*.toml` files) and their state.
+    /// The tunnels on this server (the `/etc/sortun/*.toml` files) and their state.
     Tunnels,
     /// Is this tunnel spec valid here, and are its ports free?
     TunnelCheck { spec: Spec },
@@ -50,7 +50,7 @@ pub enum Request {
         udp: bool,
     },
     /// Get a Let's Encrypt certificate for a domain (or a public IPv4 address) on this
-    /// server, for a wss tunnel that listens here. Runs `kariz-manager tunnel-cert`.
+    /// server, for a wss tunnel that listens here. Runs `sortun-manager tunnel-cert`.
     TunnelCert {
         domain: String,
         #[serde(default)]
@@ -83,7 +83,7 @@ pub enum Request {
     /// The path MTU to `remote` (another server's public address), measured with pings
     /// that may not be fragmented. Since 2.7.0.
     NetPmtu { remote: String },
-    /// Listen for one benchmark test session ([`kariz::bench`]) over `transport` with the
+    /// Listen for one benchmark test session ([`sortun::bench`]) over `transport` with the
     /// tunnel `profile`, on `port` of every IPv4 address, or of the address `bind` (this
     /// server's IPv6 address: a listener of its own beside the IPv4 one on the same port)
     /// (another free port when that one is taken; 0: any). The answer says the port. The
@@ -351,7 +351,7 @@ pub struct PortOwner {
     pub proto: String,
     pub addr: String,
     pub port: u16,
-    /// The process name (`sshd`, `kariz`), when it could be found.
+    /// The process name (`sshd`, `sortun`), when it could be found.
     pub process: Option<String>,
     pub pid: Option<u32>,
 }
@@ -400,7 +400,7 @@ pub struct SpeedReply {
     #[serde(default)]
     pub text: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub report: Option<kariz::speedtest::Report>,
+    pub report: Option<sortun::speedtest::Report>,
 }
 
 /// The answer to [`Request::TunnelCert`]: the files of the certificate, or why there are none.
@@ -435,11 +435,11 @@ pub struct BenchMeasured {
     /// The connection and its handshake, in milliseconds.
     pub connect_ms: f64,
     /// Round trips on an idle link.
-    pub latency: Option<kariz::speedtest::Latency>,
+    pub latency: Option<sortun::speedtest::Latency>,
     /// With `seconds`: the rate each way, and round trips while data moves.
     pub download_mbps: Option<f64>,
     pub upload_mbps: Option<f64>,
-    pub loaded: Option<kariz::speedtest::Latency>,
+    pub loaded: Option<sortun::speedtest::Latency>,
     /// The server name it sent (an agent older than `sni` leaves it out: it sent none).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sni: Option<String>,
@@ -456,7 +456,7 @@ pub struct SpeedStarted {
 }
 
 /// The answer to [`Request::SpeedtestPoll`]: what a running speed test has said since the
-/// last poll (the lines are `kariz::speedtest::run`'s progress lines), and, once `done`, the
+/// last poll (the lines are `sortun::speedtest::run`'s progress lines), and, once `done`, the
 /// report or why there is none.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct SpeedPoll {
@@ -471,7 +471,7 @@ pub struct SpeedPoll {
     #[serde(default)]
     pub done: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub report: Option<kariz::speedtest::Report>,
+    pub report: Option<sortun::speedtest::Report>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -510,7 +510,7 @@ pub struct Health {
     pub uptime_secs: Option<u64>,
     pub load1: Option<f64>,
     /// The IPv4 networks this server already has routes for (`172.17.0.0/16`, a cloud's
-    /// private network...), without the default route and Kariz's own `kz-` links. Private
+    /// private network...), without the default route and SorTUN's own `kz-` links. Private
     /// networks are never given a range that overlaps one.
     #[serde(default)]
     pub routes: Vec<String>,
@@ -545,7 +545,7 @@ pub struct ForwardInfo {
 /// One tunnel config on a server. Never carries the token.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TunnelInfo {
-    /// The file name without `.toml`, which is also the service (`kariz@NAME`).
+    /// The file name without `.toml`, which is also the service (`sortun@NAME`).
     pub name: String,
     pub role: String,
     pub mode: String,
@@ -560,8 +560,8 @@ pub struct TunnelInfo {
     pub forwards: Vec<ForwardInfo>,
     /// systemd says the service runs. `None` where systemd is not there to ask.
     pub active: Option<bool>,
-    /// From the running daemon's control socket (`kariz status`).
-    pub status: Option<kariz::stats::Status>,
+    /// From the running daemon's control socket (`sortun status`).
+    pub status: Option<sortun::stats::Status>,
     /// Why the file could not be read, if it could not.
     pub error: Option<String>,
 }

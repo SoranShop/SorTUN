@@ -1,4 +1,4 @@
-//! Join codes: what *Add server* shows and `kariz-panel agent --join` reads.
+//! Join codes: what *Add server* shows and `sortun-panel agent --join` reads.
 //!
 //! `kz1_` and the URL-safe base64 of a small JSON document: where the panel listens for
 //! agents, the link token, and a join secret that works once (10 minutes). The token is in
@@ -91,7 +91,7 @@ fn global_v6(a: &std::net::Ipv6Addr) -> bool {
 
 /// A link transport a join code may name.
 pub fn valid_transport(name: &str) -> bool {
-    kariz::link::LINK_TRANSPORTS
+    sortun::link::LINK_TRANSPORTS
         .iter()
         .any(|k| k.name() == name)
 }

@@ -4,8 +4,8 @@ export type Lang = "en" | "fa";
 export const LANGS: Lang[] = ["en", "fa"];
 export const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 export const REPO = "https://github.com/soranshop/SorTUN";
-declare const __KARIZ_VERSION__: string;
-export const VERSION: string = __KARIZ_VERSION__;
+declare const __SORTUN_VERSION__: string;
+export const VERSION: string = __SORTUN_VERSION__;
 
 /** A path on the site, in a language: href("fa", "/docs/panel/") */
 export const href = (lang: Lang, path = "/") => `${BASE}${lang === "fa" ? "/fa" : ""}${path}`;
@@ -55,7 +55,7 @@ export const ui = {
     demoTitle: "Try the panel",
     demoLead: "The real panel's screens, fed with sample data. Everything runs in this page; nothing is sent anywhere.",
     demoOpen: "Open it full screen",
-    demoNote: "Sample data. The password is kariz.",
+    demoNote: "Sample data. The password is sortun.",
     breadcrumb: "Breadcrumb",
   },
   fa: {
@@ -92,7 +92,7 @@ export const ui = {
     demoTitle: "پنل را امتحان کنید",
     demoLead: "صفحه‌های پنل واقعی، با داده‌های نمونه. همه‌چیز در همین صفحه اجرا می‌شود و چیزی جایی فرستاده نمی‌شود.",
     demoOpen: "باز کردن تمام‌صفحه",
-    demoNote: "داده‌های نمونه. رمز: kariz",
+    demoNote: "داده‌های نمونه. رمز: sortun",
     breadcrumb: "مسیر",
   },
 } as const;

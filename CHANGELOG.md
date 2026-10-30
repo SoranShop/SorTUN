@@ -1,27 +1,48 @@
 # Changelog
 
+## 3.0.0 - 2026-10-30
+
+Everything has SorTUN's name now: the programs (`sortun`, `sortun-panel`), the manager
+(`sortun-manager`), the services (`sortun@NAME`, `sortun-panel`, `sortun-agent`), the paths
+(`/etc/sortun`, `/etc/sortun-panel`, `/var/lib/sortun-panel`), the release archives
+(`sortun-vX.Y.Z-ARCH-linux.tar.gz`), the metrics (`sortun_*`) and the environment variables
+(`SORTUN_*`). The tunnel protocol is the same, so a 3.0 side and a 2.x side still connect.
+
+- **Moving a server of 2.x.** On each server, panel first, run once:
+  `bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh) update`.
+  It finds the earlier install, stops it, moves the tunnels, the panel's and the agent's
+  settings and data and the tunnels' certificates to the new paths, points the paths inside them
+  and certbot's renewal settings at the new names, removes the old programs and units, installs
+  3.0 and starts again what ran. Let's Encrypt certificates stay where certbot keeps them. A
+  panel of 3.0 reads agents and tunnels of 2.x, but cannot update an agent of 2.x from the
+  panel: run the script there.
+- **A simpler manager.** `sortun-manager` is a numbered list: type a number and Enter. No logo,
+  no frames, no arrow keys; questions with options are numbered too, and every screen ends with
+  Enter. The status says on or off for the core, the panel and the agent.
+- **Releases** are signed from the repository secret `SORTUN_SIGNING_KEY`.
+
 ## 2.8.0 - 2026-10-30
 
 The first release as **SorTUN**, at <https://github.com/soranshop/SorTUN>. The programs, services,
-commands and paths keep their names (`kariz`, `kariz-panel`, `kariz-manager`, `/etc/kariz`), and
-configs, panels and agents of 2.7 carry on as they are.
+commands and paths kept their earlier names until 3.0, and configs, panels and agents of 2.7
+carried on as they were.
 
 - **Fallback addresses.** `tunnel.fallback` lists other addresses of the other side: another IP
   or route of the same server, or another server with the same tunnel. While `remote` is down
   the dialing side tries them in order and keeps the first that answers; while on one, its
   sessions are renewed every minute with `remote` tried first, so the tunnel goes back once it is
-  up. For mux tunnels and `quic`; `kariz status` shows the address in use (`peer.remote`). In the
+  up. For mux tunnels and `quic`; `sortun status` shows the address in use (`peer.remote`). In the
   panel: *Fallback addresses* on a tunnel's edit page (the dialing server needs 2.8.0).
 - **Prometheus.** *Settings*, *Prometheus* turns on `/metrics` under the panel's secret path,
   behind a token shown once (only its hash is kept): every server's health and every tunnel's
   state, sessions, round trip, traffic counters and fallback, with a `prometheus.yml` job to
   paste. Off, or without the token, the address answers like any unknown one.
 - **A new release key.** Releases are signed with SorTUN's own key, built into this version and
-  `scripts/kariz.sh`. A panel or agent of 2.7 checks updates against the Kariz key and refuses
+  `scripts/sortun.sh`. A panel or agent of 2.7 checks updates against the earlier key and refuses
   this release, so on each server, panel first, run the new script once:
-  `bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh) update`.
-  It replaces the programs and `kariz-manager` and restarts what runs; the tunnels, settings and
-  the panel's data stay. Later updates come from here, from the panel or `kariz-manager update`.
+  `bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh) update`.
+  It replaces the programs and `sortun-manager` and restarts what runs; the tunnels, settings and
+  the panel's data stay. Later updates come from here, from the panel or `sortun-manager update`.
 
 ## 2.7.1 - 2026-10-27
 
@@ -39,7 +60,7 @@ own**, the tunnel wizard is **calmer**, a tunnel that went down **says why**, tu
 **renamed and arranged** and show **how long they have been up**, servers can be shown **as rows**,
 a **backup brings back the whole panel**, and **open connections no longer pile up** over the day.
 
-Update the panel first, then the agents from the panel (or `kariz-manager update` on each server).
+Update the panel first, then the agents from the panel (or `sortun-manager update` on each server).
 Links over IPv6, changing a link's MTU, moving a tunnel, a wss certificate of your own, exact usage
 counts and the connection fix need this version on the servers involved; everything that worked
 before keeps working with 2.6 agents. A server on one of the betas is offered 2.7.1 on either
@@ -48,15 +69,15 @@ channel; the details of each change are in the beta entries below.
 ## 2.7.0-beta.4 - 2026-10-27
 
 A **beta**, like [2.7.0-beta.3](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#270-beta3---2026-10-26):
-only panels on the *Beta* channel are offered it; `kariz-manager update` and the stable channel
-stay on 2.6.1. To try it on a server by hand: `kariz-manager install --version v2.7.0-beta.4`.
+only panels on the *Beta* channel are offered it; `sortun-manager update` and the stable channel
+stay on 2.6.1. To try it on a server by hand: `sortun-manager install --version v2.7.0-beta.4`.
 
 **Open connections no longer pile up** over the day: a user that vanished, or went silent after
 its connection was half closed, is now closed instead of kept until the tunnel restarted. Tunnels
 can be **renamed** (a name to be shown by, in any language) and **arranged**, the list says **how
 long each one has been up**, servers can be shown **as rows**, and a **backup now brings back the
 private networks, automatic restarts, quotas and the Telegram bot** too. Update the panel first,
-then the servers from the panel (the connection fix is in the servers' `kariz`); 2.7.0-beta.3
+then the servers from the panel (the connection fix is in the servers' `sortun`); 2.7.0-beta.3
 servers keep working.
 
 ### Added
@@ -97,8 +118,8 @@ servers keep working.
 ## 2.7.0-beta.3 - 2026-10-26
 
 A **beta**, like [2.7.0-beta.2](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#270-beta2---2026-10-26):
-only panels on the *Beta* channel are offered it; `kariz-manager update` and the stable channel
-stay on 2.6.1. To try it on a server by hand: `kariz-manager install --version v2.7.0-beta.3`.
+only panels on the *Beta* channel are offered it; `sortun-manager update` and the stable channel
+stay on 2.6.1. To try it on a server by hand: `sortun-manager install --version v2.7.0-beta.3`.
 
 A **calmer tunnel wizard and edit page**: each choice is one row with the chosen option explained,
 and what most tunnels never change is folded under *More options*. A tunnel that went down **says
@@ -133,8 +154,8 @@ servers from the panel; 2.7.0-beta.2 servers keep working.
 ## 2.7.0-beta.2 - 2026-10-26
 
 A **beta**, like [2.7.0-beta.1](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#270-beta1---2026-10-25):
-only panels on the *Beta* channel are offered it; `kariz-manager update` and the stable channel
-stay on 2.6.1. To try it on a server by hand: `kariz-manager install --version v2.7.0-beta.2`.
+only panels on the *Beta* channel are offered it; `sortun-manager update` and the stable channel
+stay on 2.6.1. To try it on a server by hand: `sortun-manager install --version v2.7.0-beta.2`.
 
 The panel now shows **how much every tunnel and server has used**, the way a provider counts it:
 on the network, with headers, resends and the tunnel's own overhead, split from the users' data, on
@@ -162,7 +183,7 @@ panel: exact counts need this version on the servers too.
   (Solar Hijri and Tehran by default).
 - **`wire` in the status document**: everything a side's sockets sent and received, by leg (users,
   link, targets, loopback), with packets, headers and resends. Every TCP socket is read from the
-  kernel (`TCP_INFO`), UDP is counted packet by packet, QUIC below its seal. `kariz status` shows
+  kernel (`TCP_INFO`), UDP is counted packet by packet, QUIC below its seal. `sortun status` shows
   it on an *on the wire* line. [Status](docs/status.md#wire-what-the-network-really-carried).
 
 ### Changed
@@ -176,8 +197,8 @@ an older server shows the users' bytes alone, marked as an estimate.
 
 ## 2.7.0-beta.1 - 2026-10-25
 
-A **beta**: only panels on the *Beta* channel are offered it; `kariz-manager update` and the stable
-channel stay on 2.6.1. To try it on a server by hand: `kariz-manager install --version v2.7.0-beta.1`.
+A **beta**: only panels on the *Beta* channel are offered it; `sortun-manager update` and the stable
+channel stay on 2.6.1. To try it on a server by hand: `sortun-manager install --version v2.7.0-beta.1`.
 
 Private network links can run **over IPv6** (GRE as `ip6gre`, and VXLAN), a link's **MTU fits its
 header and the path between its servers** ([#92](https://github.com/soranshop/SorTUN/issues/92)),
@@ -202,7 +223,7 @@ moving a tunnel need 2.7 on the servers involved; everything that worked before 
 - **The path MTU is measured.** When a link is made, both servers measure the path between them
   (pings that may not be fragmented) and a path smaller than 1500 bytes gets a link MTU that fits
   it. A link's MTU can be measured again, set by hand or put back from the *MTU* column; it changes
-  on both servers in place, without cutting the tunnels over it. `kariz-panel net pmtu ADDRESS`
+  on both servers in place, without cutting the tunnels over it. `sortun-panel net pmtu ADDRESS`
   measures a path by hand. [MTU](docs/networks.md#mtu).
 - **Move a tunnel to other servers.** The edit page has the entry and the exit server to pick, and
   *Swap*. The tunnel is set up and tested on its new servers first, then taken off the ones it
@@ -210,7 +231,7 @@ moving a tunnel need 2.7 on the servers involved; everything that worked before 
   nothing changes. A side on a server that is offline can be moved away this way. A move gives both
   sides a new token.
 - **Delete a network with its links** in one go, from its card.
-- **Panel port from the manager:** `kariz-manager panel port [N]` and menu item 7 (*Panel port*)
+- **Panel port from the manager:** `sortun-manager panel port [N]` and menu item 7 (*Panel port*)
   change the port the panel opens on; the agents' port stays, so connected servers need nothing.
   Port 80, the agents' ports and ports something else listens on are refused, and the panel goes
   back to its old port if it does not start. A new panel asks for its port at install (Enter:
@@ -256,7 +277,7 @@ agent can be added over either link. A server can have **an agents port of its o
 can be **arranged in the order you want**, a tunnel takes **4096 UDP clients per port** by
 default (set from the panel), and the panel is calmer.
 
-Update the panel first, then the agents from the panel (or `kariz-manager update` on each
+Update the panel first, then the agents from the panel (or `sortun-manager update` on each
 server). Both servers of a VXLAN link need this version, and so does the entry server of a tunnel
 that carries UDP. A server on one of the betas is offered 2.6.1 on either channel; the details of
 each change are in the beta entries below.
@@ -264,8 +285,8 @@ each change are in the beta entries below.
 ## 2.6.0-beta.4 - 2026-10-16
 
 A **beta**, like [2.6.0-beta.3](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#260-beta3---2026-10-15):
-only panels on the *Beta* channel are offered it; `kariz-manager update` and the stable channel
-stay on 2.5.1. To try it on a server by hand: `kariz-manager install --version v2.6.0-beta.4`.
+only panels on the *Beta* channel are offered it; `sortun-manager update` and the stable channel
+stay on 2.5.1. To try it on a server by hand: `sortun-manager install --version v2.6.0-beta.4`.
 
 A server added over a GRE or VXLAN link can now have an agents port of its own too, you can
 **arrange the servers in the order you want**, and the panel is calmer: tabs on a tunnel's page and
@@ -308,8 +329,8 @@ rest need nothing else.
 ## 2.6.0-beta.3 - 2026-10-15
 
 A **beta**, like [2.6.0-beta.2](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#260-beta2---2026-10-15):
-only panels on the *Beta* channel are offered it; `kariz-manager update` and the stable channel
-stay on 2.5.1. To try it on a server by hand: `kariz-manager install --version v2.6.0-beta.3`.
+only panels on the *Beta* channel are offered it; `sortun-manager update` and the stable channel
+stay on 2.5.1. To try it on a server by hand: `sortun-manager install --version v2.6.0-beta.3`.
 
 A new server can now have **an agents port of its own**: the panel listens there for that
 server's agent alone, for when the main agents port is filtered from that server's network.
@@ -334,8 +355,8 @@ Only the panel needs this version; the agents do not.
 ## 2.6.0-beta.2 - 2026-10-15
 
 A **beta**, like [2.6.0-beta.1](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#260-beta1---2026-10-15):
-only panels on the *Beta* channel are offered it; `kariz-manager update` and the stable channel
-stay on 2.5.1. To try it on a server by hand: `kariz-manager install --version v2.6.0-beta.2`.
+only panels on the *Beta* channel are offered it; `sortun-manager update` and the stable channel
+stay on 2.5.1. To try it on a server by hand: `sortun-manager install --version v2.6.0-beta.2`.
 
 VXLAN now also where an agent is set up, and in the benchmark: a server that GRE does not reach
 the panel's server from but UDP does can be added **over a VXLAN link**, and a benchmark measures
@@ -345,7 +366,7 @@ GRE and VXLAN links each on their own. Update the panel first, then the agents f
 
 - **An agent over a VXLAN link.** *Add server* now has **Over a VXLAN link** beside **Over a GRE
   link**, for a server that GRE does not reach the panel's server from but UDP does. The link's
-  addresses come from the first VXLAN network, or the panel makes one (`kariz-vxlan`, UDP 4789,
+  addresses come from the first VXLAN network, or the panel makes one (`sortun-vxlan`, UDP 4789,
   on the first pool free beside the others); its own end comes up at once and the command makes
   the server's end before the agent connects across it. *The panel connects to it* (*Across a
   private link*) and a server's *Edit* ask GRE or VXLAN for a new link too. API: `kind` (`gre`
@@ -358,9 +379,9 @@ GRE and VXLAN links each on their own. Update the panel first, then the agents f
 ## 2.6.0-beta.1 - 2026-10-15
 
 A **beta**: a prerelease that only panels on the *Beta* channel are offered (*Settings,
-Updates, Channel*); `kariz-manager update` and the stable channel stay on 2.5.1. To try it on
-a server by hand: `kariz-manager install --version v2.6.0-beta.1`. On a server that runs the
-beta, `kariz-manager update` installs the latest stable release (2.5.1) again: update it from
+Updates, Channel*); `sortun-manager update` and the stable channel stay on 2.5.1. To try it on
+a server by hand: `sortun-manager install --version v2.6.0-beta.1`. On a server that runs the
+beta, `sortun-manager update` installs the latest stable release (2.5.1) again: update it from
 the panel instead.
 
 Private networks can now be **VXLAN** as well as GRE: for two servers between which GRE
@@ -399,14 +420,14 @@ instead of 512, says so when it is full, a **health probe** tells whether a new 
 through, and Xray behind a tunnel can see **each user's real address** (PROXY protocol), so
 device limits in 3x-ui or Marzban work behind a tunnel too.
 
-Update the panel first, then the agents from the panel (or `kariz-manager update` on each
+Update the panel first, then the agents from the panel (or `sortun-manager update` on each
 server): each side checks its own stream limit, and the probe and the PROXY header need this
 version on both servers. A server on one of the betas is offered 2.5.1 on either channel.
 
 ### Added
 
 - **Real user addresses for Xray (PROXY protocol).** Every user reached the target from the exit
-  server's own Kariz process, so Xray saw `127.0.0.1` for everyone: per-account IP and device
+  server's own SorTUN process, so Xray saw `127.0.0.1` for everyone: per-account IP and device
   limits in 3x-ui or Marzban, Xray's logs, IP routing rules and fail2ban on the exit server all
   saw one address. A forward rule can now have `proxy_protocol = "v1"` or `"v2"`: the exit side
   starts each TCP connection to the target with a PROXY header carrying the user's address and
@@ -420,7 +441,7 @@ version on both servers. A server on one of the betas is offered 2.5.1 on either
   60-100 Mbit/s for the users already on it, while every new connection failed: a busy evening
   had taken every stream, or the target (Xray) was down. Every 15 seconds the entry side now
   opens a connection the way a user's is opened and has the exit side connect to a forwarded
-  target. `kariz status` shows the result on a `health` line, the status document has it as
+  target. `sortun status` shows the result on a `health` line, the status document has it as
   `probe`, the tunnel's page in the panel has a **Health** card, *Needs attention* lists such a
   tunnel, and the Telegram bot tells when three probes in a row fail (and when it is fixed). An
   exit side older than 2.4 is shown as not answering probes, never as a failure.
@@ -457,9 +478,9 @@ version on both servers. A server on one of the betas is offered 2.5.1 on either
 ## 2.5.0-beta.1 - 2026-10-14
 
 A **beta**: a prerelease that only panels on the *Beta* channel are offered (*Settings,
-Updates, Channel*); `kariz-manager update` and the stable channel stay on 2.3.0. To try it on
-a server by hand: `kariz-manager install --version v2.5.0-beta.1`. On a server that runs the
-beta, `kariz-manager update` installs the latest stable release (2.3.0) again: update it from
+Updates, Channel*); `sortun-manager update` and the stable channel stay on 2.3.0. To try it on
+a server by hand: `sortun-manager install --version v2.5.0-beta.1`. On a server that runs the
+beta, `sortun-manager update` installs the latest stable release (2.3.0) again: update it from
 the panel instead.
 
 Xray behind a tunnel can now see **each user's real address** (PROXY protocol), so device
@@ -472,7 +493,7 @@ connection, the health probe, the per-address limit).
 ### Added
 
 - **Real user addresses for Xray (PROXY protocol).** Every user reached the target from the exit
-  server's own Kariz process, so Xray saw `127.0.0.1` for everyone: per-account IP and device
+  server's own SorTUN process, so Xray saw `127.0.0.1` for everyone: per-account IP and device
   limits in 3x-ui or Marzban, Xray's logs, IP routing rules and fail2ban on the exit server all
   saw one address. A forward rule can now have `proxy_protocol = "v1"` or `"v2"`: the exit side
   starts each TCP connection to the target with a PROXY header carrying the user's address and
@@ -492,9 +513,9 @@ connection, the health probe, the per-address limit).
 ## 2.4.0-beta.1 - 2026-10-14
 
 A **beta**: a prerelease that only panels on the *Beta* channel are offered (*Settings,
-Updates, Channel*); `kariz-manager update` and the stable channel stay on 2.3.0. To try it on
-a server by hand: `kariz-manager install --version v2.4.0-beta.1`. On a server that runs the
-beta, `kariz-manager update` installs the latest stable release (2.3.0) again: update it from
+Updates, Channel*); `sortun-manager update` and the stable channel stay on 2.3.0. To try it on
+a server by hand: `sortun-manager install --version v2.4.0-beta.1`. On a server that runs the
+beta, `sortun-manager update` installs the latest stable release (2.3.0) again: update it from
 the panel instead.
 
 Built for busy evenings: a tunnel takes **4096 streams per connection** instead of 512, says so
@@ -509,7 +530,7 @@ exit side it is shown as not checked, never as a failure).
   60-100 Mbit/s for the users already on it, while every new connection failed: a busy evening
   had taken every stream, or the target (Xray) was down. Every 15 seconds the entry side now
   opens a connection the way a user's is opened and has the exit side connect to a forwarded
-  target. `kariz status` shows the result on a `health` line, the status document has it as
+  target. `sortun status` shows the result on a `health` line, the status document has it as
   `probe`, the tunnel's page in the panel has a **Health** card, *Needs attention* lists such a
   tunnel, and the Telegram bot tells when three probes in a row fail (and when it is fixed). An
   exit side older than 2.4 is shown as not answering probes, never as a failure.
@@ -587,8 +608,8 @@ the manager of 2.2.0 in place on its server.
 - **The panel follows a new IP address of its server.** When the server's IP address changes
   (the old one was filtered and the provider gave a new one) and the panel's certificate was for
   the old address, the browser refused it and the panel looked down. Now a timer
-  (`kariz-panel-heal.timer`, a minute after boot and every 10 minutes) runs
-  `kariz-manager panel heal`: it sees that the certificate's address is no longer on the server,
+  (`sortun-panel-heal.timer`, a minute after boot and every 10 minutes) runs
+  `sortun-manager panel heal`: it sees that the certificate's address is no longer on the server,
   gets a Let's Encrypt certificate for the new one, switches the panel to it and removes the old
   one. It asks for nothing unless the address changed, and waits an hour after a failure (Let's
   Encrypt limits failed attempts). Behind NAT, and for a domain, the change cannot be seen from
@@ -603,11 +624,11 @@ the manager of 2.2.0 in place on its server.
 ### Fixed
 
 - **The manager's menu of an old release on a server updated from the panel.** An update from
-  the panel swaps the programs but not `/usr/local/bin/kariz-manager`, so a server set up long
+  the panel swaps the programs but not `/usr/local/bin/sortun-manager`, so a server set up long
   ago and only ever updated from the panel went on showing the menu of the release it was
   installed with. The panel and the agent now put the manager of their own release in place each
   time they start (an update restarts them), when the one there is missing or different. And
-  `kariz-manager update` fetches the script of the release it installed instead of the newest
+  `sortun-manager update` fetches the script of the release it installed instead of the newest
   one on main, so the two ways of updating agree.
 
 ## 2.1.0 - 2026-10-06
@@ -615,7 +636,7 @@ the manager of 2.2.0 in place on its server.
 Two new things, both working with the agents you have: the **benchmark** finds the transport
 that gets through best between two servers before a tunnel is built, and the panel can **connect
 to a server across a GRE link**. The panel had a UX review, and getting a certificate for a wss
-tunnel works on servers set up with an older Kariz. The benchmark and the GRE link need the agents
+tunnel works on servers set up with an older SorTUN. The benchmark and the GRE link need the agents
 on both servers to be 2.1.0: update them from the panel (*Settings, Updates*) after the panel.
 
 ### Added
@@ -635,7 +656,7 @@ on both servers to be 2.1.0: update them from the panel (*Settings, Updates*) af
   latency, stability; weighted by the profile). It recommends one with the reason, ranks the
   others, explains what did not get through, and says when a direction is blocked. *Use this*
   fills the wizard in; *Edit with this* opens a tunnel's edit page with it. The last result of
-  each pair is kept. Core: `kariz::bench` (test links over any tunnel transport, measured like
+  each pair is kept. Core: `sortun::bench` (test links over any tunnel transport, measured like
   the speed test). Agents: `BenchListen` and `BenchDial`. API: `POST /api/bench`,
   `GET /api/bench?id=`, `POST /api/bench/stop`, `GET /api/bench/last`.
 
@@ -651,17 +672,17 @@ on both servers to be 2.1.0: update them from the panel (*Settings, Updates*) af
     is missing (the servers, an empty name, a name in use) next to the field, which it focuses.
   - Screen readers hear the top bar, the navigation and the command palette in the panel's
     language; the copy button says *Copy* (and *Copied* after), and a copy that fails says so.
-  - Every page names itself in the browser tab ("iran-eu — Tunnels — Kariz").
+  - Every page names itself in the browser tab ("iran-eu — Tunnels — SorTUN").
   - The log level filter says *All levels*, and *Follow* explains itself; the Persian settings
     say *دستگاه‌های واردشده* instead of mixing in "session", and "@BotFather" keeps its direction.
 
 ### Fixed
 
-- **Getting a certificate for a wss tunnel on a server set up with an older Kariz.** An update
+- **Getting a certificate for a wss tunnel on a server set up with an older SorTUN.** An update
   swaps the programs but not the manager script, so a server installed before `tunnel-cert`
   answered with its usage text ("certificate not obtained: ... Set GITHUB_TOKEN ..."). The panel
   and the agent now carry the manager of their own release and put it in place (in
-  `/usr/local/bin/kariz-manager`) before they ask it for a certificate.
+  `/usr/local/bin/sortun-manager`) before they ask it for a certificate.
 
 ## 2.0.0 - 2026-10-05
 
@@ -675,7 +696,7 @@ agents from the panel after it.
 - **Add a server over GRE alone.** *Add server* asks how the new server reaches the panel: *Over
   the internet* (as before) or **Over a GRE link**, for a server that can reach the panel's server
   only over GRE. Type its public IPv4 address and the panel lists the server (*waiting for its
-  agent*), gives the link a `/30` of a private network (it makes `kariz`, `10.77.0.0/16`, when
+  agent*), gives the link a `/30` of a private network (it makes `sortun`, `10.77.0.0/16`, when
   there is none) and makes its own end of the GRE link at once; the join code carries the other
   end, which the agent makes before it dials the panel's private address across it. *New command*
   on the waiting server's card makes another code, *Remove* undoes it all. A reconnect code through
@@ -785,10 +806,10 @@ agents from the panel after it.
 ### Fixed
 
 - **The manager script now updates itself.** Updating the core, the panel and the agent left the
-  `kariz-manager` command on its old version in two cases: a new script copied to the server and run
+  `sortun-manager` command on its old version in two cases: a new script copied to the server and run
   from a file was installed only while something else was being installed, and an update from the open
   menu wrote the new script to disk but went on showing the old menu. A script run from a file now
-  replaces the installed `kariz-manager` at once, the menu reopens as the new script after an update
+  replaces the installed `sortun-manager` at once, the menu reopens as the new script after an update
   replaced it, and a failed download of the script is said out loud.
 
 ### Added
@@ -820,7 +841,7 @@ agents from the panel after it.
 - **Sealed QUIC in the tunnel wizard and the edit page.** When the transport is `quic`, a switch *Seal
   every packet (obfs)* writes `[tunnel.quic] obfs = true` on both sides. It is on by default in the
   wizard, since that is what makes QUIC usable on a network that filters it; turn it off to get plain
-  QUIC. The edit page shows what a tunnel has, and both servers need Kariz 1.7 or newer (the wizard
+  QUIC. The edit page shows what a tunnel has, and both servers need SorTUN 1.7 or newer (the wizard
   says which one is behind).
 
 ## 1.7.0 - 2026-10-02
@@ -844,7 +865,7 @@ agents from the panel after it.
   tall, a long IPv6 wraps inside it, and the card's footer wraps instead of overflowing.
 - **A new look for the install script's menu**, in the style of XRayMesh. Move with the arrow keys (or
   `j` and `k`) and press Enter; a number jumps to its item, `q` or Esc leaves, and the line under the
-  list says what the highlighted item does. The items are grouped (Kariz, Web panel, Agent, System),
+  list says what the highlighted item does. The items are grouped (SorTUN, Web panel, Agent, System),
   what runs here (core, panel, agent) is shown at the top, and the list scrolls on a small terminal.
   Every item opens on a cleared screen and ends with "Press any key"; Ctrl+C in it returns to the menu.
   Questions with options are lists to move in too, and Esc cancels them. Without a terminal (a pipe,
@@ -856,7 +877,7 @@ agents from the panel after it.
   the accepting server's other tunnels already hold (their own ports, an auto tunnel's next port, and
   the ports they forward): 3080 for the first tunnel, 3081 for the second, 3082 for the third. The wizard
   says so when it moved the port, and leaves the port alone once you type one. A port held by something
-  that is not a Kariz tunnel is still caught at the review step.
+  that is not a SorTUN tunnel is still caught at the review step.
 - **The documentation and the README were rewritten** around the website. The README is now a short
   introduction that points to the site; the Persian pages were edited to read as Persian, not as a
   translation.
@@ -877,10 +898,10 @@ agents from the panel after it.
 - **You set the panel's admin password while installing it**, instead of a random one: it is
   asked twice (hidden) and must have at least 12 characters, three of the four kinds (lower case,
   UPPER CASE, digits, symbols), no common word and no run of one character. Or choose only the
-  one-time sign-in link. `kariz-manager panel password` asks the same way (`--random` makes one,
+  one-time sign-in link. `sortun-manager panel password` asks the same way (`--random` makes one,
   `--stdin` reads it) and `panel install --password-file F` reads it from a file.
 - **The manager asks once, when this server has the core but no panel and no agent, whether to
-  install the web panel** (the answer is remembered; `KARIZ_NO_OFFER=1` turns the question off).
+  install the web panel** (the answer is remembered; `SORTUN_NO_OFFER=1` turns the question off).
 - **Choose a tunnel's encryption in the panel.** The wizard and the edit page offer *Automatic*
   (recommended: AES-256-GCM where the CPU has AES instructions, ChaCha20-Poly1305 where it does
   not), *AES-256-GCM*, *ChaCha20-Poly1305* and *No encryption*. No encryption is shown in red
@@ -901,8 +922,8 @@ agents from the panel after it.
 
 - **You choose the name of the panel's own server.** Installing the panel asks what this server
   should be called in the panel, with its host name as the default (Enter keeps it);
-  `kariz-manager panel install --name NAME` gives it without asking, and `kariz-manager panel
-  name [NAME]` renames it later (`kariz-panel init --name`). A joining server never takes that
+  `sortun-manager panel install --name NAME` gives it without asking, and `sortun-manager panel
+  name [NAME]` renames it later (`sortun-panel init --name`). A joining server never takes that
   name.
 
 
@@ -929,10 +950,10 @@ agents from the panel after it.
   (16 streams for 20 s), and *Custom* with up to 32 streams and 60 s.
 - **`wss` with a real certificate.** A wss tunnel can use a self-signed certificate (pinned, as
   before) or a Let's Encrypt one for a domain or a public IPv4 address, got with one button on
-  the server that listens (`kariz-manager tunnel-cert`: port 80 is freed for a moment, the
+  the server that listens (`sortun-manager tunnel-cert`: port 80 is freed for a moment, the
   renewal timer does the rest, the tunnel reloads the renewed files).
 - **An auto tunnel says which transport it uses now**, in the tunnel list and on its page
-  (`auto → kcp`), from the live sessions (`kariz status` shows `via kcp` too).
+  (`auto → kcp`), from the live sessions (`sortun status` shows `via kcp` too).
 - **Ready-made address pools** for a new private network (five, with how many links each
   holds; one a server already routes is greyed out).
 - **Mux is a switch, and `tcpmux` is just `tcp`.** The transports are `auto`, `tcp`, `ws`,
@@ -940,15 +961,15 @@ agents from the panel after it.
   `auto` and `quic`) and its settings show only while it is on. `tcp` with mux on is what the
   core calls `tcpmux`; existing tunnels keep working and show as `tcp`.
 
-- **The manager offers updates.** Opening the menu (or `kariz-manager status`) looks for a newer
+- **The manager offers updates.** Opening the menu (or `sortun-manager status`) looks for a newer
   release and, if the core, the panel or the agent here is older, says which and asks to update
   them all. `--agent CODE` updates an older program first (an old agent refuses what a newer
-  panel sends), and `update` fetches the newest `kariz-manager` script too.
-  `KARIZ_NO_UPDATE_CHECK=1` turns the look off.
+  panel sends), and `update` fetches the newest `sortun-manager` script too.
+  `SORTUN_NO_UPDATE_CHECK=1` turns the look off.
 
 ### Fixed
 
-- **A tunnel with `auto` (or mux settings) on a server that runs an older Kariz** failed with
+- **A tunnel with `auto` (or mux settings) on a server that runs an older SorTUN** failed with
   `unknown variant auto` from that server. The panel now says which server is too old and to
   update it first, before anything is written.
 - **Typing in a dialog jumped to its first field** every time the panel refreshed (every 2 s): the
@@ -975,14 +996,14 @@ script is friendlier.
   changed. The wizard only makes tunnels.
 - **A tunnel can be deleted while one of its servers is offline.** The reachable side is
   removed at once, the tunnel leaves the lists, and the other side is removed when that server's
-  agent connects again (the panel says so, and that `kariz-manager uninstall` on that server
+  agent connects again (the panel says so, and that `sortun-manager uninstall` on that server
   does it now). Start, stop and restart also work from the side that is reachable. The name
   stays taken until the delete is done.
-- **The join code is one command** that installs Kariz first if the server does not have it:
-  `bash <(curl -fsSL .../kariz.sh) --agent CODE`.
+- **The join code is one command** that installs SorTUN first if the server does not have it:
+  `bash <(curl -fsSL .../sortun.sh) --agent CODE`.
 - **The manager installs the core on the first run**, then asks whether this server should also
   get the web panel, or join a panel that exists. Its banner and menu show the server's IPv4 and
-  IPv6 addresses and the project's GitHub; `kariz-manager status` prints what runs here.
+  IPv6 addresses and the project's GitHub; `sortun-manager status` prints what runs here.
 - **IPv4 and IPv6 of every server** are shown on its card in the panel (the address the agent
   leaves from, or the one its link is seen coming from, when that is a private one).
 - **Choose the tunnel profile** with a description of each: *Balanced* (default), *Ultra speed*
@@ -997,12 +1018,12 @@ script is friendlier.
 - **Update the agents too.** A tunnel made or edited with `auto` or with mux settings needs 1.5
   on both servers (an older agent refuses the settings it does not know). Update the panel, then
   its servers from *Settings, Updates*.
-- **`kariz-manager uninstall` removes everything**: tunnels, the agent (its service, identity and
+- **`sortun-manager uninstall` removes everything**: tunnels, the agent (its service, identity and
   private network links), the web panel and the programs. `agent remove` cleans up the same
   files.
 - **Joining a server that has an agent already** no longer fails: the manager tells you, asks,
   removes the old agent and starts the new one in its place (`--agent CODE --yes` skips the
-  question). `kariz-panel agent --join` replaces the old registration the same way.
+  question). `sortun-panel agent --join` replaces the old registration the same way.
 
 ### Fixed
 
@@ -1010,7 +1031,7 @@ script is friendlier.
   other; a few that answered slowly went over the 10 s a request is allowed and the panel
   dropped the link. They are asked side by side now, a late list of tunnels no longer ends a
   link that answers everything else, and both ends close a finished link so the agent comes back
-  at once. Both ends now log why a link ended (`journalctl -u kariz-panel` and `-u kariz-agent`).
+  at once. Both ends now log why a link ended (`journalctl -u sortun-panel` and `-u sortun-agent`).
 - **A direct tunnel with the plain `tcp` transport never showed as connected** (nothing keeps a
   connection open there), so the panel gave up creating it after 30 s. The entry now looks for
   the exit every 10 s.
@@ -1077,7 +1098,7 @@ with a new speed test.
   `tcpmux` over TCP and `kcp` over UDP (the same port number: open both in the firewall). An
   agent starts with `tcpmux`; after two links in a row that connect but carry no requests
   (networks that let TCP connect and then stall it, as on some Iranian routes) it moves to
-  `kcp`, and back, and remembers the one that worked (`/etc/kariz-panel/link-transport`).
+  `kcp`, and back, and remembers the one that worked (`/etc/sortun-panel/link-transport`).
   *Servers* shows which transport each server uses.
 - **A tunnel has a page of its own** instead of a dialog: the channel between its two
   servers, what is wrong when it is broken or stopped and how to fix it, live numbers,
@@ -1099,15 +1120,15 @@ with a new speed test.
 
 ## 1.1.0 - 2026-09-30
 
-Everything about servers and tunnels is now done in the web panel, and Kariz has a license.
+Everything about servers and tunnels is now done in the web panel, and SorTUN has a license.
 
 ### Changed
 
-- **The manager script no longer makes or runs tunnels.** `kariz-manager` keeps `install`,
+- **The manager script no longer makes or runs tunnels.** `sortun-manager` keeps `install`,
   `update`, `uninstall`, `panel ...`, `agent ...` and `--agent CODE`; its menu is now install or
   update, web panel and agent, uninstall. The commands `add`, `list`, `status`, `start`, `stop`,
   `restart`, `logs`, `speedtest`, `edit`, `remove` and `net` are gone: use the panel. Tunnel
-  configs and services (`/etc/kariz/NAME.toml`, `kariz@NAME`) are unchanged, and the panel still
+  configs and services (`/etc/sortun/NAME.toml`, `sortun@NAME`) are unchanged, and the panel still
   reads tunnels that were made before.
 - The panel's empty-list and hint texts no longer point to the manager.
 
@@ -1122,12 +1143,12 @@ Everything about servers and tunnels is now done in the web panel, and Kariz has
 
 - The design documents of the phases (`docs/PHASE*.md`); the layers and the protocol stay in
   `docs/ROADMAP.md`, now "Design and protocol". The history is in git.
-- `docs/compatibility.md`: Kariz is not publicly released yet, so it makes no compatibility
+- `docs/compatibility.md`: SorTUN is not publicly released yet, so it makes no compatibility
   promise.
 
 ### Added
 
-- **The panel always has a trusted certificate.** `kariz-manager panel install` asks for a domain
+- **The panel always has a trusted certificate.** `sortun-manager panel install` asks for a domain
   name or, without one, the server's public IP address, and gets a Let's Encrypt certificate for
   it (certbot, standalone on port 80; IP address certificates last 6 days). No self-signed
   certificate is made any more for a new panel. A timer renews it, and the panel loads the new one
@@ -1174,15 +1195,15 @@ listed here; update the panel and its agents together as usual.
 
 **Updating from the panel, and signed releases** (docs/panel.md). Backward
 compatibility is not kept before 1.0. Servers on 0.10 or older have to be updated once by hand
-(`kariz-manager update`); from 0.11 on they can be updated from the panel.
+(`sortun-manager update`); from 0.11 on they can be updated from the panel.
 
 ### Added
 
 - **Releases are signed.** Each archive has a `.sha256` and a `.sig` (an Ed25519 signature of the
   checksum file, which names the archive). The release workflow signs with a repository secret and
-  checks every signature with the key built into the program before it publishes. `kariz-manager
+  checks every signature with the key built into the program before it publishes. `sortun-manager
   install|update` checks the signature with `openssl` and the key in the script (a release without
-  one is refused from 0.11), `kariz-panel release-verify` checks a download by hand, and
+  one is refused from 0.11), `sortun-panel release-verify` checks a download by hand, and
   `release_key` pins a key of your own.
 - **Update the panel from the panel:** a notice in the top bar and *Settings, Updates* when a newer
   release is out (a check once a day, or *Check now*; stable or beta channel). One button downloads
@@ -1233,10 +1254,10 @@ not kept before 1.0: update the panel and its agents together.
   it is not there (and removes it if the tunnel cannot be made).
 - **`health` reports `routes`** (the IPv4 networks a server already routes), used to keep new
   private networks from overlapping them.
-- **`kariz-manager net list | status NAME`** (read only) on a server; `kariz-panel net
+- **`sortun-manager net list | status NAME`** (read only) on a server; `sortun-panel net
   up|down|ping|status` for debugging.
 - **CI:** a `gre` job builds two network namespaces and tests real GRE links between them
-  (private addresses ping, two links at once, a filtered path fails, a Kariz tunnel works over
+  (private addresses ping, two links at once, a filtered path fails, a SorTUN tunnel works over
   the private addresses).
 
 ### Changed
@@ -1247,7 +1268,7 @@ not kept before 1.0: update the panel and its agents together.
 ## 0.9.0 - 2026-09-30
 
 The panel can now **make and manage tunnels**, and shows what they do (docs/panel.md). Backward compatibility is not kept before 1.0: the agent protocol changed,
-so update the panel and its agents together (`kariz-manager update` on each server).
+so update the panel and its agents together (`sortun-manager update` on each server).
 
 ### Added
 
@@ -1256,7 +1277,7 @@ so update the panel and its agents together (`kariz-manager update` on each serv
   who holds a port that is not), writes the accepting side first, starts both, waits for them
   to connect, and **undoes everything on both servers if any step fails**. Edit (both sides in
   step, the old settings put back if they do not reconnect), start, stop, restart, a new token
-  and delete, for a pair. Tunnels made with `kariz-manager` can be edited the same way.
+  and delete, for a pair. Tunnels made with `sortun-manager` can be edited the same way.
 - **Live monitoring:** charts of a tunnel's throughput and round trip (1 hour, 24 hours,
   7 days, 30 days; the last hour in memory, five-minute averages in SQLite for 30 days), a
   **Logs** page that interleaves both sides of a tunnel by time with a level filter, search and
@@ -1280,14 +1301,14 @@ so update the panel and its agents together (`kariz-manager update` on each serv
 ## 0.8.0-beta - 2026-09-29
 
 The first release of the **web panel** (docs/panel.md). It is a beta: a
-prerelease that GitHub's "latest release" does not pick, so `kariz-manager update` on a
+prerelease that GitHub's "latest release" does not pick, so `sortun-manager update` on a
 running server stays on 0.7.0 until a stable release. To try it:
-`kariz-manager install --version v0.8.0-beta`, then `kariz-manager panel install`.
+`sortun-manager install --version v0.8.0-beta`, then `sortun-manager panel install`.
 The tunnel core is the 0.7 one, with the same wire format; it works with v0.4 to v0.7 peers.
 
 ### Added
 
-- **`kariz-panel`**, a second program in the release archives (all three architectures):
+- **`sortun-panel`**, a second program in the release archives (all three architectures):
   `serve` runs the panel, `agent` connects another server to it, `init`, `login-link`
   and `reset-password` set it up and look after it. One static binary, SQLite inside, the
   web app inside; nothing is fetched from the internet.
@@ -1303,22 +1324,22 @@ The tunnel core is the 0.7 one, with the same wire format; it works with v0.4 to
   (CPU, memory and network of each, add and remove), Settings (password, login links,
   sessions, appearance). About 280 KB compressed.
 - **Agents:** *Add server* makes a join code (works once, 10 minutes);
-  `kariz-manager --agent CODE` (or `kariz-panel agent --join CODE`) on the other server
-  connects it. The link is Kariz's own (`kariz::link`): the tunnels' handshake, encryption
+  `sortun-manager --agent CODE` (or `sortun-panel agent --join CODE`) on the other server
+  connects it. The link is SorTUN's own (`sortun::link`): the tunnels' handshake, encryption
   and mux, so it resists DPI like a tunnel; the agent dials the panel, so the new server
   opens no port. A leaked link token alone opens nothing: each agent also proves a key of its
   own. Agents answer four fixed requests (hello, enroll, health, tunnels): there is no
   remote shell, and tunnel tokens are never reported.
 - **What the panel shows of each server:** CPU, memory, network and uptime (from
-  `/proc`), and its Kariz tunnels: the config files, systemd's state and the running
-  daemon's `kariz status`. A tunnel whose entry and exit are both connected is drawn on the
+  `/proc`), and its SorTUN tunnels: the config files, systemd's state and the running
+  daemon's `sortun status`. A tunnel whose entry and exit are both connected is drawn on the
   map, in the state its daemon reports.
-- **kariz-manager:** `panel install [--port N] [--host H]` (settings, database,
+- **sortun-manager:** `panel install [--port N] [--host H]` (settings, database,
   certificate, service, then the address, the certificate's fingerprint and a login link),
   `panel link`, `panel password`, `panel status`, `panel logs`, `panel uninstall`;
   `--agent CODE`, `agent status | logs | remove`; a "Web panel and agent" entry in the menu
   (`w`); `install` and `update` handle the panel binary and restart the panel and agent.
-- **`kariz::link`** in the core library (an authenticated mux session between two Kariz
+- **`sortun::link`** in the core library (an authenticated mux session between two SorTUN
   programs); the tunnels do not use it.
 
 ### Not yet (phase 12)
@@ -1335,7 +1356,7 @@ transport.
 
 ### Added
 
-- **`kariz status`** on either server: whether the other side is connected (sessions,
+- **`sortun status`** on either server: whether the other side is connected (sessions,
   for how long), the round-trip time, failed handshakes and the last error, and for each
   forwarded port the open connections, UDP flows and live rates up and down; on the exit
   side, the traffic to the targets, streams served and targets that could not be reached.
@@ -1349,12 +1370,12 @@ transport.
   counter per packet.
 - **Round-trip time** from the mux pings the sides already exchange (no wire change, so
   it works against older peers too), and from QUIC's own estimate.
-- **`kariz check --json`**: one document with the settings in effect, or the error with
+- **`sortun check --json`**: one document with the settings in effect, or the error with
   the setting it names (`key`) and, for TOML syntax errors, the `line` and `column`.
-  `kariz check -c -` reads the config from standard input.
-- **kariz-manager:** `status [NAME] [--watch]` runs `kariz status` for a tunnel, or for
+  `sortun check -c -` reads the config from standard input.
+- **sortun-manager:** `status [NAME] [--watch]` runs `sortun status` for a tunnel, or for
   every tunnel without a name; the menu's status action shows it too (systemd's view for
-  a stopped tunnel, or with Kariz older than 0.7).
+  a stopped tunnel, or with SorTUN older than 0.7).
 
 ### Changed
 
@@ -1364,12 +1385,12 @@ transport.
 
 ## 0.6.1 - 2026-09-29
 
-A kariz-manager release: the `kariz` binary is the same as 0.6.0 apart from its version
+A sortun-manager release: the `sortun` binary is the same as 0.6.0 apart from its version
 number, and works with the same peers (v0.6, v0.5 and v0.4, every transport). To update
-the manager on a server, fetch the script again into `/usr/local/bin/kariz-manager`
+the manager on a server, fetch the script again into `/usr/local/bin/sortun-manager`
 (docs/manager.md).
 
-### Changed (kariz-manager)
+### Changed (sortun-manager)
 
 - **A friendlier New tunnel wizard:** six numbered steps; every choice is a numbered
   list with a hint per option (type the number or the word, Enter for the default); a
@@ -1390,7 +1411,7 @@ the manager on a server, fetch the script again into `/usr/local/bin/kariz-manag
 
 ### Fixed
 
-- **kariz-manager's menu did not show its questions.** Opening the terminal for input
+- **sortun-manager's menu did not show its questions.** Opening the terminal for input
   also sent the script's error output to `/dev/null`, and the questions, warnings and
   errors went with it: *New tunnel* seemed to take no input. Every question now shows,
   and an answer that never comes ends the script instead of repeating the question.
@@ -1398,7 +1419,7 @@ the manager on a server, fetch the script again into `/usr/local/bin/kariz-manag
   printed list of tunnels for the tunnel's name. They now list the tunnels by number and
   take the number or the name.
 - Ctrl-C in a tunnel's log returns to the menu instead of ending it.
-- `kariz-manager edit` opens the editor on the terminal also when the script was piped
+- `sortun-manager edit` opens the editor on the terminal also when the script was piped
   in, and falls back to `vi` without `nano`.
 - The script runs when piped into bash (`curl ... | bash`); it used to exit silently.
 - The wizard checks the port, and asks again for an empty address, token or pin.
@@ -1407,43 +1428,43 @@ the manager on a server, fetch the script again into `/usr/local/bin/kariz-manag
 
 ## 0.6.0 - 2026-09-29
 
-Works with v0.5 and v0.4 over every transport. `kariz speedtest` needs the exit side at
+Works with v0.5 and v0.4 over every transport. `sortun speedtest` needs the exit side at
 v0.6 too (an older exit cannot answer the test streams).
 
 ### Added
 
 - **Releases for three architectures:** static musl builds for x86_64, aarch64 (ARM64
   servers and boards, Raspberry Pi 4 and 5) and armv7 (32-bit ARM), one archive each,
-  `kariz-<version>-<arch>-linux.tar.gz` with its SHA-256. CI builds the ARM targets and
+  `sortun-<version>-<arch>-linux.tar.gz` with its SHA-256. CI builds the ARM targets and
   runs the library tests for them under QEMU on every change.
-- **`kariz speedtest`:** measures download and upload speed, latency (idle and during
+- **`sortun speedtest`:** measures download and upload speed, latency (idle and during
   each transfer) and UDP loss and jitter, through the running tunnel's own sessions: the
   same transport, encryption, mux and profile as users' traffic. It works in both
   modes: the entry side's daemon serves a local control socket (`[control] socket`,
   default next to the config file, owner only, Linux only) and runs the test over its
   live sessions. Options: `--seconds`, `--streams`, `--no-udp`. The exit side answers
   the test streams (`tunnel.speedtest = false` turns that off; at most 32 at once) and
-  must be v0.6 or newer. `kariz-manager speedtest NAME`, and option 6 of its menu.
+  must be v0.6 or newer. `sortun-manager speedtest NAME`, and option 6 of its menu.
   See docs/speedtest.md.
-- **mimalloc** as the global allocator of the `kariz` binary (cargo feature
+- **mimalloc** as the global allocator of the `sortun` binary (cargo feature
   `mimalloc`, on by default). Static musl builds run 34 % faster on average across 28
   benchmark setups (25 to 100 % with mux, `wss`, `quic` and `kcp`; plain `tcp` is
-  unchanged), for about 2 MiB more memory idle (8.1 against 6.0 MiB): Kariz commits
+  unchanged), for about 2 MiB more memory idle (8.1 against 6.0 MiB): SorTUN commits
   mimalloc's arena on demand, which cut the idle 15.6 MiB of its default. Memory grows
   more with many idle UDP flows (+6 to +9 MiB per 1,000, against +4). Build with
   `--no-default-features --features quic,kcp` for the least memory.
-- **A startup banner and new log lines.** `kariz run` starts with the Kariz logo, the
+- **A startup banner and new log lines.** `sortun run` starts with the SorTUN logo, the
   version, the author and a summary of this side's setup. On a terminal, log lines
   carry the local time, coloured level badges and highlighted fields. Under systemd
   they carry priority prefixes instead, so `journalctl` highlights warnings and errors
   and `-p warning` filters them. `[log] color = "auto" | "always" | "never"`; `NO_COLOR`
   is respected.
-- **The manager script** (`scripts/kariz.sh`, installed as `kariz-manager`): a
+- **The manager script** (`scripts/sortun.sh`, installed as `sortun-manager`): a
   one-line install for x86_64, aarch64 and armv7, with the release's checksum checked.
   - A menu, and the same actions as commands: add, list, start / stop / restart,
     status, logs, edit (checked before it is applied), remove, update, uninstall.
-  - Each tunnel is `/etc/kariz/<name>.toml`, run by the systemd template
-    `kariz@<name>` (`systemd/kariz@.service`), so one server can run several.
+  - Each tunnel is `/etc/sortun/<name>.toml`, run by the systemd template
+    `sortun@<name>` (`systemd/sortun@.service`), so one server can run several.
   - Adding a tunnel prints the exact command for the other server. For `wss` the
     listening side makes a self-signed certificate and passes its pin along.
 
@@ -1456,7 +1477,7 @@ Works with v0.5 and v0.4 as before; the new settings only change the side they a
 - **More mux settings in `[tunnel.mux]`**, each defaulting to what it was before (the
   profile's value): `coalesce`, `ping_interval_secs` (default `tuning.keepalive_secs`;
   also QUIC's keep-alive), `datagram_buffer`, `datagram_queue` and `notsent_lowat` (0
-  turns it off). `kariz check` shows the values in effect.
+  turns it off). `sortun check` shows the values in effect.
 - **Documentation** in [`docs/`](docs/README.md): getting started, a configuration
   reference with every setting, transports, profiles, UDP and games, performance,
   security and troubleshooting.
@@ -1494,7 +1515,7 @@ it).
 - **DSCP:** `[tuning] dscp = "ef"` (or `af41`, `cs4`, ..., or 0-63) marks TCP tunnel
   sockets, KCP sockets and the exit's UDP sockets to targets. Off by default: most of
   the internet clears or ignores the mark. QUIC sockets are not marked (quinn sets the
-  TOS byte of every packet itself); `kariz check` says so.
+  TOS byte of every packet itself); `sortun check` says so.
 - **`[tunnel.kcp] datagrams`** (default `true`): `false` keeps UDP flows in the
   reliable stream, as in v0.4.
 - **Samples:** `entry-gaming.toml` / `exit-gaming.toml`.
@@ -1512,7 +1533,7 @@ it).
 - **The gaming profile turns FEC 10 / 3 on over `kcp`**, unless `[tunnel.kcp]` sets
   `fec_data` or `fec_parity` (0 and 0 turn it off). At 5 % loss 99 % of game packets
   came back instead of 90 %, and downloads next to the game went 2.3x faster.
-- `kariz check` shows each rule's duplication and the DSCP mark, and warns where they
+- `sortun check` shows each rule's duplication and the DSCP mark, and warns where they
   have no effect.
 - Roadmap: the `icmp` transport (phase 5) is dropped; the stealth profile and
   active-probe fallback are later work, not scheduled.
@@ -1590,14 +1611,14 @@ UDP flows, and the entry logs that the exit side does not support UDP).
 - **Samples and checks:**
   - `entry-udp-reverse.toml` / `exit-udp-reverse.toml` (WireGuard, a game server on
     TCP+UDP).
-  - `kariz check` shows UDP settings and warns when UDP is forwarded without mux.
+  - `sortun check` shows UDP settings and warns when UDP is forwarded without mux.
 - **Tests and benchmarks:**
   - A UDP echo scenario in every row of the end-to-end matrix; idle flows, max flows,
     UDP through nginx.
   - Benchmarks for packets per second, idle latency, and latency under load over a
     throttled link.
   - `scripts/rss.sh` measures UDP flows.
-  - `KARIZ_TEST_LOG=1` shows the sides' logs in end-to-end tests.
+  - `SORTUN_TEST_LOG=1` shows the sides' logs in end-to-end tests.
 
 ### Fixed
 
@@ -1641,8 +1662,8 @@ automatically.
   - Separate connect address and SNI, for CDN edge IPs.
   - The listener reloads `tls.cert` / `tls.key` when they change.
 - **Commands and checks:**
-  - `kariz pin <cert.pem>` prints a certificate's pin.
-  - `kariz check` shows the new settings and warns about `encryption = "none"`,
+  - `sortun pin <cert.pem>` prints a certificate's pin.
+  - `sortun check` shows the new settings and warns about `encryption = "none"`,
     `tls.insecure`, and keepalives above 90 s on WebSocket transports.
 - **Docs and samples:**
   - Samples for mux, `wss` with a pinned certificate, and `wss` through a CDN.

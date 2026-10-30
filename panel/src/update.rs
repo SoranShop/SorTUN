@@ -246,7 +246,7 @@ pub fn arch_name() -> Option<&'static str> {
 
 /// The assets of `tag` for `arch`: the archive, its checksum file and its signature.
 pub fn asset_names(tag: &str, arch: &str) -> [String; 3] {
-    let base = format!("kariz-{tag}-{arch}-linux.tar.gz");
+    let base = format!("sortun-{tag}-{arch}-linux.tar.gz");
     [
         base.clone(),
         format!("{base}.sha256"),
@@ -269,7 +269,7 @@ fn get(url: &str, limit: u64, local: bool) -> Result<Vec<u8>> {
         .get(url)
         .set(
             "User-Agent",
-            concat!("kariz-panel/", env!("CARGO_PKG_VERSION")),
+            concat!("sortun-panel/", env!("CARGO_PKG_VERSION")),
         )
         .set(
             "Accept",
@@ -305,7 +305,7 @@ pub fn fetch_releases(api: &str) -> Result<Vec<Release>> {
     Ok(releases)
 }
 
-/// Takes `kariz` and `kariz-panel` out of a release archive into `dir`, marked executable.
+/// Takes `sortun` and `sortun-panel` out of a release archive into `dir`, marked executable.
 /// Only those two files, straight under the archive's one top folder, are read.
 pub fn extract(archive: &[u8], dir: &Path) -> Result<()> {
     std::fs::create_dir_all(dir)?;
@@ -325,7 +325,7 @@ pub fn extract(archive: &[u8], dir: &Path) -> Result<()> {
             [_, last] => last.as_os_str().to_str().unwrap_or_default(),
             _ => continue,
         };
-        if !matches!(name, "kariz" | "kariz-panel") || !entry.header().entry_type().is_file() {
+        if !matches!(name, "sortun" | "sortun-panel") || !entry.header().entry_type().is_file() {
             continue;
         }
         let mut data = Vec::new();
@@ -398,7 +398,7 @@ pub fn download(
 #[derive(Debug, Clone)]
 pub struct Targets {
     pub panel: PathBuf,
-    pub kariz: PathBuf,
+    pub sortun: PathBuf,
 }
 
 /// What restarting and asking the panel is, so the swap can be tested without systemd.
@@ -458,8 +458,8 @@ pub fn apply(
         at: now,
     };
     let pairs = [
-        (stage.join("kariz-panel"), &targets.panel),
-        (stage.join("kariz"), &targets.kariz),
+        (stage.join("sortun-panel"), &targets.panel),
+        (stage.join("sortun"), &targets.sortun),
     ];
     for (new, _) in &pairs {
         if !new.is_file() {
@@ -573,17 +573,17 @@ pub async fn panel_version(listen: &str, path: &str, pin: &str) -> Result<String
         "127.0.0.1"
     };
     let tcp = tokio::net::TcpStream::connect(format!("{host}:{port}")).await?;
-    let tls = kariz::transport::tls::Client::new(
-        Some(&kariz::config::TlsConfig {
+    let tls = sortun::transport::tls::Client::new(
+        Some(&sortun::config::TlsConfig {
             pin_sha256: Some(pin.to_owned()),
             ..Default::default()
         }),
-        "kariz-panel",
+        "sortun-panel",
     )?;
     let mut stream = tls.connect(tcp).await?;
     stream
         .write_all(
-            format!("GET /{path}/api/version HTTP/1.1\r\nHost: kariz-panel\r\nConnection: close\r\n\r\n")
+            format!("GET /{path}/api/version HTTP/1.1\r\nHost: sortun-panel\r\nConnection: close\r\n\r\n")
                 .as_bytes(),
         )
         .await?;
@@ -689,7 +689,7 @@ mod tests {
     fn github_s_list_is_read_without_drafts() {
         let json = r#"[
             {"tag_name":"v0.11.0","body":"notes","prerelease":false,"draft":false,
-             "assets":[{"name":"kariz-v0.11.0-x86_64-linux.tar.gz","browser_download_url":"https://example.test/a"}]},
+             "assets":[{"name":"sortun-v0.11.0-x86_64-linux.tar.gz","browser_download_url":"https://example.test/a"}]},
             {"tag_name":"v0.12.0","prerelease":false,"draft":true,"assets":[]},
             {"tag_name":"nightly","prerelease":true,"assets":[]},
             {"tag_name":"v0.10.0-beta","prerelease":true,"assets":[]}
@@ -709,9 +709,9 @@ mod tests {
         assert_eq!(
             asset_names("v0.11.0", "aarch64"),
             [
-                "kariz-v0.11.0-aarch64-linux.tar.gz",
-                "kariz-v0.11.0-aarch64-linux.tar.gz.sha256",
-                "kariz-v0.11.0-aarch64-linux.tar.gz.sig"
+                "sortun-v0.11.0-aarch64-linux.tar.gz",
+                "sortun-v0.11.0-aarch64-linux.tar.gz.sha256",
+                "sortun-v0.11.0-aarch64-linux.tar.gz.sig"
             ]
         );
     }
@@ -735,11 +735,11 @@ mod tests {
     fn only_the_two_programs_are_taken_from_an_archive() {
         let dir = tempfile::tempdir().unwrap();
         let a = archive(&[
-            ("kariz-v1/kariz", b"core"),
-            ("kariz-v1/kariz-panel", b"panel"),
-            ("kariz-v1/README.md", b"docs"),
-            ("kariz-v1/scripts/kariz.sh", b"script"),
-            ("other-folder/deep/kariz", b"not this one"),
+            ("sortun-v1/sortun", b"core"),
+            ("sortun-v1/sortun-panel", b"panel"),
+            ("sortun-v1/README.md", b"docs"),
+            ("sortun-v1/scripts/sortun.sh", b"script"),
+            ("other-folder/deep/sortun", b"not this one"),
         ]);
         extract(&a, dir.path()).unwrap();
         let mut names: Vec<_> = std::fs::read_dir(dir.path())
@@ -747,14 +747,14 @@ mod tests {
             .map(|e| e.unwrap().file_name().into_string().unwrap())
             .collect();
         names.sort();
-        assert_eq!(names, ["kariz", "kariz-panel"]);
+        assert_eq!(names, ["sortun", "sortun-panel"]);
         assert_eq!(
-            std::fs::read(dir.path().join("kariz-panel")).unwrap(),
+            std::fs::read(dir.path().join("sortun-panel")).unwrap(),
             b"panel"
         );
         // a release without one of them is refused
         let dir2 = tempfile::tempdir().unwrap();
-        assert!(extract(&archive(&[("kariz-v1/kariz", b"core")]), dir2.path()).is_err());
+        assert!(extract(&archive(&[("sortun-v1/sortun", b"core")]), dir2.path()).is_err());
         assert!(extract(b"not an archive", dir2.path()).is_err());
     }
 
@@ -784,15 +784,15 @@ mod tests {
         let root = tempfile::tempdir().unwrap();
         let stage = root.path().join("stage");
         std::fs::create_dir_all(&stage).unwrap();
-        std::fs::write(stage.join("kariz-panel"), b"NEW panel").unwrap();
-        std::fs::write(stage.join("kariz"), b"NEW core").unwrap();
+        std::fs::write(stage.join("sortun-panel"), b"NEW panel").unwrap();
+        std::fs::write(stage.join("sortun"), b"NEW core").unwrap();
         let bin = root.path().join("bin");
         std::fs::create_dir_all(&bin).unwrap();
-        std::fs::write(bin.join("kariz-panel"), b"OLD panel").unwrap();
-        std::fs::write(bin.join("kariz"), b"OLD core").unwrap();
+        std::fs::write(bin.join("sortun-panel"), b"OLD panel").unwrap();
+        std::fs::write(bin.join("sortun"), b"OLD core").unwrap();
         let targets = Targets {
-            panel: bin.join("kariz-panel"),
-            kariz: bin.join("kariz"),
+            panel: bin.join("sortun-panel"),
+            sortun: bin.join("sortun"),
         };
         (root, stage, targets)
     }
@@ -821,9 +821,9 @@ mod tests {
         );
         assert!(o.ok && !o.rolled_back && o.error.is_none(), "{o:?}");
         assert_eq!(read(&t.panel), "NEW panel");
-        assert_eq!(read(&t.kariz), "NEW core");
+        assert_eq!(read(&t.sortun), "NEW core");
         assert_eq!(read(&previous(&t.panel)), "OLD panel");
-        assert_eq!(read(&previous(&t.kariz)), "OLD core");
+        assert_eq!(read(&previous(&t.sortun)), "OLD core");
         assert_eq!(host.restarts.get(), 1);
     }
 
@@ -848,7 +848,7 @@ mod tests {
         assert!(!o.ok && o.rolled_back, "{o:?}");
         assert!(o.error.unwrap().contains("did not answer"));
         assert_eq!(read(&t.panel), "OLD panel");
-        assert_eq!(read(&t.kariz), "OLD core");
+        assert_eq!(read(&t.sortun), "OLD core");
         assert_eq!(
             host.restarts.get(),
             2,
@@ -881,7 +881,7 @@ mod tests {
     #[test]
     fn nothing_is_replaced_when_a_staged_program_is_missing() {
         let (_root, stage, t) = setup();
-        std::fs::remove_file(stage.join("kariz")).unwrap();
+        std::fs::remove_file(stage.join("sortun")).unwrap();
         let host = Fake {
             restarts: Cell::new(0),
             answers_after: 1,
@@ -947,7 +947,7 @@ mod tests {
             header.set_mode(0o644);
             header.set_cksum();
             builder
-                .append_data(&mut header, format!("kariz-x/file{i}"), &b"x"[..])
+                .append_data(&mut header, format!("sortun-x/file{i}"), &b"x"[..])
                 .unwrap();
         }
         let tar = builder.into_inner().unwrap();

@@ -209,9 +209,9 @@ export function ServerFixDialog({ server, servers, agentsOn, onChanged, onClose 
         <div className="field">
           <span className="label">{t("fix.checkTitle")}</span>
           <span className="help">{t("fix.check1")}</span>
-          <CodeBlock text="kariz-manager agent status" />
+          <CodeBlock text="sortun-manager agent status" />
           <span className="help">{t("fix.check2")}</span>
-          <CodeBlock text="systemctl restart kariz-agent" />
+          <CodeBlock text="systemctl restart sortun-agent" />
           <span className="help">{t("fix.check3")}</span>
         </div>
       )}
@@ -373,12 +373,12 @@ export function ServerFixDialog({ server, servers, agentsOn, onChanged, onClose 
           )}
           <div className="field">
             <span className="label">{t("fix.run")}</span>
-            <CodeBlock text={`kariz-manager --agent ${code}`} />
+            <CodeBlock text={`sortun-manager --agent ${code}`} />
             <span className="help">{t("fix.runHelp")}</span>
             <span className="label" style={{ marginTop: "var(--sp-3)" }}>
               {t("fix.runFresh")}
             </span>
-            <CodeBlock text={`bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh) --agent ${code}`} />
+            <CodeBlock text={`bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh) --agent ${code}`} />
             {transport !== "auto" && <span className="help">{t("add.via", { t: t(`add.x.${transport}`) })}</span>}
             <span className="countdown">{back ? "" : t("add.valid", { m: digitsOf(mmss) })}</span>
           </div>

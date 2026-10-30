@@ -82,7 +82,7 @@ The *MTU* column of each link shows its MTU and where it came from (*measured*, 
 Click it to measure the path again, set an MTU of your own (576 up to the most the link allows),
 or go back to the default. The change is made on both servers at once and **in place**: the
 interface stays, so the tunnels over it keep their connections. On a server,
-`kariz-panel net pmtu ADDRESS` measures the path to another server by hand.
+`sortun-panel net pmtu ADDRESS` measures the path to another server by hand.
 
 Before 2.7 a GRE link had 1476, 4 bytes too many for its keyed header. A server that runs an
 older agent keeps 1476 (it could only change it by making the link again); once it runs 2.7 its
@@ -148,13 +148,13 @@ IPv6, between it and the panel server's IPv6 address (both need 2.7 or newer).
 
 **Over a VXLAN link** beside it does the same with a VXLAN link, for when GRE does not pass but
 UDP does: the link's addresses come from the first VXLAN network, or from a new one the panel
-makes (`kariz-vxlan`, UDP 4789, on the first free pool), and then only UDP to that network's
+makes (`sortun-vxlan`, UDP 4789, on the first free pool), and then only UDP to that network's
 port has to pass, both ways. The new server needs SorTUN 2.6 or newer, which the command installs.
 *The panel connects to it* and a server's *Edit* (*Across a private link*) have the same choice,
 GRE or VXLAN, for a new link.
 
 1. The panel lists the server (it shows *waiting for its agent*), gives the link between the two
-   a `/30` of a network (the first one there is; with none, it makes `kariz`, `10.77.0.0/16` or
+   a `/30` of a network (the first one there is; with none, it makes `sortun`, `10.77.0.0/16` or
    the next free pool), and makes **its own end of the GRE link now**, from its public address
    to the one you typed.
 2. You run the command it shows on the new server, as root (it installs SorTUN first if needed).
@@ -211,7 +211,7 @@ gone for good, *Delete anyway* removes the link; its agent cannot come back thro
 it again with a new code.
 
 A server removed from the panel while it is offline keeps its `kz-` interfaces (it is never asked
-again): remove its agent there (`kariz-manager`, remove the agent) and they go too.
+again): remove its agent there (`sortun-manager`, remove the agent) and they go too.
 
 ## On the servers
 
@@ -223,7 +223,7 @@ ADDR/30 dev kz-XXXXX`, `ip link set kz-XXXXX mtu 1472 up`; for VXLAN the first i
 encaplimit none` (or the VXLAN one with IPv6 ends). A new MTU is set with `ip link set ... mtu`
 alone. It only ever touches interfaces named `kz-` and up to eight small letters or digits; it
 takes a link as data, never a command.
-The links are kept in `net.toml` beside `agent.toml` (`/etc/kariz-panel/net.toml`), and the
+The links are kept in `net.toml` beside `agent.toml` (`/etc/sortun-panel/net.toml`), and the
 panel sends the whole list again whenever an agent connects, so a reboot, or a change made
 while a server was away, is put right by itself: links that are missing or changed are made,
 and links that are no longer wanted are removed.

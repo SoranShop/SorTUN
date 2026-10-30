@@ -96,5 +96,5 @@ cargo test --release --test tunnel game_traffic -- --ignored --nocapture   # gam
 scripts/rss.sh tcpmux 100                                                  # memory
 ```
 
-`KARIZ_BENCH_ONLY=kcp` limits `lossy_link` and `game_traffic` to rows whose name
-contains `kcp`. `KARIZ_BENCH_LOSS=1` runs one loss rate.
+`SORTUN_BENCH_ONLY=kcp` limits `lossy_link` and `game_traffic` to rows whose name
+contains `kcp`. `SORTUN_BENCH_LOSS=1` runs one loss rate.

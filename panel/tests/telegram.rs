@@ -5,9 +5,9 @@ use std::io::{Read, Write};
 use std::net::TcpListener;
 use std::sync::{Arc, Mutex};
 
-use kariz_panel::db::Db;
-use kariz_panel::hub::Hub;
-use kariz_panel::telegram::{self, Settings};
+use sortun_panel::db::Db;
+use sortun_panel::hub::Hub;
+use sortun_panel::telegram::{self, Settings};
 use serde_json::{json, Value};
 
 const TOKEN: &str = "123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw";
@@ -75,7 +75,7 @@ impl Fake {
 fn hub() -> (Arc<Hub>, Db, tempfile::TempDir) {
     let dir = tempfile::tempdir().unwrap();
     let db = Db::in_memory().unwrap();
-    let hub = Hub::new(db.clone(), dir.path().join("kariz"));
+    let hub = Hub::new(db.clone(), dir.path().join("sortun"));
     (hub, db, dir)
 }
 
@@ -177,7 +177,7 @@ async fn mute_silences_and_unmute_brings_it_back() {
 async fn the_test_button_reports_the_bot_and_sends_to_every_chat() {
     let fake = Fake::start(
         200,
-        json!({ "ok": true, "result": { "username": "my_kariz_bot" } }),
+        json!({ "ok": true, "result": { "username": "my_sortun_bot" } }),
     );
     let (hub, db, _dir) = hub();
     let mut s = configured(&db, &fake);
@@ -192,7 +192,7 @@ async fn the_test_button_reports_the_bot_and_sends_to_every_chat() {
         },
     ];
     s.save(&db).unwrap();
-    assert_eq!(telegram::check(&hub).await.unwrap(), "my_kariz_bot");
+    assert_eq!(telegram::check(&hub).await.unwrap(), "my_sortun_bot");
     let to: Vec<i64> = texts(&fake).iter().map(|(c, _)| *c).collect();
     assert_eq!(to, vec![1, 2]);
 }

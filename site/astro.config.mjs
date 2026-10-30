@@ -25,5 +25,5 @@ export default defineConfig({
       defaultColor: false,
     },
   },
-  vite: { server: { fs: { allow: [".."] } }, define: { __KARIZ_VERSION__: JSON.stringify(version) } },
+  vite: { server: { fs: { allow: [".."] } }, define: { __SORTUN_VERSION__: JSON.stringify(version) } },
 });

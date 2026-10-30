@@ -790,12 +790,12 @@ function AddServer({ servers, agentsOn, onClose }: { servers: ServerInfo[]; agen
           )}
           <div className="field">
             <span className="label">{t("add.run")}</span>
-            <CodeBlock text={`bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh) --agent ${code}`} />
+            <CodeBlock text={`bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh) --agent ${code}`} />
             <span className="help">{t(gre && rev ? "add.rev.gre.runHelp" : gre ? "add.gre.runHelp" : rev ? "add.rev.runHelp" : "add.runHelp", { kind: kindLabel(gre?.kind) })}</span>
             <span className="label" style={{ marginTop: "var(--sp-3)" }}>
               {t("add.runInstalled")}
             </span>
-            <CodeBlock text={`kariz-manager --agent ${code}`} />
+            <CodeBlock text={`sortun-manager --agent ${code}`} />
             {(!gre || rev) && transport !== "auto" && <span className="help">{t("add.via", { t: t(`add.x.${transport}`) })}</span>}
             <span className="countdown">{joined ? "" : t("add.valid", { m: digitsOf(mmss) })}</span>
           </div>
@@ -821,7 +821,7 @@ function AddServer({ servers, agentsOn, onClose }: { servers: ServerInfo[]; agen
 }
 
 type ServerView = "cards" | "rows";
-const VIEW_KEY = "kariz.servers.view";
+const VIEW_KEY = "sortun.servers.view";
 
 function savedView(): ServerView {
   try {

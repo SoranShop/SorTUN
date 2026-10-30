@@ -17,7 +17,7 @@ protocol = "udp"                  # or "tcp+udp" for both on one port
 - **Flows end after `tuning.udp_timeout_secs`** (default 60) without packets.
   `tuning.udp_max_flows` (default 4096 per rule) limits clients.
 - **Use mux for UDP.** Without it, every flow needs a whole tunnel connection, and
-  `kariz check` warns.
+  `sortun check` warns.
 
 How a packet travels depends on the transport:
 

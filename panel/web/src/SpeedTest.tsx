@@ -52,7 +52,7 @@ interface Partial {
   udp?: { sent: number; received: number };
 }
 
-const lastKey = (name: string) => `kariz.speed.${name}`;
+const lastKey = (name: string) => `sortun.speed.${name}`;
 function readLast(name: string): Last | null {
   try {
     const v = JSON.parse(localStorage.getItem(lastKey(name)) ?? "null");

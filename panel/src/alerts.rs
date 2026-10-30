@@ -21,7 +21,7 @@
 
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use kariz::stats::{ProbeOutcome, ProbeStatus};
+use sortun::stats::{ProbeOutcome, ProbeStatus};
 
 use crate::hub::ServerView;
 
@@ -584,12 +584,12 @@ pub(crate) mod tests {
     use super::*;
     use crate::hub::TunnelView;
     use crate::wire::TunnelInfo;
-    use kariz::stats::{PeerStatus, ProbeOutcome, ProbeStatus, Status, Totals};
+    use sortun::stats::{PeerStatus, ProbeOutcome, ProbeStatus, Status, Totals};
 
     pub(crate) fn status(connected: bool) -> Status {
         Status {
             status_version: 1,
-            kariz: "1".into(),
+            sortun: "1".into(),
             role: "entry".into(),
             mode: "reverse".into(),
             transport: "tcpmux".into(),

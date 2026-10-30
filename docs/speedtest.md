@@ -1,12 +1,12 @@
 # Speed test
 
-`kariz speedtest` measures what a tunnel really gives you: download and upload speed,
+`sortun speedtest` measures what a tunnel really gives you: download and upload speed,
 latency (idle and under load), and UDP loss and jitter. It sends its test traffic **through
 the running tunnel**, over the same transport, encryption, mux and profile as your
 users' traffic, so the numbers are the tunnel's, not the raw network's.
 
 ```bash
-kariz speedtest -c /etc/kariz/main.toml
+sortun speedtest -c /etc/sortun/main.toml
 ```
 
 In the web panel it is a button on the tunnel's page ([Using the panel](using-the-panel.md)).
@@ -29,9 +29,9 @@ In the web panel it is a button on the tunnel's page ([Using the panel](using-th
 ## Run it on the entry side
 
 The entry is the server users connect to. It works in **both modes**, reverse and direct,
-because the test runs inside the entry's own daemon: `kariz speedtest` connects to the
+because the test runs inside the entry's own daemon: `sortun speedtest` connects to the
 running daemon over a local socket and asks it to run the test through its live sessions.
-So the tunnel has to be up (`kariz run`, or its service), and the command needs the same
+So the tunnel has to be up (`sortun run`, or its service), and the command needs the same
 config file as the daemon.
 
 On the exit side the command explains this and stops.
@@ -52,7 +52,7 @@ Loss is coloured: green under 1 %, yellow up to 5 %, red above.
 
 | Option | Meaning |
 |---|---|
-| `-c, --config FILE` | the tunnel's config (default `/etc/kariz/config.toml`) |
+| `-c, --config FILE` | the tunnel's config (default `/etc/sortun/config.toml`) |
 | `--seconds N` | length of the download and upload phases, 1-60 (default 10) |
 | `--streams N` | parallel streams in those phases, 1-16 (default 4) |
 | `--no-udp` | skip the UDP test |
@@ -81,7 +81,7 @@ A whole test takes about `2 + 2 x seconds + 7` seconds.
   the command says so. `tunnel.speedtest = false` on the exit turns the answering off.
   The exit serves at most 32 test streams at once and ends each one after two minutes.
 - **The control socket** is a Unix socket next to the config file
-  (`/etc/kariz/main.toml` gives `/etc/kariz/main.sock`), readable only by its owner. Both
-  sides have one since v0.7, for `kariz status`; the exit's answers no speed tests.
+  (`/etc/sortun/main.toml` gives `/etc/sortun/main.sock`), readable only by its owner. Both
+  sides have one since v0.7, for `sortun status`; the exit's answers no speed tests.
   `[control] socket = "..."` puts it elsewhere. If it cannot be made, the tunnel runs on
   without it and logs a warning. It exists on Linux only.

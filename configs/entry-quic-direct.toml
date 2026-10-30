@@ -11,7 +11,7 @@ profile = "balanced"
 [tunnel]
 transport = "quic"                 # mux is always on; encryption is QUIC's own TLS 1.3
 remote = "EXIT_SERVER_IP:443"
-token = "CHANGE-ME-run-kariz-token"
+token = "CHANGE-ME-run-sortun-token"
 
 [tunnel.quic]
 congestion = "cubic"               # cubic | bbr | newreno; bbr keeps the rate on lossy links

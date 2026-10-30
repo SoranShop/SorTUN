@@ -1,4 +1,4 @@
-//! The Kariz web panel.
+//! The SorTUN web panel.
 
 pub mod agent;
 pub mod agent_ports;
@@ -36,17 +36,17 @@ pub mod wire;
 
 use std::path::Path;
 
-/// This build's version. `KARIZ_BUILD_VERSION` at build time overrides Cargo's (the CI test
+/// This build's version. `SORTUN_BUILD_VERSION` at build time overrides Cargo's (the CI test
 /// of updating builds a second panel that calls itself newer).
 pub fn version() -> &'static str {
-    option_env!("KARIZ_BUILD_VERSION").unwrap_or(env!("CARGO_PKG_VERSION"))
+    option_env!("SORTUN_BUILD_VERSION").unwrap_or(env!("CARGO_PKG_VERSION"))
 }
 
 use anyhow::{Context, Result};
 
 use config::{random_hex, random_port, Config};
 
-/// What `kariz-panel init` made.
+/// What `sortun-panel init` made.
 pub struct Installed {
     pub config: Config,
     pub fingerprint: String,
@@ -76,7 +76,7 @@ pub fn init_with_cert(
             path: format!("k-{}", random_hex(4)?),
             data_dir: data_dir.to_path_buf(),
             agent_listen: Some(format!("0.0.0.0:{}", random_port()?)),
-            kariz_dir: std::path::PathBuf::from("/etc/kariz"),
+            sortun_dir: std::path::PathBuf::from("/etc/sortun"),
             services: Default::default(),
             cert_file,
             key_file,

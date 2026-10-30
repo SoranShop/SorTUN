@@ -15,7 +15,7 @@ export default defineConfig({
     cssCodeSplit: false,
   },
   server: {
-    // `npm run dev` talks to a panel running locally (kariz-panel serve).
+    // `npm run dev` talks to a panel running locally (sortun-panel serve).
     proxy: { "/api": { target: "https://127.0.0.1:28443", secure: false } },
   },
 });

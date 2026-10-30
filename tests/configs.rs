@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use kariz::config::{Config, Role};
+use sortun::config::{Config, Role};
 
 /// Parses a sample, with its placeholder token replaced (validation rejects it).
 fn load(path: &Path) -> Config {
@@ -12,7 +12,7 @@ fn load(path: &Path) -> Config {
         "{}: keep the placeholder token",
         path.display()
     );
-    let text = text.replace("CHANGE-ME-run-kariz-token", "sample-token-0123456789abcdef");
+    let text = text.replace("CHANGE-ME-run-sortun-token", "sample-token-0123456789abcdef");
     Config::parse(&text).unwrap_or_else(|e| panic!("{}: {e:#}", path.display()))
 }
 

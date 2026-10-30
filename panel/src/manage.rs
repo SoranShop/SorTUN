@@ -10,13 +10,13 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context, Result};
-use kariz::config::{mode_name, role_name, Config, Role};
+use sortun::config::{mode_name, role_name, Config, Role};
 
 use crate::wire::{CheckReply, ForwardInfo, PortOwner, Spec, SpeedReply, TextReply};
 
 const PLACEHOLDER_TOKEN: &str = "0000000000000000000000000000000000000000000000000000";
 
-/// A tunnel's name is its file name and its service (`kariz@NAME`): small letters, digits
+/// A tunnel's name is its file name and its service (`sortun@NAME`): small letters, digits
 /// and dashes, and it starts with a letter or a digit.
 pub fn valid_name(name: &str) -> bool {
     let bytes = name.as_bytes();
@@ -366,7 +366,7 @@ pub fn put(dir: &Path, spec: &Spec) -> Result<Option<String>> {
                     key.display()
                 );
             }
-            kariz::transport::tls::acceptor(&cert, &key)
+            sortun::transport::tls::acceptor(&cert, &key)
                 .map_err(|e| anyhow::anyhow!("the certificate cannot be used: {e}"))?;
             None
         }
@@ -414,7 +414,7 @@ pub fn get(dir: &Path, name: &str) -> Result<Spec> {
         pool: Some(u32::try_from(c.tunnel.pool).unwrap_or(8)),
         ws_path: c.tunnel.ws.as_ref().map(|w| w.path.clone()),
         ws_host: c.tunnel.ws.as_ref().and_then(|w| w.host.clone()),
-        encryption: (c.tunnel.encryption != kariz::config::Encryption::Auto)
+        encryption: (c.tunnel.encryption != sortun::config::Encryption::Auto)
             .then(|| c.tunnel.encryption.name().to_owned()),
         quic_obfs: c.tunnel.quic.as_ref().is_some_and(|q| q.obfs),
         max_conns_per_ip: c.tuning.max_conns_per_ip.filter(|v| *v > 0),
@@ -621,7 +621,7 @@ pub fn ctl_args(name: &str, action: &str) -> Result<Vec<String>> {
     if !valid_name(name) {
         bail!("a tunnel name is 1 to 32 characters: small letters, digits and dashes");
     }
-    let unit = format!("kariz@{name}");
+    let unit = format!("sortun@{name}");
     Ok(match action {
         "start" | "stop" | "restart" => vec![action.to_owned(), unit],
         "enable" | "disable" => vec![action.to_owned(), "--now".to_owned(), unit],
@@ -643,13 +643,13 @@ pub(crate) async fn run(program: &str, args: &[String], limit: Duration) -> Resu
     Ok((output.status.success(), text))
 }
 
-/// The program that gets certificates (the manager script, installed with Kariz).
-const MANAGER: &str = "/usr/local/bin/kariz-manager";
+/// The program that gets certificates (the manager script, installed with SorTUN).
+const MANAGER: &str = "/usr/local/bin/sortun-manager";
 
 /// The manager script of this release. An update swaps the programs but not the script, so
 /// the installed one can be older than the commands sent to it (one without `tunnel-cert`
 /// only prints its usage).
-const MANAGER_SCRIPT: &str = include_str!("../../scripts/kariz.sh");
+const MANAGER_SCRIPT: &str = include_str!("../../scripts/sortun.sh");
 
 /// Makes the installed manager the one of this release, when it is missing or different.
 fn sync_manager(path: &Path) -> Result<()> {
@@ -677,7 +677,7 @@ fn sync_manager(path: &Path) -> Result<()> {
 pub fn manager_in_place(services: ServiceKind) {
     if !cfg!(target_os = "linux")
         || services != ServiceKind::Systemd
-        || std::env::var_os("KARIZ_MANAGER").is_some()
+        || std::env::var_os("SORTUN_MANAGER").is_some()
     {
         return;
     }
@@ -686,14 +686,14 @@ pub fn manager_in_place(services: ServiceKind) {
         return;
     }
     match sync_manager(path) {
-        Ok(()) => tracing::info!("put the kariz-manager script of this release in place"),
+        Ok(()) => tracing::info!("put the sortun-manager script of this release in place"),
         Err(e) => tracing::warn!("the manager script could not be updated: {e:#}"),
     }
 }
 
 /// The manager's timer for `panel heal`: when the server's IP address changes and the panel's
 /// certificate was for the old one, it gets one for the new address by itself.
-const HEAL_TIMER: &str = "/etc/systemd/system/kariz-panel-heal.timer";
+const HEAL_TIMER: &str = "/etc/systemd/system/sortun-panel-heal.timer";
 
 /// Whether the panel's Let's Encrypt certificate (the manager keeps what it is for in
 /// `domain`, next to the settings) has no `panel heal` timer yet: a panel set up before the
@@ -707,7 +707,7 @@ fn heal_timer_missing(domain: &Path, timer: &Path) -> bool {
 /// panel gets it without the manager being run by hand. Nothing when the timer is there; a
 /// failure only goes to the log.
 pub async fn ensure_heal_timer(config: &Path) {
-    if !cfg!(target_os = "linux") || std::env::var_os("KARIZ_MANAGER").is_some() {
+    if !cfg!(target_os = "linux") || std::env::var_os("SORTUN_MANAGER").is_some() {
         return;
     }
     let domain = config.with_file_name("domain");
@@ -722,9 +722,9 @@ pub async fn ensure_heal_timer(config: &Path) {
             tracing::info!("set up the timer that follows a new IP address of this server")
         }
         Ok((false, out)) => {
-            tracing::warn!("kariz-manager panel heal-setup failed: {}", out.trim())
+            tracing::warn!("sortun-manager panel heal-setup failed: {}", out.trim())
         }
-        Err(e) => tracing::warn!("kariz-manager panel heal-setup failed: {e:#}"),
+        Err(e) => tracing::warn!("sortun-manager panel heal-setup failed: {e:#}"),
     }
 }
 
@@ -771,7 +771,7 @@ pub async fn issue_cert(host: &str, email: Option<&str>) -> crate::wire::CertRep
             return failed("bad_email".into());
         }
     }
-    let program = match std::env::var("KARIZ_MANAGER") {
+    let program = match std::env::var("SORTUN_MANAGER") {
         Ok(program) => program,
         Err(_) => {
             if let Err(e) = sync_manager(Path::new(MANAGER)) {
@@ -845,7 +845,7 @@ impl ServiceKind {
     pub fn services(self, dir: &Path) -> std::sync::Arc<dyn Services> {
         match self {
             Self::Systemd => std::sync::Arc::new(Systemd),
-            Self::Process => std::sync::Arc::new(Processes::new(dir, &kariz_binary())),
+            Self::Process => std::sync::Arc::new(Processes::new(dir, &sortun_binary())),
         }
     }
 }
@@ -863,7 +863,7 @@ pub trait Services: Send + Sync {
     fn active(&self, name: String) -> Fut<Option<bool>>;
 }
 
-/// The services of a Linux server with systemd: `kariz@NAME`.
+/// The services of a Linux server with systemd: `sortun@NAME`.
 pub struct Systemd;
 
 impl Services for Systemd {
@@ -885,7 +885,7 @@ impl Services for Systemd {
             let args = [
                 "is-active".to_owned(),
                 "--quiet".to_owned(),
-                format!("kariz@{name}"),
+                format!("sortun@{name}"),
             ];
             match run("systemctl", &args, Duration::from_secs(3)).await {
                 Ok((ok, _)) => Some(ok),
@@ -998,7 +998,7 @@ pub async fn logs(name: &str, lines: u32) -> TextReply {
     }
     let args = vec![
         "-u".to_owned(),
-        format!("kariz@{name}"),
+        format!("sortun@{name}"),
         "-n".to_owned(),
         lines.clamp(1, 1000).to_string(),
         "--no-pager".to_owned(),
@@ -1016,20 +1016,20 @@ pub async fn logs(name: &str, lines: u32) -> TextReply {
     }
 }
 
-/// The `kariz` program: beside this one, or where the installer puts it.
-pub fn kariz_binary() -> PathBuf {
+/// The `sortun` program: beside this one, or where the installer puts it.
+pub fn sortun_binary() -> PathBuf {
     std::env::current_exe()
         .ok()
         .and_then(|p| {
             p.parent()
-                .map(|d| d.join(format!("kariz{}", std::env::consts::EXE_SUFFIX)))
+                .map(|d| d.join(format!("sortun{}", std::env::consts::EXE_SUFFIX)))
         })
         .filter(|p| p.exists())
-        .unwrap_or_else(|| PathBuf::from("/usr/local/bin/kariz"))
+        .unwrap_or_else(|| PathBuf::from("/usr/local/bin/sortun"))
 }
 
 /// Runs the tunnel's speed test through its running daemon (the control socket, as
-/// `kariz speedtest` does) and returns the numbers.
+/// `sortun speedtest` does) and returns the numbers.
 pub async fn speedtest(
     dir: &Path,
     name: &str,
@@ -1047,16 +1047,16 @@ pub fn speedtest_setup(
     seconds: u32,
     streams: u32,
     udp: bool,
-) -> Result<(Config, kariz::speedtest::Options)> {
+) -> Result<(Config, sortun::speedtest::Options)> {
     let path = config_path(dir, name)?;
     let config = match Config::load(&path) {
         Ok(c) if c.role == Role::Entry => c,
         Ok(_) => bail!("the speed test runs on the entry side"),
         Err(e) => return Err(e),
     };
-    let options = kariz::speedtest::Options {
-        seconds: u64::from(seconds.clamp(1, kariz::speedtest::MAX_SECONDS as u32)),
-        streams: (streams as usize).clamp(1, kariz::speedtest::MAX_STREAMS),
+    let options = sortun::speedtest::Options {
+        seconds: u64::from(seconds.clamp(1, sortun::speedtest::MAX_SECONDS as u32)),
+        streams: (streams as usize).clamp(1, sortun::speedtest::MAX_STREAMS),
         udp,
     };
     Ok((config, options))
@@ -1097,24 +1097,24 @@ pub async fn speedtest_with(
 #[cfg(unix)]
 async fn measure(
     config: &Config,
-    options: kariz::speedtest::Options,
+    options: sortun::speedtest::Options,
     on_progress: impl FnMut(&str),
-) -> Result<kariz::speedtest::Report> {
+) -> Result<sortun::speedtest::Report> {
     let socket = config
         .control_socket()
         .context("this tunnel has no control socket")?;
-    let connection = kariz::control::connect(&socket)
+    let connection = sortun::control::connect(&socket)
         .await
         .context("the tunnel is not running")?;
-    Ok(kariz::control::request(connection, options, on_progress).await?)
+    Ok(sortun::control::request(connection, options, on_progress).await?)
 }
 
 #[cfg(not(unix))]
 async fn measure(
     _: &Config,
-    _: kariz::speedtest::Options,
+    _: sortun::speedtest::Options,
     _: impl FnMut(&str),
-) -> Result<kariz::speedtest::Report> {
+) -> Result<sortun::speedtest::Report> {
     bail!("the speed test needs a Linux server")
 }
 
@@ -1147,7 +1147,7 @@ mod tests {
             let mut b = [0u8; 8];
             getrandom::fill(&mut b).unwrap();
             let p = std::env::temp_dir().join(format!(
-                "kariz-manage-{}",
+                "sortun-manage-{}",
                 b.iter().map(|x| format!("{x:02x}")).collect::<String>()
             ));
             std::fs::create_dir_all(&p).unwrap();
@@ -1278,13 +1278,13 @@ mod tests {
 
     #[test]
     fn only_pem_files_can_be_named_as_a_certificate() {
-        let live = "/etc/letsencrypt/live/kariz-panel-tun-example-com/";
+        let live = "/etc/letsencrypt/live/sortun-panel-tun-example-com/";
         assert!(valid_cert_path(&format!("{live}fullchain.pem")));
         assert!(valid_cert_path(&format!("{live}privkey.pem")));
         assert!(lets_encrypt_path(&format!("{live}fullchain.pem")));
         // The admin's own, wherever they keep them.
         for own in [
-            "/etc/ssl/kariz/tun.crt",
+            "/etc/ssl/sortun/tun.crt",
             "/etc/ssl/private/tun.key",
             "/root/.acme.sh/tun.example.com_ecc/fullchain.cer",
         ] {
@@ -1297,7 +1297,7 @@ mod tests {
             "/etc/letsencrypt/live/../../shadow.pem",
             "/etc/letsencrypt/live/x/key.txt",
             "/etc/letsencrypt/live/x y/key.pem",
-            "/etc/kariz/main.toml",
+            "/etc/sortun/main.toml",
             "/proc/self/environ.pem",
             "/dev/stdin.key",
             "//etc/x.pem",
@@ -1326,7 +1326,7 @@ mod tests {
     #[test]
     fn a_wss_side_can_use_a_real_certificate_and_pins_nothing() {
         let d = Dir::new();
-        let live = "/etc/letsencrypt/live/kariz-panel-tun-example-com/";
+        let live = "/etc/letsencrypt/live/sortun-panel-tun-example-com/";
         let mut s = spec("real");
         s.transport = "wss".into();
         s.tls_cert = Some(format!("{live}fullchain.pem"));
@@ -1454,7 +1454,7 @@ mod tests {
             "{text}"
         );
         // The core reads it.
-        let config = kariz::config::Config::parse(&text).unwrap();
+        let config = sortun::config::Config::parse(&text).unwrap();
         assert_eq!(config.tuning().udp.max_flows, 8192);
         // Left out: no [tuning] at all, and an older agent is not sent the field.
         s.udp_max_flows = None;
@@ -1505,7 +1505,7 @@ mod tests {
         );
         let config = Config::load(&d.0.join("proxied.toml")).unwrap();
         let written: Vec<_> = config.forward.iter().map(|f| f.proxy_protocol).collect();
-        let v2 = Some(kariz::config::ProxyVersion::V2);
+        let v2 = Some(sortun::config::ProxyVersion::V2);
         assert_eq!(written, [v2, v2, None], "nothing on the UDP rule");
         // Only v1 or v2: the agent's config check refuses anything else.
         s.proxy_protocol = Some("v3".into());
@@ -1625,7 +1625,7 @@ mod tests {
         assert_eq!(r.conflicts[0].process.as_deref(), Some("nginx"));
         // once the tunnel exists, its own listening ports are not a conflict on an edit
         put(&d.0, &spec("main")).unwrap();
-        let held = [owner("tcp", 8443, "kariz"), owner("tcp", 3080, "kariz")];
+        let held = [owner("tcp", 8443, "sortun"), owner("tcp", 3080, "sortun")];
         assert!(check(&d.0, &held, &spec("main")).ok);
         assert!(!check(&d.0, &held, &spec("second")).ok);
     }
@@ -1657,11 +1657,11 @@ mod tests {
     fn service_actions_are_a_short_list() {
         assert_eq!(
             ctl_args("main", "restart").unwrap(),
-            vec!["restart", "kariz@main"]
+            vec!["restart", "sortun@main"]
         );
         assert_eq!(
             ctl_args("main", "enable").unwrap(),
-            vec!["enable", "--now", "kariz@main"]
+            vec!["enable", "--now", "sortun@main"]
         );
         assert!(ctl_args("main", "mask").is_err());
         assert!(ctl_args("main; reboot", "start").is_err());
@@ -1682,7 +1682,7 @@ mod tests {
     #[test]
     fn an_old_or_missing_manager_is_replaced_by_this_release_s() {
         let d = Dir::new();
-        let path = d.0.join("kariz-manager");
+        let path = d.0.join("sortun-manager");
         assert!(MANAGER_SCRIPT.contains("tunnel-cert) shift && cmd_tunnel_cert"));
         sync_manager(&path).unwrap();
         assert_eq!(std::fs::read_to_string(&path).unwrap(), MANAGER_SCRIPT);
@@ -1690,20 +1690,20 @@ mod tests {
         std::fs::write(
             &path,
             "#!/usr/bin/env bash
-echo Usage: kariz-manager
+echo Usage: sortun-manager
 ",
         )
         .unwrap();
         sync_manager(&path).unwrap();
         assert_eq!(std::fs::read_to_string(&path).unwrap(), MANAGER_SCRIPT);
         sync_manager(&path).unwrap();
-        assert!(!d.0.join("kariz-manager.new").exists());
+        assert!(!d.0.join("sortun-manager.new").exists());
     }
 
     #[test]
     fn a_lets_encrypt_panel_without_the_heal_timer_gets_it() {
         let d = Dir::new();
-        let (domain, timer) = (d.0.join("domain"), d.0.join("kariz-panel-heal.timer"));
+        let (domain, timer) = (d.0.join("domain"), d.0.join("sortun-panel-heal.timer"));
         assert!(MANAGER_SCRIPT.contains("heal-setup)"));
         // A certificate of your own: the manager keeps no `domain`.
         assert!(!heal_timer_missing(&domain, &timer));

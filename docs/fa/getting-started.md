@@ -28,7 +28,7 @@ flowchart LR
 پنل را با اسکریپت مدیر روی یک سرور نصب کنید، سرورهای دیگر را به آن وصل کنید و تانل‌ها را در مرورگر بسازید. پنل همهٔ مرحله‌های پایین را روی هر دو سرور خودش انجام می‌دهد (کانفیگ‌ها، توکن، سرویس systemd و بررسی این‌که تانل وصل شده) و اگر مرحله‌ای خراب شود همه را به حالت قبل برمی‌گرداند:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh)
 ```
 
 در منو **۳** (نصب پنل وب) را انتخاب کنید و لینکی را که چاپ می‌شود باز کنید. بعد [کار با پنل](using-the-panel.md) را بخوانید؛ منو هم در [اسکریپت مدیر](manager.md) توضیح داده شده است.
@@ -41,7 +41,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/script
 
 ```bash
 cargo build --release
-sudo cp target/release/kariz /usr/local/bin/
+sudo cp target/release/sortun /usr/local/bin/
 ```
 
 این کار را روی هر دو سرور انجام دهید.
@@ -49,7 +49,7 @@ sudo cp target/release/kariz /usr/local/bin/
 ## ۲. ساخت توکن
 
 ```bash
-kariz token
+sortun token
 ```
 
 توکن تنها رازِ تانل است. هر دو سمت یک توکن دارند و هرکس آن را داشته باشد می‌تواند از تانل استفاده کند. توکن هیچ‌وقت روی شبکه فرستاده نمی‌شود.
@@ -73,7 +73,7 @@ kariz token
 یک جفت حداقلی در حالت reverse:
 
 ```toml
-# /etc/kariz/config.toml on the entry
+# /etc/sortun/config.toml on the entry
 role = "entry"
 mode = "reverse"
 
@@ -88,7 +88,7 @@ target = "127.0.0.1:443"           # dialed by the exit
 ```
 
 ```toml
-# /etc/kariz/config.toml on the exit
+# /etc/sortun/config.toml on the exit
 role = "exit"
 mode = "reverse"
 
@@ -103,8 +103,8 @@ token = "PASTE-THE-TOKEN"
 ## ۴. بررسی و اجرا
 
 ```bash
-kariz check -c /etc/kariz/config.toml    # validates, prints a summary and warnings
-kariz run -c /etc/kariz/config.toml
+sortun check -c /etc/sortun/config.toml    # validates, prints a summary and warnings
+sortun run -c /etc/sortun/config.toml
 ```
 
 بهتر است اول سمتی را که گوش می‌دهد راه بیندازید، ولی ترتیب مهم نیست: سمتی که وصل می‌شود تا موفق شود دوباره تلاش می‌کند.
@@ -112,12 +112,12 @@ kariz run -c /etc/kariz/config.toml
 ## ۵. اجرا به‌صورت سرویس
 
 ```bash
-sudo cp systemd/kariz.service /etc/systemd/system/
-sudo systemctl enable --now kariz
-journalctl -u kariz -f
+sudo cp systemd/sortun.service /etc/systemd/system/
+sudo systemctl enable --now sortun
+journalctl -u sortun -f
 ```
 
-این unit فایل `/etc/kariz/config.toml` را می‌خواند، اگر SorTUN از کار بیفتد دوباره راهش می‌اندازد و برای پورت‌های زیر ۱۰۲۴ دسترسی لازم را می‌دهد.
+این unit فایل `/etc/sortun/config.toml` را می‌خواند، اگر SorTUN از کار بیفتد دوباره راهش می‌اندازد و برای پورت‌های زیر ۱۰۲۴ دسترسی لازم را می‌دهد.
 
 ## بعد از این
 

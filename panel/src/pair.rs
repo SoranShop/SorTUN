@@ -1720,14 +1720,14 @@ mod tests {
             r.tls_key = Some(cert.replace(".crt", ".key").replace("fullchain", "privkey"));
             r
         };
-        let own = with_cert("/etc/ssl/kariz/tun.crt");
+        let own = with_cert("/etc/ssl/sortun/tun.crt");
         assert_eq!(
             own.require_version("a", "2.6.1").unwrap_err().to_string(),
             "old_agent_cert:a:2.6.1"
         );
         assert!(own.require_version("a", "2.7.0-beta.1").is_ok());
         assert!(own.require_version("b", "2.6.1").is_ok());
-        let le = with_cert("/etc/letsencrypt/live/kariz-panel-t-example-com/fullchain.pem");
+        let le = with_cert("/etc/letsencrypt/live/sortun-panel-t-example-com/fullchain.pem");
         assert!(le.require_version("a", "2.6.1").is_ok());
         // The core takes 1 to 65536.
         assert!(req(Some(65536)).validate().is_ok());
@@ -1863,9 +1863,9 @@ mod tests {
             udp_max_flows: None,
             proxy_protocol: None,
             tls_cert: real
-                .then(|| "/etc/letsencrypt/live/kariz-panel-t-example-com/fullchain.pem".into()),
+                .then(|| "/etc/letsencrypt/live/sortun-panel-t-example-com/fullchain.pem".into()),
             tls_key: real
-                .then(|| "/etc/letsencrypt/live/kariz-panel-t-example-com/privkey.pem".into()),
+                .then(|| "/etc/letsencrypt/live/sortun-panel-t-example-com/privkey.pem".into()),
             tls_host: real.then(|| "T.example.com".into()),
             forwards: Vec::new(),
             rotate: false,

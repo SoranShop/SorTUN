@@ -27,7 +27,7 @@ jobs:
       - run: cargo clippy --lib --bins --no-default-features --features kcp -- -D warnings
       # The web panel (panel/); without its web app built, the binary embeds a placeholder
       # page, which is all a lint needs.
-      - run: cargo clippy -p kariz-panel --all-targets -- -D warnings
+      - run: cargo clippy -p sortun-panel --all-targets -- -D warnings
 
   # The core's tests and the panel's run side by side: each takes a few minutes.
   test-core:
@@ -52,7 +52,7 @@ jobs:
           cache-dependency-path: panel/web/package-lock.json
       - run: npm ci && npm run build
         working-directory: panel/web
-      - run: cargo test -p kariz-panel
+      - run: cargo test -p sortun-panel
 
   # The release targets, built the way the release builds them (`cross` for the ARM ones:
   # Docker images with the C cross-compilers that ring and mimalloc need). The ARM
@@ -86,12 +86,12 @@ jobs:
       - uses: taiki-e/install-action@v2
         with:
           tool: cross
-      - run: cross build --release --locked --target ${{ matrix.target }} -p kariz -p kariz-panel
-      - run: ls -l target/${{ matrix.target }}/release/kariz target/${{ matrix.target }}/release/kariz-panel
+      - run: cross build --release --locked --target ${{ matrix.target }} -p sortun -p sortun-panel
+      - run: ls -l target/${{ matrix.target }}/release/sortun target/${{ matrix.target }}/release/sortun-panel
       - name: Library tests under QEMU
         run: cross test --locked --target ${{ matrix.target }} --lib
 
-  # scripts/kariz.sh on a real systemd host: install from a local build, the menu through a
+  # scripts/sortun.sh on a real systemd host: install from a local build, the menu through a
   # terminal, the panel and an agent, signed releases, updating the panel from the panel. The
   # tunnels the agent would make are written by hand here (same files, same units).
   manager:
@@ -105,16 +105,18 @@ jobs:
         run: shellcheck -x tests/heal.sh && bash tests/heal.sh
       - name: The panel's port and a certificate of your own
         run: shellcheck -x tests/panel_port.sh && bash tests/panel_port.sh
-      - run: cargo build --release --locked -p kariz -p kariz-panel
+      - name: A server of 2.x moves to SorTUN's names
+        run: shellcheck -x tests/migrate.sh && bash tests/migrate.sh
+      - run: cargo build --release --locked -p sortun -p sortun-panel
       - name: Install with the manager
         run: |
-          sudo scripts/kariz.sh install --binary target/release/kariz --panel-binary target/release/kariz-panel
-          kariz-manager help >/dev/null
+          sudo scripts/sortun.sh install --binary target/release/sortun --panel-binary target/release/sortun-panel
+          sortun-manager help >/dev/null
       - name: Two tunnels by hand, as the agent would write them
         run: |
           python3 -m http.server 18081 --bind 127.0.0.1 >/dev/null 2>&1 &
-          tok=$(/usr/local/bin/kariz token)
-          sudo tee /etc/kariz/plain.toml >/dev/null <<EOF
+          tok=$(/usr/local/bin/sortun token)
+          sudo tee /etc/sortun/plain.toml >/dev/null <<EOF
           role = "entry"
           mode = "reverse"
           [tunnel]
@@ -125,7 +127,7 @@ jobs:
           listen = "127.0.0.1:18080"
           target = "127.0.0.1:18081"
           EOF
-          sudo tee /etc/kariz/plain-exit.toml >/dev/null <<EOF
+          sudo tee /etc/sortun/plain-exit.toml >/dev/null <<EOF
           role = "exit"
           mode = "reverse"
           [tunnel]
@@ -133,17 +135,17 @@ jobs:
           remote = "127.0.0.1:3080"
           token = "$tok"
           EOF
-          sudo sh -c 'chmod 600 /etc/kariz/*.toml'
-          sudo systemctl enable --now kariz@plain kariz@plain-exit
+          sudo sh -c 'chmod 600 /etc/sortun/*.toml'
+          sudo systemctl enable --now sortun@plain sortun@plain-exit
           sleep 3
           curl -sf --max-time 5 http://127.0.0.1:18080/ >/dev/null
       - name: The menu through a real terminal, installed and piped in
         run: |
-          sudo python3 tests/manager_tty.py kariz-manager
-          sudo python3 tests/manager_tty.py bash -c 'cat scripts/kariz.sh | bash'
+          sudo python3 tests/manager_tty.py sortun-manager
+          sudo python3 tests/manager_tty.py bash -c 'cat scripts/sortun.sh | bash'
       - name: Update restarts running tunnels
         run: |
-          out=$(sudo kariz-manager update --binary target/release/kariz)
+          out=$(sudo sortun-manager update --binary target/release/sortun)
           echo "$out"
           echo "$out" | grep -q "2 running tunnel(s) restarted"
           sleep 3
@@ -154,25 +156,25 @@ jobs:
       - name: The web panel and an agent through the manager
         run: |
           # Let's Encrypt cannot be reached from here: a certificate made for the test.
-          sudo mkdir -p /etc/kariz-ci
-          sudo openssl req -x509 -newkey rsa:2048 -nodes -keyout /etc/kariz-ci/key.pem -out /etc/kariz-ci/cert.pem \
+          sudo mkdir -p /etc/sortun-ci
+          sudo openssl req -x509 -newkey rsa:2048 -nodes -keyout /etc/sortun-ci/key.pem -out /etc/sortun-ci/cert.pem \
             -days 2 -subj /CN=127.0.0.1 -addext subjectAltName=IP:127.0.0.1 2>/dev/null
-          sudo kariz-manager panel install --port 28443 --host 127.0.0.1 \
-            --cert-file /etc/kariz-ci/cert.pem --key-file /etc/kariz-ci/key.pem | tee panel.txt
+          sudo sortun-manager panel install --port 28443 --host 127.0.0.1 \
+            --cert-file /etc/sortun-ci/cert.pem --key-file /etc/sortun-ci/key.pem | tee panel.txt
           grep -q "certificate" panel.txt
           link=$(grep -o 'https://[^ ]*#t=[0-9a-f]*' panel.txt)
           base=${link%%#*}
           token=${link##*#t=}
-          curl -skf "$base" | grep -q Kariz
+          curl -skf "$base" | grep -q SorTUN
           test "$(curl -sk -o /dev/null -w '%{http_code}' https://127.0.0.1:28443/nothing)" = 404
           curl -sk -c jar -H 'Content-Type: application/json' -d "{\"token\":\"$token\"}" "${base}api/link" | tee signin.json
           csrf=$(sed -n 's/.*"csrf":"\([0-9a-f]*\)".*/\1/p' signin.json)
           test -n "$csrf"
-          code=$(curl -sk -b jar -H "X-Kariz-CSRF: $csrf" -H 'Content-Type: application/json' \
+          code=$(curl -sk -b jar -H "X-SorTUN-CSRF: $csrf" -H 'Content-Type: application/json' \
             -d '{"name":"ci-agent","host":"127.0.0.1"}' "${base}api/servers/join-code" |
             sed -n 's/.*"code":"\([^"]*\)".*/\1/p')
           test -n "$code"
-          sudo KARIZ_NO_UPDATE_CHECK=1 kariz-manager --agent "$code"
+          sudo SORTUN_NO_UPDATE_CHECK=1 sortun-manager --agent "$code"
           for _ in $(seq 1 30); do
             curl -sk -b jar "${base}api/servers" > servers.json
             jq -e '.servers[] | select(.name == "ci-agent" and .online)' servers.json >/dev/null && break
@@ -185,33 +187,33 @@ jobs:
           # a login link works once
           curl -sk -H 'Content-Type: application/json' -d "{\"token\":\"$token\"}" "${base}api/link" | grep -q wrong
           # the update restarts the panel and the agent
-          out=$(sudo kariz-manager update --binary target/release/kariz --panel-binary target/release/kariz-panel)
-          echo "$out" | grep -q "Restarted kariz-panel"
-          echo "$out" | grep -q "Restarted kariz-agent"
+          out=$(sudo sortun-manager update --binary target/release/sortun --panel-binary target/release/sortun-panel)
+          echo "$out" | grep -q "Restarted sortun-panel"
+          echo "$out" | grep -q "Restarted sortun-agent"
       # The manager checks release signatures with openssl and the key in the script; here a
       # key made for the test is pinned, since only the release workflow has the real one.
       - name: Release signatures
         run: |
-          kp=target/release/kariz-panel
+          kp=target/release/sortun-panel
           d=$(mktemp -d)
-          n=kariz-v0.11.0-x86_64-linux
+          n=sortun-v0.11.0-x86_64-linux
           out=$($kp release-key --out "$d/key")
           pem=$(printf '%s\n' "$out" | sed -n '/BEGIN PUBLIC KEY/,/END PUBLIC KEY/p')
           hexkey=$(printf '%s\n' "$out" | sed -n 's/^public key (hex): //p')
           echo "an archive" > "$d/$n.tar.gz"
           (cd "$d" && sha256sum "$n.tar.gz" > "$n.tar.gz.sha256")
-          KARIZ_SIGNING_KEY=$(cat "$d/key") $kp release-sign "$d/$n.tar.gz.sha256"
+          SORTUN_SIGNING_KEY=$(cat "$d/key") $kp release-sign "$d/$n.tar.gz.sha256"
           $kp release-verify --key "$hexkey" "$d/$n.tar.gz"
-          check() { KARIZ_RELEASE_KEY_PEM="$pem" bash -c 'source scripts/kariz.sh; verify_signature "$@"' _ "$@"; }
+          check() { SORTUN_RELEASE_KEY_PEM="$pem" bash -c 'source scripts/sortun.sh; verify_signature "$@"' _ "$@"; }
           check "$d" "$n" v0.11.0
           # the release's own key (built in) does not accept a signature made with another
-          if bash -c 'source scripts/kariz.sh; verify_signature "$@"' _ "$d" "$n" v0.11.0; then exit 1; fi
+          if bash -c 'source scripts/sortun.sh; verify_signature "$@"' _ "$d" "$n" v0.11.0; then exit 1; fi
           # a checksum file that was changed after signing
           cp -r "$d" "$d-t"
           echo x >> "$d-t/$n.tar.gz.sha256"
           if check "$d-t" "$n" v0.11.0; then echo "a changed checksum file passed" >&2; exit 1; fi
           # a signed archive put under another name (another CPU's)
-          m=kariz-v0.11.0-aarch64-linux
+          m=sortun-v0.11.0-aarch64-linux
           mkdir "$d-n"
           for e in tar.gz tar.gz.sha256 tar.gz.sig; do cp "$d/$n.$e" "$d-n/$m.$e"; done
           if check "$d-n" "$m" v0.11.0; then echo "a swapped archive passed" >&2; exit 1; fi
@@ -225,29 +227,29 @@ jobs:
       - name: Update the panel from the panel
         run: |
           shellcheck tests/update_e2e.sh
-          cp target/release/kariz-panel /tmp/kariz-panel-old
-          KARIZ_BUILD_VERSION=99.0.0 cargo build --release --locked -p kariz-panel
-          cp target/release/kariz-panel /tmp/kariz-panel-new
-          sudo bash tests/update_e2e.sh /tmp/kariz-panel-new target/release/kariz
+          cp target/release/sortun-panel /tmp/sortun-panel-old
+          SORTUN_BUILD_VERSION=99.0.0 cargo build --release --locked -p sortun-panel
+          cp target/release/sortun-panel /tmp/sortun-panel-new
+          sudo bash tests/update_e2e.sh /tmp/sortun-panel-new target/release/sortun
       - name: Banner in the journal, priority prefixes understood
         run: |
-          sudo journalctl -u kariz@plain -o cat --no-pager | tee journal.txt | head -20
+          sudo journalctl -u sortun@plain -o cat --no-pager | tee journal.txt | head -20
           grep -q "developed by ErfanXRay" journal.txt
           ! grep -q '^<[0-9]>' journal.txt
       - name: Remove and uninstall
         run: |
-          sudo systemctl disable --now kariz@plain kariz@plain-exit
-          sudo kariz-manager agent remove
-          sudo kariz-manager panel uninstall --yes
-          test ! -e /etc/kariz-panel/panel.toml
-          test ! -e /usr/local/bin/kariz-panel
-          sudo kariz-manager uninstall --yes
-          test ! -e /usr/local/bin/kariz
+          sudo systemctl disable --now sortun@plain sortun@plain-exit
+          sudo sortun-manager agent remove
+          sudo sortun-manager panel uninstall --yes
+          test ! -e /etc/sortun-panel/panel.toml
+          test ! -e /usr/local/bin/sortun-panel
+          sudo sortun-manager uninstall --yes
+          test ! -e /usr/local/bin/sortun
       - if: failure()
-        run: sudo journalctl -u 'kariz@*' -u kariz-panel -u kariz-agent --no-pager -n 200
+        run: sudo journalctl -u 'sortun@*' -u sortun-panel -u sortun-agent --no-pager -n 200
 
   # Private networks (phase 13): two network namespaces play two servers, and the agent's
-  # GRE code (`kariz-panel net`) links them: the private addresses answer, two links between
+  # GRE code (`sortun-panel net`) links them: the private addresses answer, two links between
   # the same pair work at once, a filtered GRE path fails the test, `net down` removes it.
   gre:
     runs-on: ubuntu-latest
@@ -256,8 +258,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: shellcheck tests/gre_ns.sh
-      - run: cargo build -p kariz -p kariz-panel
-      - run: sudo bash tests/gre_ns.sh target/debug/kariz-panel target/debug/kariz
+      - run: cargo build -p sortun -p sortun-panel
+      - run: sudo bash tests/gre_ns.sh target/debug/sortun-panel target/debug/sortun
 
   # The panel the way a person uses it: Playwright drives a real browser against a real panel
   # and a real agent (tunnels run as child processes, so no systemd is needed here). It covers
@@ -277,7 +279,7 @@ jobs:
           cache-dependency-path: panel/web/package-lock.json
       - run: npm ci && npm run build
         working-directory: panel/web
-      - run: cargo build -p kariz -p kariz-panel
+      - run: cargo build -p sortun -p sortun-panel
       - run: npx playwright install --with-deps chromium
         working-directory: panel/web
       - run: npx playwright test
@@ -311,5 +313,5 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y nginx-light
       - run: cargo test --test tunnel nginx -- --nocapture
         env:
-          KARIZ_REQUIRE_NGINX: "1"
-          KARIZ_NGINX: /usr/sbin/nginx
+          SORTUN_REQUIRE_NGINX: "1"
+          SORTUN_NGINX: /usr/sbin/nginx

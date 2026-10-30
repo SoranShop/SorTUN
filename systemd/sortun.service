@@ -4,7 +4,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart=/usr/local/bin/kariz run -c /etc/kariz/config.toml
+ExecStart=/usr/local/bin/sortun run -c /etc/sortun/config.toml
 Restart=always
 RestartSec=2
 LimitNOFILE=1048576

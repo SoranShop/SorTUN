@@ -30,7 +30,7 @@ const T = {
     more: "The same in words, with every detail:",
     moreLink: "Using the panel",
     steps: [
-      { id: "signin", hi: "#pw-wrap", title: "Sign in", text: "The manager printed a one-time link on the server: open it and you are in. In the demo the password is kariz. With Show me, the tour signs in for you and you watch the descent into the panel." },
+      { id: "signin", hi: "#pw-wrap", title: "Sign in", text: "The manager printed a one-time link on the server: open it and you are in. In the demo the password is sortun. With Show me, the tour signs in for you and you watch the descent into the panel." },
       { id: "map", page: "map", hi: "#main", title: "The map", text: "Every server is a well on the horizon, every tunnel a channel of water between two of them. Flowing water is traffic; a dashed empty channel is a stopped tunnel; a red pulse is a broken one. Hover a channel for its numbers." },
       { id: "servers", page: "servers", hi: "#srv-add", title: "Add your servers", text: "Servers lists every server with its CPU, memory and network. Add server gives a join code and one command to run on the new server; it appears here within seconds, and opens no port." },
       { id: "tunnels", page: "tunnels", hi: "#tn-new", title: "Your tunnels", text: "Tunnels lists every tunnel with its two servers, transport, state and traffic. New tunnel opens the wizard." },
@@ -54,7 +54,7 @@ const T = {
     more: "همین‌ها به‌صورت نوشته، با همهٔ جزئیات:",
     moreLink: "کار با پنل",
     steps: [
-      { id: "signin", hi: "#pw-wrap", title: "ورود", text: "مدیر روی سرور یک لینک یک‌بارمصرف چاپ کرد: بازش کنید و وارد شده‌اید. در دمو رمز kariz است. با «نشانم بده»، تور به‌جای شما وارد می‌شود و فرود به داخل پنل را می‌بینید." },
+      { id: "signin", hi: "#pw-wrap", title: "ورود", text: "مدیر روی سرور یک لینک یک‌بارمصرف چاپ کرد: بازش کنید و وارد شده‌اید. در دمو رمز sortun است. با «نشانم بده»، تور به‌جای شما وارد می‌شود و فرود به داخل پنل را می‌بینید." },
       { id: "map", page: "map", hi: "#main", title: "نقشه", text: "هر سرور یک چاه روی افق است و هر تانل مجرای آبی بین دو تا از آن‌ها. آب روان ترافیک است؛ مجرای خالی و خط‌چین تانل متوقف است؛ نبض قرمز یعنی خراب. برای دیدن عددها روی یک مجرا نگه دارید." },
       { id: "servers", page: "servers", hi: "#srv-add", title: "سرورهایتان را اضافه کنید", text: "«سرورها» هر سرور را با CPU، حافظه و شبکه‌اش نشان می‌دهد. «افزودن سرور» یک کد پیوستن و یک دستور می‌دهد که روی سرور تازه اجرا می‌کنید؛ در چند ثانیه اینجا ظاهر می‌شود و هیچ پورتی باز نمی‌کند." },
       { id: "tunnels", page: "tunnels", hi: "#tn-new", title: "تانل‌هایتان", text: "«تانل‌ها» هر تانل را با دو سرورش، ترنسپورت، وضعیت و ترافیکش نشان می‌دهد. «تانل تازه» ویزارد را باز می‌کند." },
@@ -88,7 +88,7 @@ const headings = [{ depth: 2, slug: "steps", text: T.title }];
     </ol>
     <div class="tour-stage">
       <div class="frame">
-        <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>kariz-panel · demo</span></div>
+        <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>sortun-panel · demo</span></div>
         <iframe title={T.frame} src={`${import.meta.env.BASE_URL}demo/index.html?lang=${lang}`}></iframe>
       </div>
       <div class="tour-nav">
@@ -171,7 +171,7 @@ const headings = [{ depth: 2, slug: "steps", text: T.title }];
         await until(() => screen() === "login" || screen() === "app");
         if (screen() !== "app") {
           const d = doc()!;
-          d.querySelector<HTMLInputElement>("#pw")!.value = "kariz";
+          d.querySelector<HTMLInputElement>("#pw")!.value = "sortun";
           d.querySelector<HTMLFormElement>("#login-form")!.requestSubmit();
           await until(() => screen() === "app", 6000);
           await sleep(400);

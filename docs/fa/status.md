@@ -2,14 +2,14 @@
 
 [English](../status.md) · **فارسی**
 
-SorTUNِ در حال اجرا روی سوکت کنترلش، در هر دو سمت، به `status` جواب می‌دهد: سمت دیگر وصل هست یا نه، زمان رفت‌وبرگشت، آخرین خطا، و آنچه از هر پورت فورواردشده می‌گذرد. `kariz status` آن را روی سرور نشان می‌دهد؛ پنل وب هر ثانیه آن را می‌خواند.
+SorTUNِ در حال اجرا روی سوکت کنترلش، در هر دو سمت، به `status` جواب می‌دهد: سمت دیگر وصل هست یا نه، زمان رفت‌وبرگشت، آخرین خطا، و آنچه از هر پورت فورواردشده می‌گذرد. `sortun status` آن را روی سرور نشان می‌دهد؛ پنل وب هر ثانیه آن را می‌خواند.
 
-## `kariz status`
+## `sortun status`
 
 روی هر سرور، وقتی تانل در حال اجراست:
 
 ```bash
-kariz status -c /etc/kariz/main.toml
+sortun status -c /etc/sortun/main.toml
 ```
 
 ```text
@@ -24,7 +24,7 @@ kariz status -c /etc/kariz/main.toml
 
 | گزینه | معنی |
 |---|---|
-| `-c, --config FILE` | کانفیگ تانل (پیش‌فرض `/etc/kariz/config.toml`) |
+| `-c, --config FILE` | کانفیگ تانل (پیش‌فرض `/etc/sortun/config.toml`) |
 | `--watch` | هر ثانیه دوباره بکش تا Ctrl+C |
 | `--json` | سند دیمن را همان‌طور که هست چاپ کن (یک خواندن، بدون نرخ) |
 
@@ -32,7 +32,7 @@ kariz status -c /etc/kariz/main.toml
 
 ## سوکت کنترل
 
-هر سمت کنار کانفیگش یک سوکت Unix باز می‌کند: `/etc/kariz/main.sock` برای `/etc/kariz/main.toml`، یا `[control] socket`. فقط صاحبش می‌تواند بازش کند (حالت ۰۶۰۰). روی ویندوز نیست.
+هر سمت کنار کانفیگش یک سوکت Unix باز می‌کند: `/etc/sortun/main.sock` برای `/etc/sortun/main.toml`، یا `[control] socket`. فقط صاحبش می‌تواند بازش کند (حالت ۰۶۰۰). روی ویندوز نیست.
 
 هر اتصال یک درخواست دارد، یک خط:
 
@@ -48,7 +48,7 @@ daemon -> client   ---\n<JSON document>\n
 ```json
 {
   "status_version": 1,
-  "kariz": "0.7.0",
+  "sortun": "0.7.0",
   "role": "entry",
   "mode": "reverse",
   "transport": "tcpmux",
@@ -93,7 +93,7 @@ daemon -> client   ---\n<JSON document>\n
 | فیلد | معنی |
 |---|---|
 | `status_version` | نسخهٔ قالب سند (۱) |
-| `kariz` | نسخهٔ دیمن |
+| `sortun` | نسخهٔ دیمن |
 | `role`، `mode`، `transport`، `profile` | مثل کانفیگش |
 | `uptime_secs` | از راه‌اندازی دیمن |
 

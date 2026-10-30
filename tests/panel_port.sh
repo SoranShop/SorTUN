@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# `kariz-manager panel port` and a certificate of your own (issue #95): which ports the panel can
+# `sortun-manager panel port` and a certificate of your own (issue #95): which ports the panel can
 # take, the port written into its settings (and put back when the panel does not start), and a
 # certificate and key checked before the panel is pointed at them. systemctl and what listens
 # on a port are stand-ins; the certificates are made with openssl.
 # Usage: bash tests/panel_port.sh (no root, nothing on the system is touched).
 set -euo pipefail
 
-# shellcheck source=scripts/kariz.sh
-source "$(dirname "$0")/../scripts/kariz.sh"
+# shellcheck source=scripts/sortun.sh
+source "$(dirname "$0")/../scripts/sortun.sh"
 set +e
 
 dir=$(mktemp -d)
@@ -21,7 +21,7 @@ agent_listen = "0.0.0.0:29001"
 EOF
 
 # What listens where: "port unit comm" per line.
-LISTENING="28443 kariz-panel.service kariz-panel
+LISTENING="28443 sortun-panel.service sortun-panel
 8443 nginx.service nginx"
 port_users() {
     awk -v p="$1" '$1 == p { print $2, $3, 1 }' <<<"$LISTENING"
@@ -63,7 +63,7 @@ done
 (panel_port 443) >/dev/null 2>&1 || fail "panel port 443 failed"
 [[ "$(panel_setting listen)" == "[::]:443" ]] || fail "listen is $(panel_setting listen)"
 [[ "$(panel_setting agent_listen)" == "0.0.0.0:29001" ]] || fail "the agents' port changed"
-grep -q "restart kariz-panel" "$dir/systemctl" || fail "the panel was not restarted"
+grep -q "restart sortun-panel" "$dir/systemctl" || fail "the panel was not restarted"
 
 # The same port again: nothing is restarted.
 : >"$dir/systemctl"
@@ -82,7 +82,7 @@ STARTS=1
 
 # Asked: a refused answer is asked again, Enter keeps the port it has.
 printf '80\n2053\n' >"$dir/answers"
-IN_FD="" KARIZ_INPUT=$dir/answers
+IN_FD="" SORTUN_INPUT=$dir/answers
 answer=""
 ask_panel_port answer 443 >/dev/null 2>&1
 [[ "$answer" == 2053 ]] || fail "asked port: $answer"
@@ -94,7 +94,7 @@ printf '\n' >"$dir/answers"
 IN_FD=""
 ask_panel_port answer "" >/dev/null 2>&1
 [[ -z "$answer" ]] || fail "Enter at install did not leave a random port: $answer"
-IN_FD="" KARIZ_INPUT=""
+IN_FD="" SORTUN_INPUT=""
 
 # A certificate of your own: the key must be the certificate's.
 mkcert() {

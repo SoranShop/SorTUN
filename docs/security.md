@@ -3,7 +3,7 @@
 ## The token
 
 The token is the only secret. Anyone who has it can use the tunnel, and anyone without
-it cannot. Generate it with `kariz token`, keep it out of shared places, and change it
+it cannot. Generate it with `sortun token`, keep it out of shared places, and change it
 on both sides if it leaks. It never travels over the network: the handshake proves
 each side knows it without sending it.
 
@@ -37,7 +37,7 @@ each side knows it without sending it.
 
 ## Updates
 
-Releases are signed with an Ed25519 key. `kariz-manager` and the panel check the
+Releases are signed with an Ed25519 key. `sortun-manager` and the panel check the
 signature, and the panel's agents check it again on their own servers, so a copy of a release that
 was tampered with, or that another key signed, is not installed even if it comes from the right
 address. The panel's update swaps the programs with a rollback, and never runs a file whose
@@ -45,7 +45,7 @@ signature does not verify.
 
 ## Settings that weaken it
 
-`kariz check` and the startup log warn about each:
+`sortun check` and the startup log warn about each:
 
 - `encryption = "none"`: authenticates, but the traffic is readable on the wire. Use it
   only inside another encrypted layer. The panel offers it as *No encryption*, in red, and asks

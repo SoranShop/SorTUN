@@ -76,4 +76,4 @@ cargo test --release --test tunnel game_traffic -- --ignored --nocapture   # gam
 scripts/rss.sh tcpmux 100                                                  # memory
 ```
 
-`KARIZ_BENCH_ONLY=kcp` بنچمارک‌های `lossy_link` و `game_traffic` را به ردیف‌هایی محدود می‌کند که نامشان `kcp` دارد. `KARIZ_BENCH_LOSS=1` یک نرخ اتلاف را اجرا می‌کند.
+`SORTUN_BENCH_ONLY=kcp` بنچمارک‌های `lossy_link` و `game_traffic` را به ردیف‌هایی محدود می‌کند که نامشان `kcp` دارد. `SORTUN_BENCH_LOSS=1` یک نرخ اتلاف را اجرا می‌کند.

@@ -1,7 +1,7 @@
-//! How `kariz status` shows a daemon's status (docs/status.md).
+//! How `sortun status` shows a daemon's status (docs/status.md).
 
-use kariz::stats::{ForwardStatus, LastError, ProbeOutcome, ProbeStatus, Status};
-use kariz::wire::WireStatus;
+use sortun::stats::{ForwardStatus, LastError, ProbeOutcome, ProbeStatus, Status};
+use sortun::wire::WireStatus;
 
 use crate::logging::{Style, AQUA, BOLD, DIM, RED, TEAL, YELLOW};
 
@@ -286,7 +286,7 @@ fn on_network(wire: &WireStatus) -> (u64, u64) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use kariz::stats::{ExitStatus, PeerStatus, Totals};
+    use sortun::stats::{ExitStatus, PeerStatus, Totals};
     use time::UtcOffset;
 
     fn plain() -> Style {
@@ -300,7 +300,7 @@ mod tests {
     fn entry(bytes_down: u64) -> Status {
         Status {
             status_version: 1,
-            kariz: "0.7.0".into(),
+            sortun: "0.7.0".into(),
             role: "entry".into(),
             mode: "direct".into(),
             transport: "tcpmux".into(),

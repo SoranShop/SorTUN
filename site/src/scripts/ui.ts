@@ -26,7 +26,7 @@ const reduced = matchMedia("(prefers-reduced-motion: reduce)");
 $("[data-theme-toggle]")?.addEventListener("click", () => {
   const next = root.dataset.theme === "dawn" ? "night" : "dawn";
   root.dataset.theme = next;
-  store.set("kariz-site-theme", next);
+  store.set("sortun-site-theme", next);
 });
 const lowBtn = $<HTMLButtonElement>("[data-low-toggle]");
 // "1" is low power on, "0" is motion on even when the system asks for less; no value follows the system.
@@ -36,10 +36,10 @@ syncLow();
 lowBtn?.addEventListener("click", () => {
   if (isLow()) {
     root.dataset.low = "0";
-    store.set("kariz-site-low", "0");
+    store.set("sortun-site-low", "0");
   } else {
     root.dataset.low = "1";
-    store.set("kariz-site-low", "1");
+    store.set("sortun-site-low", "1");
   }
   syncLow();
 });

@@ -56,9 +56,9 @@ const card = new URL(`${BASE}/social-preview.png`, Astro.site);
         var h = document.documentElement;
         h.classList.add("js");
         try {
-          var th = localStorage.getItem("kariz-site-theme");
+          var th = localStorage.getItem("sortun-site-theme");
           if (th === "dawn" || th === "night") h.dataset.theme = th;
-          var lw = localStorage.getItem("kariz-site-low");
+          var lw = localStorage.getItem("sortun-site-low");
           if (lw === "1" || lw === "0") h.dataset.low = lw;
         } catch (e) {}
       })();

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Drives the kariz-manager menu through a real terminal (a pty), the way a person does.
+"""Drives the sortun-manager menu through a real terminal (a pty), the way a person does.
 
-Checks what only a terminal shows: the menu is drawn and a number jumps to its item, a screen
-ends with "press any key", and Ctrl+C: during a screen it returns to the menu at once (no key
-needed), at the menu it leaves, as q does. Usage:
-sudo python3 tests/manager_tty.py [command...] (default: kariz-manager).
+Checks what only a terminal shows: the menu is drawn and a number opens its item, a screen
+ends with "Enter: back to the menu", and Ctrl+C: during a screen it returns to the menu at once (no key
+needed), at the menu it leaves, as 0 does. Usage:
+sudo python3 tests/manager_tty.py [command...] (default: sortun-manager).
 """
 
 import os
@@ -16,16 +16,15 @@ import time
 
 ANSI = re.compile(rb"\x1b\[[0-9;]*m")
 TIMEOUT = 20
-# The menu's own key line: always on the screen (the list scrolls on a small terminal, so an
-# item's name may not be), and no screen of an action has it.
-MENU = "a number jumps"
+# The menu's own question: no screen of an action asks it.
+MENU = "Choose a number"
 
 
 class Session:
     def __init__(self, argv):
         # The menu looks for a newer release at start; a test does not wait for GitHub.
-        os.environ["KARIZ_NO_UPDATE_CHECK"] = "1"
-        os.environ["KARIZ_NO_OFFER"] = "1"
+        os.environ["SORTUN_NO_UPDATE_CHECK"] = "1"
+        os.environ["SORTUN_NO_OFFER"] = "1"
         self.pid, self.fd = pty.fork()
         if self.pid == 0:
             os.execvp(argv[0], argv)
@@ -97,27 +96,25 @@ class Session:
 
 
 def main():
-    argv = sys.argv[1:] or ["kariz-manager"]
+    argv = sys.argv[1:] or ["sortun-manager"]
     s = Session(argv)
 
-    # The menu is drawn with its first item highlighted; a number jumps to its item (and shows
-    # what it does), without Enter.
+    # The menu is a numbered list; a number and Enter opens its item.
     s.expect(MENU)
-    s.key("9")
-    s.expect("Paste a panel's join code")
+    s.key("9\r")
+    s.expect("Join code")
+    s.ctrl_c()
+    s.back_in_menu()
 
-    # 2 and Enter: the status screen, and "press any key" before the menu comes back.
-    s.key("2")
+    # 2 and Enter: the status screen, and Enter before the menu comes back.
+    s.key("2\r")
+    s.expect("Enter: back to the menu")
     s.key("\r")
-    s.expect("Press any key to continue")
-    s.key(" ")
 
     # Ctrl+C inside a screen (11 is the logs, which asks which log first): straight back to
     # the menu, no key in between.
     s.expect(MENU)
-    s.key("1")
-    s.key("1")
-    s.key("\r")
+    s.key("11\r")
     s.expect("Which log?")
     s.ctrl_c()
     s.back_in_menu()
@@ -126,11 +123,16 @@ def main():
     if b"New tunnel" in s.seen:
         s.fail("the menu still offers tunnels")
 
-    # q leaves the manager.
-    s.key("q")
+    # A number that is not in the list says so and shows the menu again.
+    s.key("42\r")
+    s.expect("Type a number from the list")
+    s.expect(MENU)
+
+    # 0 leaves the manager.
+    s.key("0\r")
     code = s.wait()
     if code != 0:
-        s.fail(f"the manager exited with {code} after q")
+        s.fail(f"the manager exited with {code} after 0")
 
     # Ctrl+C at the menu itself leaves it too.
     s = Session(argv)

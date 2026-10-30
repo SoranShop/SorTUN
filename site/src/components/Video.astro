@@ -64,7 +64,7 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2,
 const digits = "۰۱۲۳۴۵۶۷۸۹";
 const shown = (s: number) => (lang === "fa" ? clock(s).replace(/\d/g, (d) => digits[+d]) : clock(s));
 const headings = [{ depth: 2, slug: "chapters", text: T.chapters }];
-const src = `${base}video/kariz-panel-tutorial.mp4`;
+const src = `${base}video/sortun-panel-tutorial.mp4`;
 ---
 
 <DocsShell lang={lang} title={T.title} description={T.desc} path="/docs/video/" slug="video" headings={headings}>

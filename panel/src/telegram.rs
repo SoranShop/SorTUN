@@ -332,7 +332,7 @@ fn call(s: &Settings, method: &str, body: &Value, timeout: u64) -> Result<Value,
         .post(&url)
         .set(
             "User-Agent",
-            concat!("kariz-panel/", env!("CARGO_PKG_VERSION")),
+            concat!("sortun-panel/", env!("CARGO_PKG_VERSION")),
         )
         .set("Content-Type", "application/json")
         .send_string(&body.to_string());
@@ -1119,7 +1119,7 @@ pub mod text {
         let up = rows.iter().filter(|(_, _, up)| *up).count();
         let mut out = if fa {
             format!(
-                "📊 <b>وضعیت کاریز</b>\nسرورها: {} از {} آنلاین · تانل‌ها: {} از {} وصل\n",
+                "📊 <b>وضعیت SorTUN</b>\nسرورها: {} از {} آنلاین · تانل‌ها: {} از {} وصل\n",
                 n(fa, online),
                 n(fa, views.len()),
                 n(fa, up),
@@ -1366,7 +1366,7 @@ pub mod text {
 
     pub fn help(fa: bool) -> String {
         if fa {
-            "🤖 <b>ربات کاریز</b>\n\
+            "🤖 <b>ربات SorTUN</b>\n\
              /status — وضعیت همهٔ سرورها و تانل‌ها\n\
              /servers — سرورها\n\
              /server نام — جزئیات یک سرور\n\
@@ -1391,7 +1391,7 @@ pub mod text {
     pub fn connected(fa: bool) -> String {
         if fa {
             format!(
-                "✅ این چت به پنل کاریز وصل شد. از این به بعد اعلان‌ها اینجا می‌آید.\n\n{}",
+                "✅ این چت به پنل SorTUN وصل شد. از این به بعد اعلان‌ها اینجا می‌آید.\n\n{}",
                 help(fa)
             )
         } else {
@@ -1404,7 +1404,7 @@ pub mod text {
 
     pub fn test(fa: bool) -> String {
         if fa {
-            "✅ پیام آزمایشی از پنل کاریز".into()
+            "✅ پیام آزمایشی از پنل SorTUN".into()
         } else {
             "✅ A test message from the SorTUN panel".into()
         }

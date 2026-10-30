@@ -14,8 +14,8 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
 use anyhow::{anyhow, bail, Result};
-use kariz::config::TransportKind;
-use kariz::link::Acceptor;
+use sortun::config::TransportKind;
+use sortun::link::Acceptor;
 use rusqlite::{params, OptionalExtension};
 
 use crate::hub::{Hub, LOCAL};
@@ -63,8 +63,8 @@ pub struct Ports {
 /// fails; another transport that cannot bind is only logged.
 pub async fn bind(listen: &str, token: &str, cert: &Path, key: &Path) -> Result<Vec<Acceptor>> {
     let mut out = Vec::new();
-    for kind in kariz::link::LINK_TRANSPORTS {
-        let addr = kariz::link::address_for(listen, kind)?;
+    for kind in sortun::link::LINK_TRANSPORTS {
+        let addr = sortun::link::address_for(listen, kind)?;
         let mut bound = 0;
         let mut last = None;
         for one in crate::agent::listen_addresses(&addr) {
@@ -350,7 +350,7 @@ mod tests {
         let root = tempfile::tempdir().unwrap();
         let hub = Hub::new(
             crate::db::Db::in_memory().unwrap(),
-            root.path().join("kariz"),
+            root.path().join("sortun"),
         );
         let main = Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
             .await

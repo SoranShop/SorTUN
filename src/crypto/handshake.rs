@@ -285,7 +285,7 @@ where
         None => {
             return Err(io::Error::new(
                 io::ErrorKind::Unsupported,
-                "peer asked for an unknown cipher (different kariz versions?)",
+                "peer asked for an unknown cipher (different sortun versions?)",
             ))
         }
     };

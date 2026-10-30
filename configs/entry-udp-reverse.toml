@@ -13,7 +13,7 @@ profile = "gaming"                 # smaller buffers and queues, lowest latency
 [tunnel]
 transport = "tcpmux"               # use mux for UDP: without it every flow needs its own connection
 listen = "0.0.0.0:3080"
-token = "CHANGE-ME-run-kariz-token"
+token = "CHANGE-ME-run-sortun-token"
 
 [[forward]]
 listen = "0.0.0.0:51820"           # WireGuard clients connect here

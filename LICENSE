@@ -1,27 +1,27 @@
-KARIZ LICENSE
+SORTUN LICENSE
 Version 1.0
 
 Copyright (c) 2026 Erfan-XRay. All rights reserved.
 
-Kariz is source-available, not open source. You may read it, and you may run the official
-releases on your own servers. You may not use the Kariz core, or anything in it, anywhere
+SorTUN is source-available, not open source. You may read it, and you may run the official
+releases on your own servers. You may not use the SorTUN core, or anything in it, anywhere
 else. The terms follow.
 
 1. DEFINITIONS
 
-   "Kariz" means everything in this repository at https://github.com/Erfan-XRay/Kariz and
+   "SorTUN" means everything in this repository at https://github.com/Erfan-XRay/SorTUN and
    the release archives the Licensor publishes on its Releases page: the tunnel core, the
    web panel and its agent, the manager script, the documentation, the website and the
    design files.
 
-   "Core" means the tunnel program and library (the `kariz` crate and binary), the Kariz
-   tunnel protocol and wire format, and the Kariz configuration format.
+   "Core" means the tunnel program and library (the `sortun` crate and binary), the SorTUN
+   tunnel protocol and wire format, and the SorTUN configuration format.
 
    "Official Release" means a release archive published by the Licensor, with its checksum
    and signature.
 
-   "Licensor" means Erfan-XRay, the owner of Kariz. "You" means the person or organization
-   using Kariz.
+   "Licensor" means Erfan-XRay, the owner of SorTUN. "You" means the person or organization
+   using SorTUN.
 
 2. WHAT YOU MAY DO
 
@@ -31,9 +31,9 @@ else. The terms follow.
    2.2 Run. You may run unmodified Official Releases, or unmodified builds that You made
        yourself from a tagged version of the source, on servers that You own or administer,
        for any lawful purpose, commercial or not, free of charge, provided the Core runs as
-       part of Kariz: started by the Kariz panel, its agent or its manager script, or from
-       its own configuration files as documented. Using Kariz tunnels between Your own
-       servers to run Your own services is running Kariz, and is allowed.
+       part of SorTUN: started by the SorTUN panel, its agent or its manager script, or from
+       its own configuration files as documented. Using SorTUN tunnels between Your own
+       servers to run Your own services is running SorTUN, and is allowed.
 
    2.3 Propose changes. You may fork the repository on GitHub, and keep a private working
        copy, only to prepare changes that You submit back to the Licensor, and only until
@@ -44,29 +44,29 @@ else. The terms follow.
 
 3. WHAT YOU MAY NOT DO
 
-   3.1 Use the Core outside Kariz. You may not use the Core, or any part of it (its code,
+   3.1 Use the Core outside SorTUN. You may not use the Core, or any part of it (its code,
        algorithms, protocol, wire format, configuration format, build outputs), in, with or
        inside any other program, panel, service, product, library, script or tunnel. You may
        not link, embed, wrap, bundle or call it from other software, and no other software
        may be made to manage, drive or orchestrate it.
 
    3.2 Copy or derive. You may not copy, reproduce, translate, port to another language,
-       adapt or create anything derived from any part of Kariz, and You may not write
-       another implementation that speaks the Kariz protocol or reads the Kariz
+       adapt or create anything derived from any part of SorTUN, and You may not write
+       another implementation that speaks the SorTUN protocol or reads the SorTUN
        configuration format.
 
    3.3 Distribute. You may not distribute, publish, mirror, sublicense, sell, rent or lend
-       Kariz, or a modified, rebranded or repackaged version of it. You may not offer Kariz
+       SorTUN, or a modified, rebranded or repackaged version of it. You may not offer SorTUN
        itself as a product or a hosted service.
 
-   3.4 Modify for use. You may not run a modified version of Kariz, other than the private
+   3.4 Modify for use. You may not run a modified version of SorTUN, other than the private
        working copy of 2.3, and You may not remove or alter its notices, its name, its
        signatures, or the checks that verify Official Releases.
 
-   3.5 Train on it. You may not use Kariz, or any part of it, to train or fine-tune a
+   3.5 Train on it. You may not use SorTUN, or any part of it, to train or fine-tune a
        machine learning model, or put it in a dataset for that purpose.
 
-   3.6 Use the name. You may not use the name "Kariz" or its logo for other software or for
+   3.6 Use the name. You may not use the name "SorTUN" or its logo for other software or for
        a modified version of this software.
 
    3.7 Reverse engineer. You may not reverse engineer, decompile or disassemble the Official
@@ -77,38 +77,38 @@ else. The terms follow.
    If You submit a change to the Licensor (a pull request, a patch, text), You confirm that
    You have the right to submit it, and You give the Licensor a perpetual, irrevocable,
    worldwide, royalty-free right to use, modify, distribute and relicense it as part of
-   Kariz, under this license or any other.
+   SorTUN, under this license or any other.
 
 5. THIRD-PARTY COMPONENTS
 
-   Kariz depends on libraries, and includes fonts, that have their own licenses (see
+   SorTUN depends on libraries, and includes fonts, that have their own licenses (see
    `Cargo.lock`, `panel/web/package-lock.json` and `design/fonts/`). Those licenses apply to
    those components, not this one, and this license does not take away what they give You.
-   They are not part of Kariz for the purposes of clause 3.
+   They are not part of SorTUN for the purposes of clause 3.
 
 6. OWNERSHIP
 
-   Kariz is licensed, not sold. The Licensor keeps all rights that this license does not
+   SorTUN is licensed, not sold. The Licensor keeps all rights that this license does not
    expressly grant. Nothing here transfers ownership or grants a right by implication.
 
 7. TERMINATION
 
    This license ends by itself, without notice, if You break any of its terms. You must then
-   stop using Kariz and delete every copy. Clauses 3, 6, 8 and 9 survive.
+   stop using SorTUN and delete every copy. Clauses 3, 6, 8 and 9 survive.
 
 8. NO WARRANTY
 
-   KARIZ IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+   SORTUN IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
 
 9. LIMIT OF LIABILITY
 
    TO THE EXTENT THE LAW ALLOWS, THE LICENSOR IS NOT LIABLE FOR ANY DAMAGES, DIRECT OR
-   INDIRECT, ARISING FROM THE USE OF KARIZ OR THE INABILITY TO USE IT.
+   INDIRECT, ARISING FROM THE USE OF SORTUN OR THE INABILITY TO USE IT.
 
 10. THIS LICENSE OVER TIME
 
-    The Licensor may publish a new version of this license for new versions of Kariz. A
-    version of Kariz that You received under this license stays under it.
+    The Licensor may publish a new version of this license for new versions of SorTUN. A
+    version of SorTUN that You received under this license stays under it.
 
-Contact: https://github.com/Erfan-XRay/Kariz/issues
+Contact: https://github.com/Erfan-XRay/SorTUN/issues

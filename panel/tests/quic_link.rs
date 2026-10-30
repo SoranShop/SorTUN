@@ -3,9 +3,9 @@
 
 use std::time::Duration;
 
-use kariz_panel::agent::{self, Agent};
-use kariz_panel::db::Db;
-use kariz_panel::hub::Hub;
+use sortun_panel::agent::{self, Agent};
+use sortun_panel::db::Db;
+use sortun_panel::hub::Hub;
 
 #[tokio::test]
 async fn an_agent_joins_over_quic_and_it_is_remembered() {
@@ -17,7 +17,7 @@ async fn an_agent_joins_over_quic_and_it_is_remembered() {
     // The panel's QUIC listener is on the port after its agents port: a code names the
     // agents port, and the agent adds one for quic, as for wss.
     let quic =
-        kariz::link::Acceptor::bind_via("127.0.0.1:0", &token, kariz::config::TransportKind::Quic)
+        sortun::link::Acceptor::bind_via("127.0.0.1:0", &token, sortun::config::TransportKind::Quic)
             .await
             .unwrap();
     let port = quic.local_addr().unwrap().port();
@@ -33,7 +33,7 @@ async fn an_agent_joins_over_quic_and_it_is_remembered() {
     let path = dir.path().join("agent.toml");
     let mut config = agent::enroll_from_code(&code, &path).unwrap();
     assert_eq!(config.transport.as_deref(), Some("quic"));
-    config.kariz_dir = dir.path().join("kariz");
+    config.sortun_dir = dir.path().join("sortun");
     config.save(&path).unwrap();
     let running = tokio::spawn(Agent::new(&path, config).run());
 

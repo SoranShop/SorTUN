@@ -49,9 +49,9 @@ work through CDNs and reverse proxies ([guide](CDN.md)).
 - **Anything that is not a valid upgrade** on the configured path gets the `404` page of
   a stock nginx.
 - **`wss` certificates:** a real one (Let's Encrypt), reloaded when the files change, or
-  a self-signed one pinned on the dialer with `tls.pin_sha256` (`kariz pin cert.pem`).
+  a self-signed one pinned on the dialer with `tls.pin_sha256` (`sortun pin cert.pem`).
 - Keep pings at 90 s or less behind a CDN, which closes idle WebSockets after about
-  100 s. `kariz check` warns otherwise.
+  100 s. `sortun check` warns otherwise.
 
 ## `quic`
 
@@ -116,7 +116,7 @@ TCP's speed (hundreds of Mbit/s). Between two servers this rarely matters.
 By default a listening `wss` side serves a self-signed certificate that the dialing side pins.
 In the panel you can instead choose *Let's Encrypt*, give a domain (or a public IPv4 address) that
 points at the listening server, and press the button: the server runs
-`kariz-manager tunnel-cert`, which stops whatever holds port 80 for a few seconds, gets the
+`sortun-manager tunnel-cert`, which stops whatever holds port 80 for a few seconds, gets the
 certificate, and sets up the renewal timer. The tunnel then names the files under
 `/etc/letsencrypt/live/` (`tunnel.tls.cert` / `key`), reloads them when they are renewed, and the
 dialing side checks the certificate against the web's roots (no pin).

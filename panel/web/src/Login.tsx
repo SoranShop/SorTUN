@@ -236,7 +236,7 @@ export function Login({
 
         <p className="login-foot">
           <span>{t("login.foot")}</span>
-          <code dir="ltr">kariz-manager panel link</code>
+          <code dir="ltr">sortun-manager panel link</code>
         </p>
         <Copyright />
       </form>

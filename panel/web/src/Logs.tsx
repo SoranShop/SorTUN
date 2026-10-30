@@ -16,7 +16,7 @@ interface Parsed {
   role: string;
 }
 
-/** A journal line ("2026-09-29T21:17:46+0000 host kariz[12]: INFO ...") as its parts. */
+/** A journal line ("2026-09-29T21:17:46+0000 host sortun[12]: INFO ...") as its parts. */
 function parse(l: LogLine): Parsed {
   const clean = l.text.replace(ANSI, "");
   const time = clean.slice(11, 19);

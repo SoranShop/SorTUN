@@ -6,13 +6,13 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use kariz_panel::agent::{self, Agent};
-use kariz_panel::agent_update::Launcher;
-use kariz_panel::db::Db;
-use kariz_panel::hub::Hub;
-use kariz_panel::manage::Systemd;
-use kariz_panel::net::Real;
-use kariz_panel::{sign, update, updater};
+use sortun_panel::agent::{self, Agent};
+use sortun_panel::agent_update::Launcher;
+use sortun_panel::db::Db;
+use sortun_panel::hub::Hub;
+use sortun_panel::manage::Systemd;
+use sortun_panel::net::Real;
+use sortun_panel::{sign, update, updater};
 
 type Launches = Arc<Mutex<Vec<(PathBuf, Vec<String>)>>>;
 
@@ -34,8 +34,8 @@ fn release(version: &str) -> (updater::Files, String) {
     let mut noise = vec![0u8; 3 * 1024 * 1024];
     getrandom::fill(&mut noise).unwrap();
     for (name, data) in [
-        ("kariz-x/kariz", &noise[..]),
-        ("kariz-x/kariz-panel", &b"the new panel"[..]),
+        ("sortun-x/sortun", &noise[..]),
+        ("sortun-x/sortun-panel", &b"the new panel"[..]),
     ] {
         let mut header = tar::Header::new_gnu();
         header.set_size(data.len() as u64);
@@ -60,7 +60,7 @@ fn release(version: &str) -> (updater::Files, String) {
 }
 
 async fn join(hub: &Arc<Hub>, root: &Path, key: &str, launches: Launches) -> String {
-    let acceptor = kariz::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
+    let acceptor = sortun::link::Acceptor::bind("127.0.0.1:0", &hub.link_token().unwrap())
         .await
         .unwrap();
     let addr = acceptor.local_addr().unwrap().to_string();
@@ -96,7 +96,7 @@ async fn join(hub: &Arc<Hub>, root: &Path, key: &str, launches: Launches) -> Str
 #[tokio::test]
 async fn a_release_is_sent_in_pieces_checked_by_the_agent_and_handed_to_the_helper() {
     let root = tempfile::tempdir().unwrap();
-    let hub = Hub::new(Db::in_memory().unwrap(), root.path().join("kariz"));
+    let hub = Hub::new(Db::in_memory().unwrap(), root.path().join("sortun"));
     let (files, key) = release("99.0.0");
     let launches: Launches = Launches::default();
     let id = join(&hub, root.path(), &key, launches.clone()).await;
@@ -109,11 +109,11 @@ async fn a_release_is_sent_in_pieces_checked_by_the_agent_and_handed_to_the_help
     assert_eq!(launched[0].1[0], "agent-update-apply");
     let stage = root.path().join("agent/updates/99.0.0");
     assert_eq!(
-        std::fs::read(stage.join("kariz-panel")).unwrap(),
+        std::fs::read(stage.join("sortun-panel")).unwrap(),
         b"the new panel"
     );
     assert_eq!(
-        std::fs::metadata(stage.join("kariz")).unwrap().len(),
+        std::fs::metadata(stage.join("sortun")).unwrap().len(),
         3 * 1024 * 1024
     );
 }
@@ -121,7 +121,7 @@ async fn a_release_is_sent_in_pieces_checked_by_the_agent_and_handed_to_the_help
 #[tokio::test]
 async fn a_release_signed_by_a_key_the_agent_does_not_trust_is_refused_over_the_link() {
     let root = tempfile::tempdir().unwrap();
-    let hub = Hub::new(Db::in_memory().unwrap(), root.path().join("kariz"));
+    let hub = Hub::new(Db::in_memory().unwrap(), root.path().join("sortun"));
     let (files, _) = release("99.0.0");
     let (_, other) = release("99.0.0");
     let launches: Launches = Launches::default();

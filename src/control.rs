@@ -1,6 +1,6 @@
 //! The control socket: a local socket through which tools talk to the running daemon.
 //! Both sides answer `status` (its counters, docs/status.md); the entry side also runs
-//! `kariz speedtest` through its live sessions.
+//! `sortun speedtest` through its live sessions.
 //!
 //! Why a socket and not a second process that dials the exit itself: in reverse mode the
 //! exit dials the entry, and the daemon owns the port it dials; and a test through the
@@ -287,7 +287,7 @@ mod unix {
         F: Future<Output = io::Result<Channel>> + Send + 'static,
     {
         if let Err(e) = listen(&path, open, stats).await {
-            warn!(socket = %path.display(), error = %e, "no control socket (kariz status and speedtest will not work)");
+            warn!(socket = %path.display(), error = %e, "no control socket (sortun status and speedtest will not work)");
         }
         std::future::pending::<()>().await;
         Ok(())
@@ -367,7 +367,7 @@ mod tests {
         assert_eq!(status.role, "entry");
         assert_eq!(status.forwards[0].bytes_up, 1234);
         assert_eq!(status.totals.tcp_open, 1);
-        assert_eq!(status.kariz, env!("CARGO_PKG_VERSION"));
+        assert_eq!(status.sortun, env!("CARGO_PKG_VERSION"));
     }
 
     #[tokio::test]

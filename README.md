@@ -51,7 +51,7 @@ to run it: servers, tunnels, charts and logs in a browser.
 On the server that will hold the panel, as root:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh)
 ```
 
 The script finds your CPU (x86_64, aarch64 or armv7), downloads the latest release, checks its
@@ -103,7 +103,7 @@ The same pages are the Markdown files in [`docs/`](docs/README.md) (Persian: [`d
 ## Build from source
 
 ```bash
-cargo build --release                         # target/release/kariz
+cargo build --release                         # target/release/sortun
 cargo test                                    # nginx tests run too when nginx is installed
 cargo build --release --no-default-features   # without quic and kcp
 ```
