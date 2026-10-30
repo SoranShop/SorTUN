@@ -13,10 +13,12 @@ use tokio::task::JoinSet;
 use tokio::time::{sleep, timeout};
 use tracing::{debug, error, info, warn};
 
-use crate::auto::{self, Dial};
+use crate::auto;
 use crate::channel::{self, Channel, Link};
 use crate::config::{Config, Mode, TransportKind, Tuning};
 use crate::crypto::{Crypto, ReplayFilter};
+#[cfg(feature = "quic")]
+use crate::failover::Failover;
 use crate::mux::{MuxSession, SessionConfig, Side};
 use crate::proto::{
     self, Open, KIND_PROBE, KIND_SPEEDTEST, KIND_UDP, STATUS_DIAL_FAILED, STATUS_OK,
@@ -108,13 +110,18 @@ pub async fn run(config: Config) -> Result<()> {
                     connections = mux.connections,
                     "exit: reverse mode with mux, keeping sessions to the entry side"
                 );
-                let dialer = Arc::new(if config.tunnel.transport == TransportKind::Auto {
-                    Dial::auto(&transport, &config.tunnel.token, remote, &tuning)?
-                } else {
-                    Dial::one(&transport, remote, &tuning)?
-                });
+                let dialer = Arc::new(auto::failover(
+                    &config,
+                    &transport,
+                    &tuning,
+                    &exit.stats.peer,
+                )?);
                 for _ in 0..mux.connections {
                     let (exit, dialer) = (exit.clone(), dialer.clone());
+                    let lifetime = {
+                        let (dialer, lifetime) = (dialer.clone(), mux.max_lifetime);
+                        move || dialer.lifetime(lifetime)
+                    };
                     let connect = {
                         let (exit, sessions) = (exit.clone(), sessions.clone());
                         move || {
@@ -122,7 +129,9 @@ pub async fn run(config: Config) -> Result<()> {
                                 (exit.clone(), dialer.clone(), sessions.clone());
                             async move {
                                 let wait = exit.tuning.dial_timeout + exit.tuning.handshake_timeout;
-                                let (link, via) = dialer.connect(&exit.crypto, wait).await?;
+                                let (link, via) = dialer
+                                    .connect(wait, |d| d.connect(&exit.crypto, wait))
+                                    .await?;
                                 let session = MuxSession::over(link, Side::Server, sessions);
                                 if let Some(via) = via {
                                     session.set_transport(via);
@@ -131,7 +140,7 @@ pub async fn run(config: Config) -> Result<()> {
                             }
                         }
                     };
-                    let (lifetime, link) = (mux.max_lifetime, exit.stats.peer.clone());
+                    let link = exit.stats.peer.clone();
                     tasks.spawn(async move {
                         let on_session = move |s| {
                             tokio::spawn(run_session(exit.clone(), s));
@@ -214,19 +223,30 @@ async fn run_quic(
     match config.mode {
         Mode::Reverse => {
             let remote = config.tunnel.remote.as_deref().expect("validated");
-            let dialer = Arc::new(QuicDialer::new(remote, quic_config.sni.as_deref(), &quic)?);
+            let sni = quic_config.sni.as_deref();
+            let dialer = Arc::new(Failover::new(
+                remote,
+                &config.tunnel.fallback,
+                exit.stats.peer.clone(),
+                |addr| QuicDialer::new(addr, sni, &quic),
+            )?);
             info!(
                 remote,
                 connections = mux.connections,
                 congestion = quic_config.congestion.name(),
                 "exit: reverse mode over QUIC, keeping sessions to the entry side"
             );
+            let wait = tuning.dial_timeout + tuning.handshake_timeout;
             for _ in 0..mux.connections {
                 let (exit, dialer, sessions) = (exit.clone(), dialer.clone(), sessions.clone());
+                let lifetime = {
+                    let (dialer, lifetime) = (dialer.clone(), mux.max_lifetime);
+                    move || dialer.lifetime(lifetime)
+                };
                 let connect = move || {
                     let (dialer, sessions) = (dialer.clone(), sessions.clone());
                     async move {
-                        let conn = dialer.connect().await?;
+                        let conn = dialer.connect(wait, QuicDialer::connect).await?;
                         Ok(Session::Quic(QuicSession::new(
                             conn,
                             &sessions,
@@ -234,7 +254,7 @@ async fn run_quic(
                         )))
                     }
                 };
-                let (lifetime, link) = (mux.max_lifetime, exit.stats.peer.clone());
+                let link = exit.stats.peer.clone();
                 tasks.spawn(async move {
                     let on_session = move |s| {
                         tokio::spawn(run_session(exit.clone(), s));

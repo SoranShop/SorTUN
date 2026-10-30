@@ -181,6 +181,10 @@ pub struct TunnelConfig {
     pub listen: Option<String>,
     /// Address of the other side (exit in reverse mode, entry in direct mode).
     pub remote: Option<String>,
+    /// Dialing side: other addresses of the other side (another server, or the same one
+    /// by another route), tried in order while `remote` is down (see `failover`).
+    #[serde(default)]
+    pub fallback: Vec<String>,
     /// Shared secret. Both sides must use the same value.
     pub token: String,
     /// Reverse mode only: idle tunnel connections the exit keeps open towards the entry.
@@ -513,6 +517,8 @@ impl Forward {
     }
 }
 
+/// `tunnel.fallback`: each address down costs a connect a dial timeout.
+const MAX_FALLBACKS: usize = 8;
 const DEFAULT_DUPLICATE_GAP_MS: u8 = 5;
 const DUPLICATE_COPIES: std::ops::RangeInclusive<u8> = 1..=3;
 const MAX_DUPLICATE_GAP_MS: u8 = 50;
@@ -1050,6 +1056,35 @@ impl Config {
             }
         }
 
+        if !self.tunnel.fallback.is_empty() {
+            if self.is_acceptor() {
+                bail!(
+                    "tunnel.fallback is for the dialing side; role = \"{}\" in mode = \"{}\" \
+                     listens",
+                    role_name(self.role),
+                    mode_name(self.mode)
+                );
+            }
+            // Without sessions there is nothing to renew, so nothing would go back to
+            // `remote` once it is up again.
+            if !self.mux().enabled && self.tunnel.transport != TransportKind::Quic {
+                bail!("tunnel.fallback needs mux (tunnel.mux.enabled) or transport = \"quic\"");
+            }
+            if self.tunnel.fallback.len() > MAX_FALLBACKS {
+                bail!("tunnel.fallback takes at most {MAX_FALLBACKS} addresses");
+            }
+            let mut seen = vec![self.tunnel.remote.as_deref().unwrap_or_default()];
+            for addr in &self.tunnel.fallback {
+                if addr.trim().is_empty() {
+                    bail!("tunnel.fallback has an empty address");
+                }
+                if seen.contains(&addr.as_str()) {
+                    bail!("tunnel.fallback: {addr} is there twice (or is tunnel.remote)");
+                }
+                seen.push(addr);
+            }
+        }
+
         if self.mode == Mode::Reverse && self.role == Role::Exit && self.tunnel.pool == 0 {
             bail!("tunnel.pool must be at least 1");
         }
@@ -1471,6 +1506,50 @@ mod tests {
         );
         let err = Config::parse(&text).unwrap_err().to_string();
         assert!(err.contains("tunnel.remote"), "{err}");
+    }
+
+    #[test]
+    fn fallback_is_for_a_dialing_side_with_sessions() {
+        let exit = |transport: &str, mode: &str, fallback: &str| {
+            Config::parse(&format!(
+                r#"
+                role = "exit"
+                mode = "{mode}"
+                [tunnel]
+                transport = "{transport}"
+                listen = "0.0.0.0:3080"
+                remote = "203.0.113.1:3080"
+                fallback = [{fallback}]
+                token = "{TOKEN}"
+                "#
+            ))
+        };
+        let ok = exit(
+            "tcpmux",
+            "reverse",
+            r#""203.0.113.2:3080", "[2001:db8::1]:3080""#,
+        )
+        .unwrap();
+        assert_eq!(ok.tunnel.fallback.len(), 2);
+        assert!(exit("tcpmux", "reverse", "")
+            .unwrap()
+            .tunnel
+            .fallback
+            .is_empty());
+        let err =
+            |transport, mode, fallback| exit(transport, mode, fallback).unwrap_err().to_string();
+        // The direct exit listens: there is nothing for it to fall back to.
+        assert!(err("tcpmux", "direct", r#""203.0.113.2:3080""#).contains("dialing side"));
+        // Plain tcp keeps no sessions to renew.
+        assert!(err("tcp", "reverse", r#""203.0.113.2:3080""#).contains("needs mux"));
+        assert!(err("tcpmux", "reverse", r#""203.0.113.1:3080""#).contains("twice"));
+        assert!(err("tcpmux", "reverse", r#""a:1", "a:1""#).contains("twice"));
+        assert!(err("tcpmux", "reverse", r#""  ""#).contains("empty"));
+        let many = (0..=MAX_FALLBACKS)
+            .map(|i| format!("\"10.0.0.{i}:1\""))
+            .collect::<Vec<_>>()
+            .join(",");
+        assert!(err("tcpmux", "reverse", &many).contains("at most"));
     }
 
     #[test]

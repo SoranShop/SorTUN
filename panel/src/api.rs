@@ -86,6 +86,8 @@ pub fn routes() -> Router<AppState> {
         .route("/api/networks/links/mtu", post(link_mtu))
         .route("/api/networks/links/family", post(link_family))
         .route("/api/servers/address", post(server_address))
+        .route("/api/metrics", get(metrics_status).post(metrics_settings))
+        .route("/metrics", get(metrics_scrape))
         .route("/api/update", get(update_status))
         .route("/api/update/check", post(update_check))
         .route("/api/update/settings", post(update_settings))
@@ -2322,6 +2324,75 @@ async fn update_check(State(state): State<AppState>, headers: HeaderMap) -> Resp
         Err(_) => {}
     }
     reply(StatusCode::OK, state.hub.update_status())
+}
+
+/// Whether `/metrics` is on (its token is only shown when it is made).
+async fn metrics_status(State(state): State<AppState>, headers: HeaderMap) -> Response {
+    if let Err(r) = authenticate(&state, &headers, false) {
+        return r;
+    }
+    match crate::metrics::enabled(&state.db) {
+        Ok(enabled) => reply(StatusCode::OK, json!({ "enabled": enabled })),
+        Err(e) => internal(e),
+    }
+}
+
+#[derive(Deserialize)]
+struct MetricsSettings {
+    /// On: a new token (the old one stops working). Off: no scrape is answered.
+    enabled: bool,
+}
+
+async fn metrics_settings(
+    State(state): State<AppState>,
+    peer: Peer,
+    headers: HeaderMap,
+    Json(body): Json<MetricsSettings>,
+) -> Response {
+    let me = match authenticate(&state, &headers, true) {
+        Ok(s) => s,
+        Err(r) => return r,
+    };
+    let who = format!("session {}", me.id);
+    if body.enabled {
+        match crate::metrics::enable(&state.db) {
+            Ok(token) => {
+                audit(&state, &who, &ip_of(&peer), "metrics token made");
+                reply(StatusCode::OK, json!({ "enabled": true, "token": token }))
+            }
+            Err(e) => internal(e),
+        }
+    } else {
+        match crate::metrics::disable(&state.db) {
+            Ok(()) => {
+                audit(&state, &who, &ip_of(&peer), "metrics turned off");
+                reply(StatusCode::OK, json!({ "enabled": false }))
+            }
+            Err(e) => internal(e),
+        }
+    }
+}
+
+/// A Prometheus scrape: the metrics for the right token, the plain 404 for anything else.
+async fn metrics_scrape(State(state): State<AppState>, headers: HeaderMap) -> Response {
+    if !crate::metrics::allowed(&state.db, &headers) {
+        return crate::http::not_found();
+    }
+    match state.hub.snapshot() {
+        Ok(servers) => (
+            StatusCode::OK,
+            [
+                (
+                    header::CONTENT_TYPE,
+                    "text/plain; version=0.0.4; charset=utf-8",
+                ),
+                (header::CACHE_CONTROL, "no-store"),
+            ],
+            crate::metrics::render(&servers),
+        )
+            .into_response(),
+        Err(e) => internal(e),
+    }
 }
 
 #[derive(Deserialize)]

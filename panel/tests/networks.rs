@@ -232,6 +232,7 @@ async fn links_are_made_on_both_servers_reused_undone_and_protected() {
         tls_host: None,
         forwards: Vec::new(),
         rotate: false,
+        fallback: Vec::new(),
         network,
     };
     let mut made = None;

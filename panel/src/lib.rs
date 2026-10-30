@@ -19,6 +19,7 @@ pub mod http;
 pub mod hub;
 pub mod join;
 pub mod manage;
+pub mod metrics;
 pub mod net;
 pub mod netops;
 pub mod networks;

@@ -175,6 +175,7 @@ async fn a_pair_is_made_edited_stopped_deleted_and_a_failure_leaves_nothing() {
             protocol: "tcp".into(),
         }],
         rotate: false,
+        fallback: Vec::new(),
         network: None,
     };
 
@@ -366,6 +367,7 @@ async fn a_tunnel_moves_to_another_server_and_a_move_that_fails_changes_nothing(
             protocol: "tcp".into(),
         }],
         rotate: false,
+        fallback: Vec::new(),
         network: None,
     };
     let op = pair::create(&hub, request(&a, listen)).unwrap();

@@ -23,6 +23,24 @@ import { benchLabel, isV6 } from "./Benchmark";
 import type { BenchChoice } from "./Benchmark";
 
 /** What the panel last saw of a side it cannot ask now (its server is offline), as a spec to start from. */
+/**
+ * The fallback addresses as typed (separated by commas or spaces): an address without a port gets the tunnel's,
+ * an IPv6 one in brackets. `bad` is the first one that is not an address.
+ */
+export function fallbackList(text: string, port: string): { list: string[]; bad?: string } {
+  const list: string[] = [];
+  for (const item of text.split(/[\s,]+/).filter(Boolean)) {
+    const withPort = /^\[[0-9a-fA-F:.]+\]:\d{1,5}$/.test(item) || /^[^:\[\]]+:\d{1,5}$/.test(item);
+    const v6 = /^[0-9a-fA-F:.]+$/.test(item) && item.includes(":");
+    const host = /^[A-Za-z0-9.-]+$/.test(item);
+    if (withPort && +item.slice(item.lastIndexOf(":") + 1) <= 65535 && +item.slice(item.lastIndexOf(":") + 1) > 0) list.push(item);
+    else if (v6) list.push(`[${item}]:${port}`);
+    else if (host) list.push(`${item}:${port}`);
+    else return { list, bad: item };
+  }
+  return { list };
+}
+
 function specOf(name: string, info: TunnelInfo): Spec {
   return {
     name,
@@ -74,6 +92,7 @@ export function TunnelEdit({ tunnel, servers, preset, onBack }: { tunnel: Tunnel
   const [encAck, setEncAck] = useState(false);
   const [obfs, setObfs] = useState(false);
   const [perIp, setPerIp] = useState("");
+  const [fallback, setFallback] = useState("");
   const [udpFlows, setUdpFlows] = useState("");
   const [proxy, setProxy] = useState<ProxyChoice>("off");
   // The private GRE network the tunnel runs over (its id), or none: found from the address the
@@ -94,6 +113,9 @@ export function TunnelEdit({ tunnel, servers, preset, onBack }: { tunnel: Tunnel
   const dialer = mode === "reverse" ? exit : entry;
   const parsed = useMemo(() => parsePorts(ports, protocol, target.trim() || "127.0.0.1"), [ports, protocol, target]);
   const isWs = transport === "ws" || transport === "wss";
+  // Fallback addresses need sessions to renew: mux, or quic.
+  const canFallback = transport === "quic" || muxOn || !MUX_OPTIONAL.includes(transport);
+  const fallbackOf = (text: string) => fallbackList(text, listenPort);
   const choices = (() => {
     const s = servers.find((x) => x.id === acceptor);
     return s ? addressesOf(s) : [];
@@ -136,6 +158,7 @@ export function TunnelEdit({ tunnel, servers, preset, onBack }: { tunnel: Tunnel
         setListenHost(hostOf(acc.listen) || "0.0.0.0");
         setListenPort(portOf(acc.listen));
         setDialHost(hostOf(dia.remote));
+        setFallback((dia.fallback ?? []).join(", "));
         setWsPath(a.ws_path ?? b.ws_path ?? "/");
         setWsHost(a.ws_host ?? b.ws_host ?? "");
         const real = acc.tls_cert && acc.tls_key ? { cert: acc.tls_cert, key: acc.tls_key } : null;
@@ -231,6 +254,7 @@ export function TunnelEdit({ tunnel, servers, preset, onBack }: { tunnel: Tunnel
     listen: `${listenHost}:${listenPort}`,
     dial: `${dialHost.includes(":") && !dialHost.startsWith("[") ? `[${dialHost}]` : dialHost}:${listenPort}`,
     network: netId || undefined,
+    fallback: canFallback && !netId ? fallbackOf(fallback).list : undefined,
     pool,
     ws_path: isWs ? wsPath : undefined,
     ws_host: isWs && wsHost.trim() ? wsHost.trim() : undefined,
@@ -287,6 +311,7 @@ export function TunnelEdit({ tunnel, servers, preset, onBack }: { tunnel: Tunnel
     if (!cipherReady(enc, transport, encAck)) return t("enc.needAck");
     if (parsed.bad !== undefined) return parsed.bad ? t("wz.badPorts", { bit: parsed.bad }) : t("wz.ports");
     if (muxSpec.bad) return `${t(`mux.${muxSpec.bad}`)}: ${t("mux.badValue")}`;
+    if (canFallback && !netId && fallbackOf(fallback).bad) return t("fb.bad", { addr: fallbackOf(fallback).bad ?? "" });
     if (perIpOf(perIp).bad) return t("perip.bad");
     if (protocol.includes("udp") && udpFlowsOf(udpFlows).bad) return t("udpflows.bad");
     return "";
@@ -457,6 +482,13 @@ export function TunnelEdit({ tunnel, servers, preset, onBack }: { tunnel: Tunnel
                 )}
                 {mode === "direct" && <span className="help">{t("wz.directHelp", { server: serverName(acceptor), port: listenPort })}</span>}
               </div>
+              {canFallback && !netId && (
+                <div className="field">
+                  <label htmlFor="te-fallback">{t("fb.title")}</label>
+                  <input className="text mono" id="te-fallback" dir="ltr" value={fallback} placeholder="203.0.113.6, [2001:db8::6]" onChange={(e) => setFallback(e.target.value)} />
+                  <span className="help">{t("fb.help", { other: serverName(dialer), port: listenPort })}</span>
+                </div>
+              )}
             </div>
             {transport === "wss" && <TlsChoice value={tls} onChange={setTls} server={acceptor} serverName={serverName(acceptor)} onHost={(h) => setDialHost(h)} />}
           </fieldset>

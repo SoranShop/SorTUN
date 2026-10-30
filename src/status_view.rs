@@ -319,6 +319,7 @@ mod tests {
                 streams: Some(140),
                 streams_max: Some(8192),
                 full: 0,
+                remote: None,
             },
             totals: Totals::default(),
             forwards: vec![ForwardStatus {

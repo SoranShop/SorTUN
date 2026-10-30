@@ -203,6 +203,8 @@ pub struct Peer {
     max_streams: u64,
     /// New connections that found every session full.
     full: AtomicU64,
+    /// With `tunnel.fallback`: the address of the other side in use.
+    remote: Mutex<Option<String>>,
 }
 
 impl Peer {
@@ -223,6 +225,11 @@ impl Peer {
     pub fn link_up(&self) {
         self.handshakes_ok.fetch_add(1, Relaxed);
         *lock(&self.last_ok) = Some(Instant::now());
+    }
+
+    /// The dialing side with `tunnel.fallback` now uses `addr` (see [`crate::failover`]).
+    pub fn set_remote(&self, addr: &str) {
+        *lock(&self.remote) = Some(addr.to_owned());
     }
 
     /// Connecting to or authenticating the other side failed.
@@ -279,6 +286,7 @@ impl Peer {
             streams: mux.then_some(streams),
             streams_max: (mux && self.max_streams > 0).then_some(open_sessions * self.max_streams),
             full: self.full.load(Relaxed),
+            remote: lock(&self.remote).clone(),
         }
     }
 }
@@ -560,6 +568,10 @@ pub struct PeerStatus {
     /// New connections that failed because every session was full.
     #[serde(default)]
     pub full: u64,
+    /// The dialing side with `tunnel.fallback`: the address of the other side in use
+    /// (`tunnel.remote`, or one of the fallbacks); absent without fallbacks.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remote: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

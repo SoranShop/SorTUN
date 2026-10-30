@@ -61,7 +61,7 @@ const NOT_FOUND: &str = "<html>\r\n<head><title>404 Not Found</title></head>\r\n
                          <center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx</center>\r\n\
                          </body>\r\n</html>\r\n";
 
-fn not_found() -> Response<Body> {
+pub(crate) fn not_found() -> Response<Body> {
     let mut response = Response::new(Body::from(NOT_FOUND));
     *response.status_mut() = StatusCode::NOT_FOUND;
     let headers = response.headers_mut();
@@ -368,6 +368,41 @@ mod tests {
             .await
             .unwrap();
         (response.status(), response.headers().clone())
+    }
+
+    /// `/metrics` is nginx's 404 until it is on, and then only for the token.
+    #[tokio::test]
+    async fn metrics_answer_only_the_token() {
+        let db = Db::in_memory().unwrap();
+        let app = router("k-7f3a9c", AppState::new(db.clone()));
+        let scrape = |bearer: Option<&str>| {
+            let mut request = Request::get("/k-7f3a9c/metrics");
+            if let Some(token) = bearer {
+                request = request.header(header::AUTHORIZATION, format!("Bearer {token}"));
+            }
+            let app = app.clone();
+            async move {
+                let response = app
+                    .oneshot(request.body(Body::empty()).unwrap())
+                    .await
+                    .unwrap();
+                let status = response.status();
+                let bytes = axum::body::to_bytes(response.into_body(), 1 << 20)
+                    .await
+                    .unwrap();
+                (status, String::from_utf8_lossy(&bytes).into_owned())
+            }
+        };
+        let (status, body) = scrape(None).await;
+        assert_eq!(status, StatusCode::NOT_FOUND);
+        assert!(body.contains("nginx"));
+        let token = crate::metrics::enable(&db).unwrap();
+        assert_eq!(scrape(Some("wrong")).await.0, StatusCode::NOT_FOUND);
+        let (status, body) = scrape(Some(&token)).await;
+        assert_eq!(status, StatusCode::OK);
+        // The panel's own server is always there.
+        assert!(body.contains("# TYPE kariz_server_up gauge"), "{body}");
+        assert!(body.contains(r#"kariz_server_up{server="#), "{body}");
     }
 
     #[tokio::test]

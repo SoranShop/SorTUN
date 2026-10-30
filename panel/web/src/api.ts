@@ -421,6 +421,8 @@ export interface PairRequest {
   proxy_protocol?: string;
   forwards: ForwardSpec[];
   rotate?: boolean;
+  /** The dialing side's other addresses of the accepting side, tried in order while `dial` is down. */
+  fallback?: string[];
   /** Direct mode: run over this private GRE network (its id). */
   network?: string;
 }
@@ -434,6 +436,8 @@ export interface Spec {
   profile?: string;
   listen?: string;
   remote?: string;
+  /** The dialing side: `tunnel.fallback`. */
+  fallback?: string[];
   pool?: number;
   ws_path?: string;
   ws_host?: string;
@@ -706,6 +710,8 @@ export const api = {
   update: () => call<UpdateStatus>("GET", "update"),
   checkUpdate: () => call<UpdateStatus>("POST", "update/check", {}),
   updateSettings: (body: { channel?: "stable" | "beta"; auto?: boolean }) => call<UpdateStatus>("POST", "update/settings", body),
+  metrics: () => call<{ enabled: boolean }>("GET", "metrics"),
+  metricsSet: (enabled: boolean) => call<{ enabled: boolean; token?: string }>("POST", "metrics", { enabled }),
   telegram: () => call<TelegramView>("GET", "telegram"),
   telegramSet: (body: TelegramChange) => call<TelegramView>("POST", "telegram", body),
   telegramPair: () => call<TelegramView>("POST", "telegram/pair", {}),

@@ -845,6 +845,7 @@ mod tests {
             tls_host: None,
             forwards: Vec::new(),
             rotate: false,
+            fallback: Vec::new(),
             network: Some("n".into()),
         };
         let at = |mode: &str| {

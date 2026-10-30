@@ -121,16 +121,17 @@ pub fn is_full(e: &io::Error) -> bool {
 /// session; each new one is handed to `on_session`. A closed session is replaced, with
 /// backoff while connecting fails.
 ///
-/// With `lifetime`, a session is also replaced after roughly that long (±10 %, so
-/// several sessions do not rotate in lockstep): the replacement is connected first, then
-/// the old session stops taking streams and closes once its streams are done.
+/// With a `lifetime` (asked again for each session), a session is also replaced after
+/// roughly that long (±10 %, so several sessions do not rotate in lockstep): the
+/// replacement is connected first, then the old session stops taking streams and closes
+/// once its streams are done.
 ///
 /// Sessions coming up and failed attempts are counted in `link`.
 pub async fn maintain<C, Fut>(
     peer: &'static str,
     link: Arc<Peer>,
     mut connect: C,
-    lifetime: Option<Duration>,
+    lifetime: impl Fn() -> Option<Duration>,
     on_session: impl Fn(Arc<Session>),
 ) where
     C: FnMut() -> Fut,
@@ -164,7 +165,7 @@ pub async fn maintain<C, Fut>(
         }
 
         let rotate = async {
-            match lifetime {
+            match lifetime() {
                 Some(l) => sleep(jitter(l)).await,
                 None => std::future::pending().await,
             }
@@ -283,7 +284,7 @@ mod tests {
             async move { Ok(Session::Kmux(MuxSession::new(a, Side::Client, config()))) }
         };
         let p = pool.clone();
-        let lifetime = Some(Duration::from_millis(300));
+        let lifetime = || Some(Duration::from_millis(300));
         let link = Arc::new(Peer::default());
         tokio::spawn(maintain("test peer", link, connect, lifetime, move |s| {
             p.add(s)

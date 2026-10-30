@@ -1066,6 +1066,7 @@ mod tests {
                 streams: None,
                 streams_max: None,
                 full: 0,
+                remote: None,
             },
             totals: StatTotals {
                 bytes_up: up,

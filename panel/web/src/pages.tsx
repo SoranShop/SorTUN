@@ -10,6 +10,7 @@ import type { MapData, MapHit } from "./scene-map";
 import { useApp } from "./store";
 import { BackupDialog, RestoreDialog } from "./Extras";
 import { TelegramSection } from "./Telegram";
+import { MetricsSection } from "./Metrics";
 import { AutoRestartDialog } from "./AutoRestart";
 import { ServerFixDialog } from "./ServerFix";
 import { useNetworks } from "./Networks";
@@ -1412,6 +1413,7 @@ export function SettingsPage({ hasPassword, onPasswordSet, updates }: { hasPassw
     ["sec", t("set.sec"), "shield"],
     ["upd", t("set.updates"), "update"],
     ["tg", t("set.telegram"), "bell"],
+    ["met", t("set.metrics"), "cpu"],
     ["use", t("set.usage"), "gauge"],
     ["bak", t("set.backup"), "download"],
     ["look", t("set.look"), "palette"],
@@ -1468,6 +1470,9 @@ export function SettingsPage({ hasPassword, onPasswordSet, updates }: { hasPassw
         </div>
         <div id="set-tg" className="set-section">
           <TelegramSection />
+        </div>
+        <div id="set-met" className="set-section">
+          <MetricsSection />
         </div>
         <Card title={t("set.usage")} id="set-use" className="set-section">
           <UsageSettingsRows row={row} />

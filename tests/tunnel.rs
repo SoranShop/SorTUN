@@ -2639,3 +2639,64 @@ async fn kcp_transfer_survives_loss() {
         run.await.unwrap();
     }
 }
+
+/// `tunnel.fallback`: the entry dials its exits in direct mode. The main one is down, so the
+/// fallback carries the users; when the fallback goes and the main one comes up, the
+/// sessions are made again to the main one.
+#[tokio::test(flavor = "multi_thread")]
+async fn fallback_takes_over_and_the_main_address_takes_it_back() {
+    let target = echo_server().await;
+    let (main, fallback, user_port) = (free_port(), free_port(), free_port());
+    let exit = |port: u16| {
+        format!(
+            r#"
+            role = "exit"
+            mode = "direct"
+            [tunnel]
+            transport = "tcpmux"
+            listen = "127.0.0.1:{port}"
+            token = "{TOKEN}"
+            "#
+        )
+    };
+    let entry = format!(
+        r#"
+        role = "entry"
+        mode = "direct"
+        [[forward]]
+        listen = "127.0.0.1:{user_port}"
+        target = "127.0.0.1:{target}"
+        [tunnel]
+        transport = "tcpmux"
+        remote = "127.0.0.1:{main}"
+        fallback = ["127.0.0.1:{fallback}"]
+        token = "{TOKEN}"
+        "#
+    );
+    let echoes = |what: &'static str| async move {
+        let payload = pattern(64 << 10);
+        let deadline = Instant::now() + Duration::from_secs(20);
+        loop {
+            let tried =
+                tokio::time::timeout(Duration::from_secs(5), echo_roundtrip(user_port, &payload))
+                    .await;
+            if matches!(&tried, Ok(Ok(got)) if *got == payload) {
+                return;
+            }
+            assert!(
+                Instant::now() < deadline,
+                "{what}: no echo through the tunnel"
+            );
+            tokio::time::sleep(Duration::from_millis(200)).await;
+        }
+    };
+    let second = Side::start(&exit(fallback));
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    let _entry = Side::start(&entry);
+    echoes("over the fallback, the main address down").await;
+
+    let first = Side::start(&exit(main));
+    drop(second);
+    echoes("back over the main address, the fallback gone").await;
+    drop(first);
+}

@@ -66,6 +66,10 @@ pub fn render(spec: &Spec, token: &str, cert_files: Option<(&Path, &Path)>) -> R
     if let Some(remote) = &spec.remote {
         tunnel.insert("remote".into(), text(remote));
     }
+    if !spec.fallback.is_empty() {
+        let list = spec.fallback.iter().map(|a| text(a)).collect();
+        tunnel.insert("fallback".into(), Value::Array(list));
+    }
     tunnel.insert("token".into(), text(token));
     if let Some(pool) = spec.pool {
         tunnel.insert("pool".into(), Value::Integer(i64::from(pool)));
@@ -405,6 +409,7 @@ pub fn get(dir: &Path, name: &str) -> Result<Spec> {
         profile: Some(c.profile.name().to_owned()),
         listen: c.tunnel.listen.clone(),
         remote: c.tunnel.remote.clone(),
+        fallback: c.tunnel.fallback.clone(),
         token: None,
         pool: Some(u32::try_from(c.tunnel.pool).unwrap_or(8)),
         ws_path: c.tunnel.ws.as_ref().map(|w| w.path.clone()),

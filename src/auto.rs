@@ -10,6 +10,7 @@
 
 use std::io;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::{Context, Result};
@@ -17,8 +18,10 @@ use tokio::time::timeout;
 use tracing::{debug, info, warn};
 
 use crate::channel::{self, Link};
-use crate::config::{TransportKind, Tuning, WsConfig};
+use crate::config::{Config, TransportKind, Tuning, WsConfig};
 use crate::crypto::Crypto;
+use crate::failover::Failover;
+use crate::stats::Peer;
 use crate::transport::{Dialer, Listener, Settings};
 
 /// The transports `auto` uses, in the order a dialing side tries them.
@@ -89,6 +92,24 @@ pub async fn bind_all(
         }
     }
     Ok(listeners)
+}
+
+/// What the dialing side of a mux tunnel dials: `tunnel.remote` and its fallbacks, each
+/// over the tunnel's transport (or all of [`KINDS`] for `auto`).
+pub fn failover(
+    config: &Config,
+    transport: &Settings,
+    tuning: &Tuning,
+    peer: &Arc<Peer>,
+) -> io::Result<Failover<Dial>> {
+    let remote = config.tunnel.remote.as_deref().expect("validated");
+    Failover::new(remote, &config.tunnel.fallback, peer.clone(), |addr| {
+        if config.tunnel.transport == TransportKind::Auto {
+            Dial::auto(transport, &config.tunnel.token, addr, tuning)
+        } else {
+            Dial::one(transport, addr, tuning)
+        }
+    })
 }
 
 /// The dialing side of a tunnel: one transport, or all of [`KINDS`] in turn.

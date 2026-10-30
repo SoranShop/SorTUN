@@ -16,6 +16,7 @@ mod auto;
 mod channel;
 mod entry;
 mod exit;
+mod failover;
 mod limit;
 mod relay;
 pub mod speedtest;

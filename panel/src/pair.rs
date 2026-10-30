@@ -80,6 +80,11 @@ pub struct PairRequest {
     /// dials the private address.
     #[serde(default)]
     pub network: Option<String>,
+    /// The dialing side's `tunnel.fallback`: other addresses of the accepting side (another
+    /// IP or route of the same server, or another server with the same tunnel), tried in
+    /// order while `dial` is down.
+    #[serde(default)]
+    pub fallback: Vec<String>,
 }
 
 impl PairRequest {
@@ -95,6 +100,11 @@ impl PairRequest {
             profile: self.profile.clone(),
             listen: accepts.then(|| self.listen.clone()),
             remote: (!accepts).then(|| self.dial.clone()),
+            fallback: if accepts {
+                Vec::new()
+            } else {
+                self.fallbacks()
+            },
             token: token.map(str::to_owned),
             pool: self.pool,
             ws_path: self.ws_path.clone(),
@@ -158,6 +168,15 @@ impl PairRequest {
     /// both of its servers must run 1.5 or newer, or they would refuse the config.
     fn needs_new_servers(&self) -> bool {
         self.transport == "auto" || self.mux.as_ref().is_some_and(|m| !m.is_empty())
+    }
+
+    /// The fallback addresses as they are written: trimmed, without empty ones.
+    fn fallbacks(&self) -> Vec<String> {
+        self.fallback
+            .iter()
+            .map(|a| a.trim().to_owned())
+            .filter(|a| !a.is_empty())
+            .collect()
     }
 
     /// Whether the tunnel's QUIC packets are sealed.
@@ -274,6 +293,14 @@ impl PairRequest {
         {
             bail!("old_agent_cert:{id}:{version}");
         }
+        // Fallback addresses came with 2.8.0: an older core refuses the field. Only the
+        // dialing side has them.
+        if id == self.acceptor_first()[1]
+            && !self.fallbacks().is_empty()
+            && !release_at_least(version, FALLBACK_SINCE)
+        {
+            bail!("old_agent_fallback:{id}:{version}");
+        }
         Ok(())
     }
 
@@ -312,6 +339,33 @@ impl PairRequest {
         if self.udp_flows().is_some_and(|v| v > 65536) {
             bail!("bad_udp_flows");
         }
+        let fallback = self.fallbacks();
+        if !fallback.is_empty() {
+            // The core takes them only where it keeps sessions to renew (see its
+            // `tunnel.fallback`), and an address needs a port.
+            let sessions = self.transport == "quic"
+                || self
+                    .mux
+                    .as_ref()
+                    .and_then(|m| m.enabled)
+                    .unwrap_or(self.transport != "tcp");
+            if !sessions {
+                bail!("fallback_needs_mux");
+            }
+            let has_port = |addr: &str| {
+                addr.rsplit_once(':')
+                    .filter(|(host, _)| !host.is_empty())
+                    .and_then(|(_, port)| port.parse::<u16>().ok())
+                    .is_some_and(|port| port > 0)
+            };
+            let mut seen = vec![self.dial.trim()];
+            for addr in &fallback {
+                if fallback.len() > 8 || seen.contains(&addr.as_str()) || !has_port(addr) {
+                    bail!("bad_fallback");
+                }
+                seen.push(addr);
+            }
+        }
         Ok(())
     }
 }
@@ -322,6 +376,9 @@ const UDP_FLOWS_SINCE: &str = "2.6.0-beta.4";
 /// The first release whose agent takes a wss certificate of the admin's own (any PEM files
 /// on the server, not only the manager's Let's Encrypt ones).
 const OWN_CERT_SINCE: &str = "2.7.0-beta.1";
+
+/// The first release whose core takes `tunnel.fallback`.
+const FALLBACK_SINCE: &str = "2.8.0";
 
 /// Whether `version` is `min` or a later release, prereleases in their order
 /// (`2.6.0-beta.3` is before `2.6.0-beta.4`, which is before `2.6.0`). One that cannot be
@@ -1409,6 +1466,7 @@ mod tests {
             proxy_protocol: None,
             forwards: Vec::new(),
             rotate: false,
+            fallback: Vec::new(),
             network: None,
         };
         let now = [side("a", "entry"), side("b", "exit")];
@@ -1465,6 +1523,7 @@ mod tests {
             proxy_protocol: None,
             forwards: Vec::new(),
             rotate: false,
+            fallback: Vec::new(),
             network: None,
         };
         for ok in ["auto", "aes-256-gcm", "chacha20-poly1305", "none"] {
@@ -1528,6 +1587,7 @@ mod tests {
             tls_host: None,
             forwards: Vec::new(),
             rotate: false,
+            fallback: Vec::new(),
             network: None,
         };
         // Both sides get it over quic, and nobody over another transport.
@@ -1573,6 +1633,7 @@ mod tests {
             tls_host: None,
             forwards: Vec::new(),
             rotate: false,
+            fallback: Vec::new(),
             network: None,
         };
         let (entry, exit) = req(Some(300), None).specs(None, None);
@@ -1619,6 +1680,7 @@ mod tests {
             tls_host: None,
             forwards: Vec::new(),
             rotate: false,
+            fallback: Vec::new(),
             network: None,
         };
         let (entry, exit) = req(Some(8192)).specs(None, None);
@@ -1701,6 +1763,7 @@ mod tests {
             tls_host: None,
             forwards: Vec::new(),
             rotate: false,
+            fallback: Vec::new(),
             network: None,
         };
         let (entry, exit) = req(Some("v1")).specs(None, None);
@@ -1762,6 +1825,7 @@ mod tests {
             encryption: None,
             forwards: Vec::new(),
             rotate: false,
+            fallback: Vec::new(),
             network: None,
         };
         assert!(req("auto", None).needs_new_servers());
@@ -1805,6 +1869,7 @@ mod tests {
             tls_host: real.then(|| "T.example.com".into()),
             forwards: Vec::new(),
             rotate: false,
+            fallback: Vec::new(),
             network: None,
         };
         // Reverse: the entry listens, the exit dials.

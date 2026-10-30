@@ -292,6 +292,9 @@ pub struct Spec {
     pub listen: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub remote: Option<String>,
+    /// The dialing side's other addresses of the other side (`tunnel.fallback`, 2.8.0).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub fallback: Vec<String>,
     /// Sent when a tunnel is made or its token changes; `None` keeps the one in the file.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,

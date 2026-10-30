@@ -580,13 +580,13 @@ fn probe_state(p: &ProbeStatus) -> ProbeState {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
     use crate::hub::TunnelView;
     use crate::wire::TunnelInfo;
     use kariz::stats::{PeerStatus, ProbeOutcome, ProbeStatus, Status, Totals};
 
-    fn status(connected: bool) -> Status {
+    pub(crate) fn status(connected: bool) -> Status {
         Status {
             status_version: 1,
             kariz: "1".into(),
@@ -608,6 +608,7 @@ mod tests {
                 streams: None,
                 streams_max: None,
                 full: 0,
+                remote: None,
             },
             totals: Totals {
                 bytes_up: 0,
