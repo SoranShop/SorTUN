@@ -730,7 +730,7 @@ fn may_go(hub: &Hub, link: &Link, views: &[crate::hub::ServerView], force: bool)
                 .reverse
                 .as_ref()
                 .is_some_and(|r| r.host == link.addr_a || r.host == link.addr_b);
-        if reached && !(force && !hub.is_online(&server.id)) {
+        if reached && (!force || hub.is_online(&server.id)) {
             bail!("agent_uses:{}", server.id);
         }
     }
