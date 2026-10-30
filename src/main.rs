@@ -80,6 +80,43 @@ enum Command {
         #[arg(long)]
         no_udp: bool,
     },
+    /// Before making a tunnel: which transports get through between two servers. Run
+    /// `sortun probe listen` on one, then the command it prints on the other.
+    Probe {
+        #[command(subcommand)]
+        side: ProbeSide,
+    },
+}
+
+#[derive(Subcommand)]
+enum ProbeSide {
+    /// Listen for the test, and print the command to run on the other server.
+    Listen {
+        /// The port the tunnel would use: TCP and UDP on it and on the next, TCP on the one
+        /// after (default: a random one from 20000 to 59999).
+        #[arg(long)]
+        port: Option<u16>,
+        /// This server's address as the other one reaches it (repeat it for IPv4 and IPv6).
+        /// Default: the addresses its internet routes leave from.
+        #[arg(long)]
+        host: Vec<String>,
+        /// Minutes to wait for the other server.
+        #[arg(long, default_value_t = 10)]
+        minutes: u64,
+        /// The tunnel's profile: balanced, ultraspeed or gaming.
+        #[arg(long, default_value = "balanced")]
+        profile: String,
+    },
+    /// Try every transport to the server that printed CODE.
+    Dial {
+        /// The code `sortun probe listen` printed (it starts with sp1.).
+        code: String,
+        /// Also move data each way this many seconds over the ones that get through (0: no).
+        #[arg(long, default_value_t = 0)]
+        speed: u64,
+        #[arg(long, default_value = "balanced")]
+        profile: String,
+    },
 }
 
 fn main() -> Result<()> {
@@ -118,6 +155,147 @@ fn main() -> Result<()> {
             };
             speedtest(&Config::load(&config)?, options)
         }
+        Command::Probe { side } => probe(side),
+    }
+}
+
+/// `sortun probe`: the two ends of a transport test between two servers, with no panel.
+fn probe(side: ProbeSide) -> Result<()> {
+    use sortun::probe;
+    let runtime = tokio::runtime::Runtime::new()?;
+    match side {
+        ProbeSide::Listen {
+            port,
+            host,
+            minutes,
+            profile,
+        } => {
+            let port = match port {
+                Some(p) => p,
+                None => {
+                    let mut b = [0u8; 2];
+                    getrandom::fill(&mut b).map_err(|e| anyhow::anyhow!("{e}"))?;
+                    20000 + u16::from_be_bytes(b) % 40000
+                }
+            };
+            if port > u16::MAX - 2 {
+                bail!("--port must leave room for the two after it (at most {})", u16::MAX - 2);
+            }
+            let addrs = if host.is_empty() {
+                let found = probe::own_addrs();
+                for ip in found.iter().filter(|ip| !probe::is_public(ip)) {
+                    eprintln!(
+                        "note: {ip} is a private address; if the other server reaches this one by \
+                         a public one, give it with --host"
+                    );
+                }
+                found.iter().map(ToString::to_string).collect::<Vec<_>>()
+            } else {
+                host
+            };
+            if addrs.is_empty() {
+                bail!("found no address of this server: give it with --host");
+            }
+            let token = probe::new_token()?;
+            let code = probe::Code {
+                addrs: addrs.clone(),
+                port,
+                token: token.clone(),
+            };
+            let dir = std::env::temp_dir().join(format!("sortun-probe-{}", std::process::id()));
+            std::fs::create_dir_all(&dir)?;
+            let tls = probe::self_signed(&dir).ok();
+            println!("Listening for the test on {}:", addrs.join(", "));
+            let (next, last) = (port + 1, port + 2);
+            println!("  ports TCP {port}, {next}, {last} and UDP {port}, {next}");
+            println!();
+            println!("Run this on the other server:");
+            println!();
+            println!("  sortun probe dial {}", code.encode());
+            println!();
+            println!("Waiting up to {minutes} minutes (Ctrl+C stops). Nothing is kept here.");
+            let result = runtime.block_on(async {
+                let listening = probe::serve(
+                    port,
+                    &token,
+                    &profile,
+                    std::time::Duration::from_secs(minutes * 60),
+                    tls.as_ref().map(|(c, k)| (c.as_path(), k.as_path())),
+                    |kind, at| {
+                        if let Err(e) = at {
+                            eprintln!("  {:<7} cannot listen: {e}", kind.name());
+                        }
+                    },
+                );
+                tokio::select! {
+                    done = listening => done,
+                    _ = tokio::signal::ctrl_c() => Ok(()),
+                }
+            });
+            let _ = std::fs::remove_dir_all(&dir);
+            result?;
+            Ok(())
+        }
+        ProbeSide::Dial {
+            code,
+            speed,
+            profile,
+        } => {
+            let code = probe::Code::decode(&code)?;
+            println!(
+                "Trying every transport to {} (port {}, up to {} s each):",
+                code.addrs.join(", "),
+                code.port,
+                probe::DIAL_LIMIT.as_secs()
+            );
+            println!();
+            let outcomes = runtime.block_on(probe::run(&code, &profile, speed, |o| {
+                println!("{}", probe_line(o));
+            }));
+            println!();
+            match probe::best(&outcomes) {
+                Some(best) => {
+                    let got = outcomes.iter().filter(|o| o.result.is_ok()).count();
+                    println!(
+                        "{got} of {} got through. The best here: {} to {}.",
+                        outcomes.len(),
+                        best.kind.name(),
+                        best.addr
+                    );
+                    println!(
+                        "The other direction can differ: run `sortun probe listen` on this server \
+                         and the command it prints on the other to see it."
+                    );
+                    Ok(())
+                }
+                None => bail!(
+                    "nothing got through. Check that the other server is still listening and that \
+                     its ports are open; or test the other direction (`sortun probe listen` here)."
+                ),
+            }
+        }
+    }
+}
+
+/// One line of `sortun probe dial`: the transport, where, and how it went.
+fn probe_line(o: &sortun::probe::Outcome) -> String {
+    let head = format!("  {:<7} {:<26}", o.kind.name(), o.addr);
+    match &o.result {
+        Ok(r) => {
+            let mut line = format!(
+                "{head} OK      handshake {:.0} ms, round trip {:.1} ms",
+                r.handshake_ms, r.latency.p50_ms
+            );
+            if r.latency.sent > 0 && r.latency.received < r.latency.sent {
+                let lost = r.latency.sent - r.latency.received;
+                line += &format!(", {lost} of {} lost", r.latency.sent);
+            }
+            if let (Some(down), Some(up)) = (r.download_mbps, r.upload_mbps) {
+                line += &format!(", {down:.0} / {up:.0} Mbit/s down / up");
+            }
+            line
+        }
+        Err(why) => format!("{head} FAILED  {why}"),
     }
 }
 

@@ -7,6 +7,7 @@ pub mod control;
 pub mod crypto;
 pub mod link;
 pub mod mux;
+pub mod probe;
 pub mod proto;
 pub mod proxy_header;
 pub mod session;

@@ -1919,6 +1919,8 @@ MENU_ROWS=(
     ""
     "logs|11|Logs"
     "uninstall|12|Uninstall SorTUN"
+    ""
+    "probe|13|Test transports to another server"
     "exit|0|Exit"
 )
 
@@ -2096,6 +2098,24 @@ screen_agent_remove() {
     cmd_agent remove
 }
 
+# Which transports get through to another server, before a tunnel is made (`sortun probe`):
+# one server listens and prints a command, the other runs it.
+screen_probe() {
+    need_sortun
+    local which code
+    choose which "This server" listen \
+        "listen|waits for the other server, and prints the command to run there" \
+        "dial|runs the command another server printed"
+    if [[ "$which" == listen ]]; then
+        "$BIN" probe listen
+    else
+        ask code "Paste the command or its code (sp1....)"
+        code=$(grep -o 'sp1\.[A-Za-z0-9_-]*' <<<"$code" | head -n 1 || true)
+        [[ -n "$code" ]] || die "That has no code in it (it starts with sp1.)."
+        "$BIN" probe dial "$code"
+    fi
+}
+
 screen_logs() {
     local which
     choose which "Which log?" panel \
@@ -2146,6 +2166,7 @@ menu() {
             agent) run_screen screen_agent ;;
             aremove) run_screen screen_agent_remove ;;
             logs) run_screen screen_logs ;;
+            probe) run_screen screen_probe ;;
             uninstall) run_screen cmd_uninstall ;;
             exit) menu_goodbye ;;
             *) ;;

@@ -16,6 +16,11 @@ Everything has SorTUN's name now: the programs (`sortun`, `sortun-panel`), the m
   3.0 and starts again what ran. Let's Encrypt certificates stay where certbot keeps them. A
   panel of 3.0 reads agents and tunnels of 2.x, but cannot update an agent of 2.x from the
   panel: run the script there.
+- **Test the path before a tunnel, without a panel.** `sortun probe listen` on one server
+  prints a command; run it on the other (`sortun probe dial CODE`) and it tries `tcpmux`, `kcp`,
+  `ws`, `wss` and `quic` over IPv4 and IPv6 and says which got through, the handshake time and
+  round trip, why the others did not, and the best one (`--speed N` measures speed too). Item
+  13 of the manager's menu. See [the manager](docs/manager.md).
 - **A simpler manager.** `sortun-manager` is a numbered list: type a number and Enter. No logo,
   no frames, no arrow keys; questions with options are numbered too, and every screen ends with
   Enter. The status says on or off for the core, the panel and the agent.

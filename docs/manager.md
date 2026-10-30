@@ -129,6 +129,31 @@ the panel's data (tokens, servers, certificate) go too; `--yes` answers yes to e
 server that is connected to a panel keeps showing there as offline until you remove it in the
 panel. `agent remove` removes only the agent.
 
+## Test the path before a tunnel
+
+Which transports get through between two servers, without a panel. On the server that would
+listen (the entry in reverse mode, the exit in direct mode):
+
+```bash
+sortun probe listen
+```
+
+It listens for a few minutes on a random port (`--port` to choose it: TCP on it and the next
+two, UDP on it and the next) and prints one command. Run that command on the other server:
+
+```bash
+sortun probe dial sp1.eyJh...
+```
+
+It tries `tcpmux`, `kcp`, `ws`, `wss` and `quic` to every address of the first server (IPv4
+and IPv6), one after another, and prints for each whether it got through, how long the
+handshake took and the round trip, or why not (no answer, refused, cut off in the
+handshake), then the best one. `--speed 3` also moves data each way for three seconds over
+the ones that got through. Nothing is written and no tunnel is made; the test has its own
+token. The other direction can differ: swap the two servers to see it. In the menu:
+*13 Test transports to another server*. The web panel has the same test, with scores, as its
+**Benchmark**.
+
 ## Logs
 
 SorTUN logs go to the journal, with systemd's priority for each line. The panel shows them in
