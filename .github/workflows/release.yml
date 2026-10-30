@@ -120,5 +120,5 @@ jobs:
           # which `kariz-manager install` and `update` use, stays on the last stable one.
           flags=()
           case "$GITHUB_REF_NAME" in *-*) flags=(--prerelease) ;; esac
-          gh release create "$GITHUB_REF_NAME" --title "Kariz $GITHUB_REF_NAME" "${flags[@]}" \
+          gh release create "$GITHUB_REF_NAME" --title "SorTUN $GITHUB_REF_NAME" "${flags[@]}" \
             --notes-file notes.md kariz-*.tar.gz kariz-*.tar.gz.sha256 kariz-*.tar.gz.sig
