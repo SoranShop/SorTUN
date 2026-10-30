@@ -26,10 +26,10 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Mutex;
 
 use anyhow::Result;
-use sortun::stats::Status;
-use sortun::wire::DirStatus;
 use rusqlite::{params, OptionalExtension};
 use serde::{Deserialize, Serialize};
+use sortun::stats::Status;
+use sortun::wire::DirStatus;
 
 use crate::auth::now;
 use crate::calendar::Calendar;

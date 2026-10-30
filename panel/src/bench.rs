@@ -23,10 +23,10 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use anyhow::{anyhow, bail, Result};
-use sortun::config::TransportKind;
-use sortun::speedtest::Latency;
 use rusqlite::{params, OptionalExtension};
 use serde::{Deserialize, Serialize};
+use sortun::config::TransportKind;
+use sortun::speedtest::Latency;
 use tracing::debug;
 
 use crate::auth::now;

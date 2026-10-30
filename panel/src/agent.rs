@@ -11,9 +11,9 @@ use std::time::Duration;
 
 use anyhow::{bail, Context, Result};
 use bytes::Bytes;
+use serde::{Deserialize, Serialize};
 use sortun::mux::Side;
 use sortun::session::Session;
-use serde::{Deserialize, Serialize};
 use tracing::{info, warn};
 
 use crate::collect::{self, Sampler};

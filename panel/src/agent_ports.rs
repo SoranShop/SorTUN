@@ -14,9 +14,9 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
 use anyhow::{anyhow, bail, Result};
+use rusqlite::{params, OptionalExtension};
 use sortun::config::TransportKind;
 use sortun::link::Acceptor;
-use rusqlite::{params, OptionalExtension};
 
 use crate::hub::{Hub, LOCAL};
 

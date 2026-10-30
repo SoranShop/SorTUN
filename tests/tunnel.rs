@@ -4,8 +4,8 @@ mod link;
 
 use std::time::{Duration, Instant};
 
-use sortun::config::Config;
 use link::{Counts, Impairment, TcpLink, UdpLink};
+use sortun::config::Config;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream, UdpSocket};
 

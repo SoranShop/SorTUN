@@ -166,8 +166,9 @@ fn join_codes_carry_the_link_token_and_a_secret_that_is_not_stored_as_it_is() {
         Db::in_memory().unwrap(),
         std::path::PathBuf::from("/nonexistent"),
     );
-    let code = sortun_panel::join::decode(&hub.create_join(Some("a"), "203.0.113.5:29001").unwrap())
-        .unwrap();
+    let code =
+        sortun_panel::join::decode(&hub.create_join(Some("a"), "203.0.113.5:29001").unwrap())
+            .unwrap();
     assert_eq!(code.p, "203.0.113.5:29001");
     assert_eq!(code.t, hub.link_token().unwrap());
     assert_eq!(code.n.as_deref(), Some("a"));

@@ -16,10 +16,13 @@ async fn an_agent_joins_over_quic_and_it_is_remembered() {
 
     // The panel's QUIC listener is on the port after its agents port: a code names the
     // agents port, and the agent adds one for quic, as for wss.
-    let quic =
-        sortun::link::Acceptor::bind_via("127.0.0.1:0", &token, sortun::config::TransportKind::Quic)
-            .await
-            .unwrap();
+    let quic = sortun::link::Acceptor::bind_via(
+        "127.0.0.1:0",
+        &token,
+        sortun::config::TransportKind::Quic,
+    )
+    .await
+    .unwrap();
     let port = quic.local_addr().unwrap().port();
     tokio::spawn(hub.clone().serve_agents(quic));
 

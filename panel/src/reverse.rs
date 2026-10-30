@@ -16,9 +16,9 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use anyhow::{anyhow, bail, Result};
-use sortun::mux::Side;
 use rusqlite::{params, OptionalExtension};
 use serde::Serialize;
+use sortun::mux::Side;
 use tracing::{debug, info, warn};
 
 use crate::hub::{Hub, LOCAL};

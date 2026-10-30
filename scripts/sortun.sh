@@ -50,14 +50,12 @@ RAW_URL="https://raw.githubusercontent.com/$REPO/main/scripts/sortun.sh"
 
 if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
     C_RESET=$'\e[0m' C_BOLD=$'\e[1m' C_DIM=$'\e[2m'
-    C_TEAL=$'\e[38;5;45m' C_AQUA=$'\e[38;5;75m' C_PURPLE=$'\e[38;5;141m' C_SAND=$'\e[38;5;179m'
+    C_TEAL=$'\e[38;5;45m' C_AQUA=$'\e[38;5;75m'
     C_RED=$'\e[38;5;203m' C_YELLOW=$'\e[38;5;220m' C_GREEN=$'\e[38;5;84m'
-    C_GRAY=$'\e[38;5;245m' C_LINK=$'\e[4;38;5;51m' C_PINK=$'\e[38;5;213m'
-    # The background of the highlighted row in the menu and the pickers.
-    C_SEL=$'\e[48;5;237m'
+    C_GRAY=$'\e[38;5;245m' C_LINK=$'\e[4;38;5;51m'
 else
-    C_RESET='' C_BOLD='' C_DIM='' C_TEAL='' C_AQUA='' C_PURPLE='' C_SAND='' C_RED='' C_YELLOW='' C_GREEN=''
-    C_GRAY='' C_LINK='' C_PINK='' C_SEL=''
+    C_RESET='' C_BOLD='' C_DIM='' C_TEAL='' C_AQUA='' C_RED='' C_YELLOW='' C_GREEN=''
+    C_GRAY='' C_LINK=''
 fi
 
 # A web address, underlined, so it stands out and is easy to find.
@@ -2008,7 +2006,7 @@ menu_status_lines() {
 
 # The menu: the status, the numbered items, and a number to type.
 menu_select() {
-    local row id num label answer
+    local row num label answer
     if ui_interactive; then
         printf '\e[H\e[2J'
     fi
@@ -2018,7 +2016,7 @@ menu_select() {
         if [[ -z "$row" ]]; then
             echo
         else
-            IFS='|' read -r id num label <<<"$row"
+            IFS='|' read -r _ num label <<<"$row"
             printf '   %2s  %s\n' "$num" "$label"
         fi
     done

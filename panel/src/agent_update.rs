@@ -33,7 +33,13 @@ pub struct SystemdRun;
 impl Launcher for SystemdRun {
     fn launch(&self, program: &Path, args: Vec<String>) -> Result<()> {
         let status = std::process::Command::new("systemd-run")
-            .args(["--unit", "sortun-agent-update", "--collect", "--quiet", "--"])
+            .args([
+                "--unit",
+                "sortun-agent-update",
+                "--collect",
+                "--quiet",
+                "--",
+            ])
             .arg(program)
             .args(args)
             .status()

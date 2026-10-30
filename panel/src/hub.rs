@@ -16,10 +16,10 @@ use std::time::{Duration, Instant};
 
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
-use sortun::mux::Side;
-use sortun::session::Session;
 use rusqlite::{params, OptionalExtension};
 use serde::Serialize;
+use sortun::mux::Side;
+use sortun::session::Session;
 use tracing::{debug, info, warn};
 
 use crate::agent::{Agent, AgentConfig};

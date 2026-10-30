@@ -210,7 +210,13 @@ async fn run(hub: &Arc<Hub>, op: &str, s: &UpdateSettings, release: Release) -> 
 fn handoff(s: &UpdateSettings, stage: &std::path::Path, version: &str) -> Result<()> {
     let helper = stage.join("sortun-panel");
     let status = std::process::Command::new("systemd-run")
-        .args(["--unit", "sortun-panel-update", "--collect", "--quiet", "--"])
+        .args([
+            "--unit",
+            "sortun-panel-update",
+            "--collect",
+            "--quiet",
+            "--",
+        ])
         .arg(&helper)
         .arg("update-apply")
         .arg("--stage")
