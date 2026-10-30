@@ -1,34 +1,34 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Kariz. Water finds its way underground." width="100%">
+  <img src="assets/banner.png" alt="SorTUN. Water finds its way underground." width="100%">
 </p>
 
 <p align="center">
-  <a href="https://github.com/Erfan-XRay/Kariz/actions/workflows/ci.yml"><img src="https://github.com/Erfan-XRay/Kariz/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://github.com/Erfan-XRay/Kariz/releases"><img src="https://img.shields.io/github/v/release/Erfan-XRay/Kariz?label=version&color=34d0c3" alt="Latest release"></a>
+  <a href="https://github.com/soranshop/SorTUN/actions/workflows/ci.yml"><img src="https://github.com/soranshop/SorTUN/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/soranshop/SorTUN/releases"><img src="https://img.shields.io/github/v/release/soranshop/SorTUN?label=version&color=34d0c3" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/rust-1.80%2B-e9c46a?logo=rust" alt="Rust 1.80+">
   <img src="https://img.shields.io/badge/platform-linux-12365e?logo=linux&logoColor=white" alt="Linux">
 </p>
 
 <p align="center">
   <b>English</b> · <a href="README_FA.md">فارسی</a> ·
-  <a href="https://erfan-xray.github.io/Kariz/">Website</a> ·
-  <a href="https://erfan-xray.github.io/Kariz/docs/">Documentation</a> ·
-  <a href="https://erfan-xray.github.io/Kariz/try/">Live demo</a> ·
+  <a href="https://soranshop.github.io/SorTUN/">Website</a> ·
+  <a href="https://soranshop.github.io/SorTUN/docs/">Documentation</a> ·
+  <a href="https://soranshop.github.io/SorTUN/try/">Live demo</a> ·
   <a href="CHANGELOG.md">Changelog</a>
 </p>
 
 ---
 
-**Kariz** (کاریز) takes its name from the qanats of Iran: channels dug under the desert that carry water
-from the mountains to the villages, through a line of wells, without ever coming to the surface.
-The software does the same for traffic. It joins two servers with a fast, encrypted tunnel; your
-users connect to the **entry**, and Kariz carries their TCP and UDP traffic to the **exit**, which
+**SorTUN** works like the qanats of Iran: channels dug under the desert that carry water from the
+mountains to the villages, through a line of wells, without ever coming to the surface. It does
+the same for traffic. It joins two servers with a fast, encrypted tunnel; your
+users connect to the **entry**, and SorTUN carries their TCP and UDP traffic to the **exit**, which
 reaches the real destinations.
 
 ```mermaid
 flowchart LR
     U([Users]) -->|TCP / UDP| E[Entry]
-    E <==>|"Kariz tunnel<br/>tcp · tcpmux · ws · wss · quic · kcp"| X[Exit]
+    E <==>|"SorTUN tunnel<br/>tcp · tcpmux · ws · wss · quic · kcp"| X[Exit]
     X --> T([Targets])
 ```
 
@@ -51,7 +51,7 @@ to run it: servers, tunnels, charts and logs in a browser.
 On the server that will hold the panel, as root:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Erfan-XRay/Kariz/main/scripts/kariz.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh)
 ```
 
 The script finds your CPU (x86_64, aarch64 or armv7), downloads the latest release, checks its
@@ -59,7 +59,7 @@ signature and opens a menu. Choose **Install the web panel here**: it prints the
 one-time login link. From then on you work in the browser. Add your other servers (each runs one command
 with a code from the panel), then make a tunnel between any two of them with the wizard.
 
-Want to look first? The [live demo](https://erfan-xray.github.io/Kariz/try/) runs the real panel on sample data.
+Want to look first? The [live demo](https://soranshop.github.io/SorTUN/try/) runs the real panel on sample data.
 
 ## What you get
 
@@ -79,7 +79,7 @@ Want to look first? The [live demo](https://erfan-xray.github.io/Kariz/try/) run
   monthly quota that warns before it runs out.
 - **Alerts in Telegram.** Your own bot tells you when a server goes offline or a tunnel goes down (and
   when it is back), and answers `/status` with every server and tunnel. It can go through a proxy or a
-  tunnel where Telegram is blocked. [Set it up](https://erfan-xray.github.io/Kariz/docs/telegram/).
+  tunnel where Telegram is blocked. [Set it up](https://soranshop.github.io/SorTUN/docs/telegram/).
 - **Signed releases.** The install script, the panel and its agents verify a release's signature before
   they run anything from it.
 
@@ -89,14 +89,14 @@ Everything else is on the website, in English and Persian:
 
 | | |
 |---|---|
-| [Getting started](https://erfan-xray.github.io/Kariz/docs/getting-started/) | install, the first tunnel, systemd |
-| [Using the panel](https://erfan-xray.github.io/Kariz/docs/using-the-panel/) · [Guided tour](https://erfan-xray.github.io/Kariz/docs/tour/) · [Video tutorial](https://erfan-xray.github.io/Kariz/docs/video/) | the panel, page by page, and in two minutes of video |
-| [The manager script](https://erfan-xray.github.io/Kariz/docs/manager/) | installing, updating, the menu |
-| [Transports](https://erfan-xray.github.io/Kariz/docs/transports/) · [Which one?](https://erfan-xray.github.io/Kariz/docs/how-it-works/) | choosing and tuning |
-| [Configuration reference](https://erfan-xray.github.io/Kariz/docs/configuration/) | every setting, default and limit |
-| [UDP and games](https://erfan-xray.github.io/Kariz/docs/udp-and-games/) · [CDN](https://erfan-xray.github.io/Kariz/docs/cdn/) | specific setups |
-| [Troubleshooting](https://erfan-xray.github.io/Kariz/docs/troubleshooting/) · [Security](https://erfan-xray.github.io/Kariz/docs/security/) | when something is wrong |
-| [Changelog](https://erfan-xray.github.io/Kariz/docs/changelog/) | what changed in each version |
+| [Getting started](https://soranshop.github.io/SorTUN/docs/getting-started/) | install, the first tunnel, systemd |
+| [Using the panel](https://soranshop.github.io/SorTUN/docs/using-the-panel/) · [Guided tour](https://soranshop.github.io/SorTUN/docs/tour/) · [Video tutorial](https://soranshop.github.io/SorTUN/docs/video/) | the panel, page by page, and in two minutes of video |
+| [The manager script](https://soranshop.github.io/SorTUN/docs/manager/) | installing, updating, the menu |
+| [Transports](https://soranshop.github.io/SorTUN/docs/transports/) · [Which one?](https://soranshop.github.io/SorTUN/docs/how-it-works/) | choosing and tuning |
+| [Configuration reference](https://soranshop.github.io/SorTUN/docs/configuration/) | every setting, default and limit |
+| [UDP and games](https://soranshop.github.io/SorTUN/docs/udp-and-games/) · [CDN](https://soranshop.github.io/SorTUN/docs/cdn/) | specific setups |
+| [Troubleshooting](https://soranshop.github.io/SorTUN/docs/troubleshooting/) · [Security](https://soranshop.github.io/SorTUN/docs/security/) | when something is wrong |
+| [Changelog](https://soranshop.github.io/SorTUN/docs/changelog/) | what changed in each version |
 
 The same pages are the Markdown files in [`docs/`](docs/README.md) (Persian: [`docs/fa/`](docs/fa/README.md)).
 
@@ -113,7 +113,7 @@ protocol are described in [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Support
 
-Kariz is made by one person and is free to run on your own servers. If it helps you and you want it to go on,
+SorTUN is made by one person and is free to run on your own servers. If it helps you and you want it to go on,
 you can donate; it is never required. Send each coin **only on the network shown next to it**: a coin sent on
 another network cannot be recovered. (The same, in [English](docs/support.md) and [Persian](docs/fa/support.md), is on the website.)
 
@@ -127,7 +127,7 @@ A star on the repository, a report of a problem with its log, and a word to othe
 
 ## License
 
-Kariz is **source-available, not open source**. You may read the code and run the official releases on your
+SorTUN is **source-available, not open source**. You may read the code and run the official releases on your
 own servers; using the core (or anything in it) anywhere else, copying it or redistributing it is not allowed.
 The full terms are in [LICENSE](LICENSE).
 

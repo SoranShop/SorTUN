@@ -41,7 +41,7 @@ export interface Tunnel {
   connections: number;
   rtt: number | null;
   error: string | null;
-  /** The entry side's health probe (Kariz 2.4 and newer). */
+  /** The entry side's health probe (SorTUN 2.4 and newer). */
   probe: ProbeStatus | null;
   /** With mux: streams in use and the most the connections take, on the fuller side. */
   capacity: { streams: number; max: number } | null;

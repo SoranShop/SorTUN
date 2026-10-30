@@ -15,7 +15,7 @@ use ring::signature::{self, Ed25519KeyPair, KeyPair, UnparsedPublicKey};
 
 /// The release public key: 32 raw bytes, hex. (`kariz-panel release-key` makes a pair.)
 pub const RELEASE_KEY_HEX: &str =
-    "586c5c36199ec24fc3b24b572f2d94809e5938b4b47e4b70ec3dbfa1b36f8d3b";
+    "e0671779e366f9609ce3c66b4b569cf448470c14ce4330541e3f7d5a09fb4234";
 
 const B64: base64::engine::GeneralPurpose = base64::engine::general_purpose::STANDARD;
 

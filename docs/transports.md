@@ -32,7 +32,7 @@ authentication with the token, X25519 for forward secrecy), AEAD records, and mu
 the user's first bytes ride along with the handshake.
 
 `tcpmux` is `tcp` with mux: a few long-lived connections, each carrying many streams
-with their own flow control. Opening a stream costs no round trip. On Linux, Kariz sets
+with their own flow control. Opening a stream costs no round trip. On Linux, SorTUN sets
 `TCP_NOTSENT_LOWAT` on these connections so the kernel does not hold a backlog that
 UDP packets and new streams would wait behind.
 
@@ -126,7 +126,7 @@ full chain and its private key on the listening server (PEM, without a passphras
 paths ending in `.pem`, `.crt`, `.cer` or `.key`) and the domain (or IPv4 address) it is for.
 Before the tunnel is changed, the server checks that the files are there and that the key is the
 certificate's. It must be a certificate browsers trust (from acme.sh, your provider, a CA), since
-the dialing side checks it against the web's roots; Kariz does not renew it, but the tunnel reads
+the dialing side checks it against the web's roots; SorTUN does not renew it, but the tunnel reads
 the new files by itself when you do. The listening server needs 2.7.0-beta.1 or newer.
 
 The dialing side checks it against **the name it was issued for**: the panel sets that as its

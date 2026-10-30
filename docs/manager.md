@@ -1,10 +1,10 @@
 # The manager script
 
-`scripts/kariz.sh` installs Kariz and its [web panel](panel.md) on a Linux server with systemd,
+`scripts/kariz.sh` installs SorTUN and its [web panel](panel.md) on a Linux server with systemd,
 and connects a server to a panel. After the first run it is also the `kariz-manager` command.
 
 **Tunnels are not made here.** Servers, tunnels, private networks, backups and updates of the
-other servers are all done in the web panel. The manager is only the way to get Kariz onto a
+other servers are all done in the web panel. The manager is only the way to get SorTUN onto a
 server and the panel running; from then on you work in the browser.
 
 ## Install
@@ -12,10 +12,10 @@ server and the panel running; from then on you work in the browser.
 As root, on each server:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Erfan-XRay/Kariz/main/scripts/kariz.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh)
 ```
 
-The first time on a server it installs the Kariz core by itself, then asks what else this
+The first time on a server it installs the SorTUN core by itself, then asks what else this
 server is for: only the core (tunnels are made from a panel on another server), the web panel
 here as well, or a connection to a panel that exists. Every run after that opens a menu, with
 the server's name and its IPv4 and IPv6 addresses at the top, and below it what runs here (the
@@ -30,12 +30,12 @@ script) the menu and the questions are numbered and read as lines.
 
 | | |
 |---|---|
-| **1** Install or update Kariz | finds your CPU (x86_64, aarch64 or armv7), downloads the latest release, checks its SHA-256 and its signature, and installs `kariz`, `kariz-panel`, the systemd units and the `kariz-manager` command |
+| **1** Install or update SorTUN | finds your CPU (x86_64, aarch64 or armv7), downloads the latest release, checks its SHA-256 and its signature, and installs `kariz`, `kariz-panel`, the systemd units and the `kariz-manager` command |
 | **2** Status and addresses | what runs on this server, its addresses and the panel's address |
 | **3** to **8** Web panel | install the panel here, make a login link, set the admin password, change the domain or IP and its certificate (Let's Encrypt, or the files of one you have), change the panel's port, remove the panel |
 | **9**, **10** Agent | connect this server to a panel with a join code, or disconnect it |
 | **11** Live logs | follow the panel's or the agent's log |
-| **12** Uninstall Kariz | stops and removes what it installed |
+| **12** Uninstall SorTUN | stops and removes what it installed |
 
 If GitHub limits your downloads (many servers behind one address), set `GITHUB_TOKEN` to any
 personal access token before running the script: it is used only to lift that limit.
@@ -62,7 +62,7 @@ kariz-manager install --binary ./kariz        # a binary you built yourself
 The menu and the commands do the same things:
 
 ```bash
-kariz-manager install [--version vX.Y.Z] [--binary PATH]   # Kariz (and the panel program)
+kariz-manager install [--version vX.Y.Z] [--binary PATH]   # SorTUN (and the panel program)
 kariz-manager update [--version vX.Y.Z]                    # a new release; what runs is restarted
 kariz-manager uninstall [--yes]                            # --yes also deletes the configs
 
@@ -118,11 +118,11 @@ To fetch it by hand:
 
 ```bash
 curl -fsSL -o /usr/local/bin/kariz-manager \
-    https://raw.githubusercontent.com/Erfan-XRay/Kariz/main/scripts/kariz.sh
+    https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh
 chmod +x /usr/local/bin/kariz-manager
 ```
 
-`uninstall` removes Kariz from the server completely: every tunnel, the agent (its service, its
+`uninstall` removes SorTUN from the server completely: every tunnel, the agent (its service, its
 identity and the private network links it made), the web panel if there is one, and the
 programs. It lists what it will remove and asks once, then asks whether the tunnel configs and
 the panel's data (tokens, servers, certificate) go too; `--yes` answers yes to everything. A
@@ -131,7 +131,7 @@ panel. `agent remove` removes only the agent.
 
 ## Logs
 
-Kariz logs go to the journal, with systemd's priority for each line. The panel shows them in
+SorTUN logs go to the journal, with systemd's priority for each line. The panel shows them in
 its Logs page; on the server:
 
 ```bash
@@ -144,7 +144,7 @@ journalctl -u kariz-agent -f                # the agent
 ## Good to know
 
 - It needs root, systemd, and `curl` or `wget`.
-- Tunnels are ordinary Kariz configs in `/etc/kariz/<name>.toml`, run by the service
+- Tunnels are ordinary SorTUN configs in `/etc/kariz/<name>.toml`, run by the service
   `kariz@<name>`; the panel's agent writes them. You can read them, and the
   [configuration reference](configuration.md) explains every setting, but change them in the
   panel so both sides stay in step.

@@ -22,6 +22,7 @@ Unknown keys are errors, so a typo is caught rather than ignored.
 | `transport` | `tcp`, `tcpmux`, `ws`, `wss`, `quic`, `kcp` | `tcp` | Same on both sides. See [Transports](transports.md). |
 | `listen` | `host:port` | | Listening side: entry in reverse mode, exit in direct mode. |
 | `remote` | `host:port` | | Dialing side: the other side's address (or a CDN edge). Resolved on every attempt. |
+| `fallback` | list of `host:port`, at most 8 | `[]` | Dialing side, with mux or `quic`: other addresses of the other side (another IP or route of the same server, or another server with the same tunnel and token). While `remote` is down they are tried in order and the first that answers is used; while on one, sessions are renewed every minute and `remote` is tried first, so the tunnel goes back to it once it is up. `kariz status` shows the address in use. 2.8.0 and newer. |
 | `token` | at least 16 characters | required | Same on both sides. Generate with `kariz token`. |
 | `encryption` | `auto`, `chacha20-poly1305`, `aes-256-gcm`, `none` | `auto` | `auto` dials with AES-256-GCM on CPUs with AES instructions, else ChaCha20-Poly1305, and accepts either. `none` only authenticates; set it on both sides or neither. `quic` always uses TLS 1.3: leave `auto`. |
 | `pool` | at least 1 | `8` | Reverse mode without mux: idle connections the exit keeps open. |
@@ -53,7 +54,7 @@ or off on both sides.
 | `host` | both | | Dialer: the `Host` header (and SNI for `wss`), so `remote` can be a CDN IP. Listener: requests for any other host are rejected. |
 | `early_data` | dialer | `false` | Put the tunnel hello inside the upgrade request, saving a round trip. The listener always accepts it. |
 | `user_agent` | dialer | a desktop Chrome | |
-| `headers` | dialer | | Extra request headers, e.g. `{ "Accept-Language" = "en-US,en;q=0.9" }`. Headers Kariz sets itself cannot be overridden. |
+| `headers` | dialer | | Extra request headers, e.g. `{ "Accept-Language" = "en-US,en;q=0.9" }`. Headers SorTUN sets itself cannot be overridden. |
 
 ## `[tunnel.tls]` (`wss`)
 
@@ -110,7 +111,7 @@ One table per rule; as many as needed.
 
 ### Real user addresses (`proxy_protocol`)
 
-Without it, every user reaches the target from the exit server's own Kariz process, so
+Without it, every user reaches the target from the exit server's own SorTUN process, so
 Xray sees `127.0.0.1` for everyone: per-account IP and device limits in 3x-ui or
 Marzban, Xray's access log, IP routing rules and fail2ban on the exit server all see one
 address. With `proxy_protocol`, the exit writes a PROXY header (HAProxy's format, `v1`
@@ -129,9 +130,9 @@ proxy_protocol = "v2"
 > `"acceptProxyProtocol": true` in the inbound's `streamSettings.sockopt` (in 3x-ui: the
 > inbound's **Proxy Protocol** switch) for exactly the ports behind these rules. A target
 > that does not expect it reads the header as the start of the user's traffic, and every
-> connection through that port breaks. Turn it on in Xray and in Kariz together.
+> connection through that port breaks. Turn it on in Xray and in SorTUN together.
 
-- Both servers need Kariz 2.5 or newer: the entry sends the user's address with each
+- Both servers need SorTUN 2.5 or newer: the entry sends the user's address with each
   connection, and an older exit refuses such connections.
 - TCP only. UDP flows never get a header (Xray does not take one on UDP), so a
   `tcp+udp` rule sends one on its TCP connections only, and a `udp` rule refuses the

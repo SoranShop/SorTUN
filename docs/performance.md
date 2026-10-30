@@ -42,7 +42,7 @@ setups of the throughput benchmark, 3 alternating rounds each:
 | Memory, 1,000 idle UDP flows | +6 to +9 MiB | +4 MiB |
 
 mimalloc commits its first arena eagerly by default, which took an idle side to 15.6 MiB;
-Kariz turns that off at startup (`MIMALLOC_ARENA_EAGER_COMMIT=0`, set in
+SorTUN turns that off at startup (`MIMALLOC_ARENA_EAGER_COMMIT=0`, set in
 `src/allocator.rs` unless the environment sets it), which is where the 8.1 MiB comes from.
 
 For the least memory instead, build without it:

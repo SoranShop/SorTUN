@@ -135,7 +135,7 @@ export function Login({
       <div className="login-top">
         <div className="brand">
           <img src={logo} alt="" />
-          <span>Kariz</span>
+          <span>SorTUN</span>
         </div>
         <div className="chip-group">
           <button className="chip" type="button" onClick={() => setLang(lang === "fa" ? "en" : "fa")}>

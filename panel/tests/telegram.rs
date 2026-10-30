@@ -140,7 +140,7 @@ async fn a_chat_connects_with_the_code_and_then_gets_answers() {
     telegram::handle(&hub, &after, &message(42, "/server nothing-like-it")).await;
     telegram::handle(&hub, &after, &message(42, "hello")).await;
     let sent = texts(&fake);
-    assert!(sent[1].1.contains("Kariz status"), "{}", sent[1].1);
+    assert!(sent[1].1.contains("SorTUN status"), "{}", sent[1].1);
     assert!(
         sent[2].1.contains("No server with that name"),
         "{}",

@@ -79,7 +79,7 @@ Telegram cannot be reached from some countries. The panel's server needs to reac
 - **A proxy**: `http://host:port` or `socks5://host:port`, with `user:password@` before the host
   if it needs them. A proxy you already have on that server (an Xray or V2Ray client that opens a
   local SOCKS port, for example) works: `socks5://127.0.0.1:10808`.
-- **A local port that a tunnel forwards**: if the panel's server is the *entry* of a Kariz tunnel
+- **A local port that a tunnel forwards**: if the panel's server is the *entry* of a SorTUN tunnel
   to a server where Telegram is not blocked, add a forward to that tunnel's config:
 
   ```toml
@@ -118,4 +118,4 @@ address.
 | The test works but no alerts come | no chat is connected, the kind of message is off, the alerts are muted (`/unmute`), or the thing was not down for the whole wait |
 | `/start CODE` gets no answer | the code was used or has expired (ten minutes): press *Connect a chat* for a new one |
 | *chat not found* or *bot was blocked by the user* | the chat removed the bot: connect it again |
-| *Conflict: can't use getUpdates method while webhook is active* | the bot has a webhook set elsewhere (another program uses it): use a bot of its own for Kariz |
+| *Conflict: can't use getUpdates method while webhook is active* | the bot has a webhook set elsewhere (another program uses it): use a bot of its own for SorTUN |

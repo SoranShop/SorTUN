@@ -11,7 +11,7 @@ use kariz_panel::db::Db;
 use kariz_panel::http::{self, AppState};
 
 #[derive(Parser)]
-#[command(name = "kariz-panel", version, about = "The Kariz web panel")]
+#[command(name = "kariz-panel", version, about = "The SorTUN web panel")]
 struct Cli {
     #[command(subcommand)]
     command: Command,

@@ -1,19 +1,19 @@
 <p align="center">
-  <img src="assets/banner.png" alt="کاریز. آب، راهش را از زیر زمین پیدا می‌کند." width="100%">
+  <img src="assets/banner.png" alt="SorTUN. آب، راهش را از زیر زمین پیدا می‌کند." width="100%">
 </p>
 
 <p align="center">
-  <a href="https://github.com/Erfan-XRay/Kariz/actions/workflows/ci.yml"><img src="https://github.com/Erfan-XRay/Kariz/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://github.com/Erfan-XRay/Kariz/releases"><img src="https://img.shields.io/github/v/release/Erfan-XRay/Kariz?label=version&color=34d0c3" alt="آخرین نسخه"></a>
+  <a href="https://github.com/soranshop/SorTUN/actions/workflows/ci.yml"><img src="https://github.com/soranshop/SorTUN/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/soranshop/SorTUN/releases"><img src="https://img.shields.io/github/v/release/soranshop/SorTUN?label=version&color=34d0c3" alt="آخرین نسخه"></a>
   <img src="https://img.shields.io/badge/rust-1.80%2B-e9c46a?logo=rust" alt="Rust 1.80+">
   <img src="https://img.shields.io/badge/platform-linux-12365e?logo=linux&logoColor=white" alt="Linux">
 </p>
 
 <p align="center">
   <a href="README.md">English</a> · <b>فارسی</b> ·
-  <a href="https://erfan-xray.github.io/Kariz/fa/">وب‌سایت</a> ·
-  <a href="https://erfan-xray.github.io/Kariz/fa/docs/">مستندات</a> ·
-  <a href="https://erfan-xray.github.io/Kariz/fa/try/">دموی زنده</a> ·
+  <a href="https://soranshop.github.io/SorTUN/fa/">وب‌سایت</a> ·
+  <a href="https://soranshop.github.io/SorTUN/fa/docs/">مستندات</a> ·
+  <a href="https://soranshop.github.io/SorTUN/fa/try/">دموی زنده</a> ·
   <a href="docs/fa/CHANGELOG.md">تغییرات</a>
 </p>
 
@@ -21,14 +21,14 @@
 
 <div dir="rtl">
 
-**کاریز** نامش را از کاریزهای ایران گرفته: کانال‌هایی که زیر کویر کنده‌اند و آب را از دل کوه، از میان ردیفی از چاه‌ها، بی‌آن‌که به سطح زمین بیاید به آبادی می‌رسانند. این برنامه همین کار را برای ترافیک می‌کند. دو سرور را با یک تانل سریع و رمزنگاری‌شده به هم وصل می‌کند؛ کاربرها به **ورودی** (entry) وصل می‌شوند و کاریز ترافیک TCP و UDP‌شان را به **خروجی** (exit) می‌رساند، همان سروری که به مقصدهای واقعی دسترسی دارد.
+**SorTUN** مثل کاریزهای ایران کار می‌کند: کانال‌هایی که زیر کویر کنده‌اند و آب را از دل کوه، از میان ردیفی از چاه‌ها، بی‌آن‌که به سطح زمین بیاید به آبادی می‌رسانند. این برنامه همین کار را برای ترافیک می‌کند. دو سرور را با یک تانل سریع و رمزنگاری‌شده به هم وصل می‌کند؛ کاربرها به **ورودی** (entry) وصل می‌شوند و SorTUN ترافیک TCP و UDP‌شان را به **خروجی** (exit) می‌رساند، همان سروری که به مقصدهای واقعی دسترسی دارد.
 
 </div>
 
 ```mermaid
 flowchart LR
     U([Users]) -->|TCP / UDP| E[Entry]
-    E <==>|"Kariz tunnel<br/>tcp · tcpmux · ws · wss · quic · kcp"| X[Exit]
+    E <==>|"SorTUN tunnel<br/>tcp · tcpmux · ws · wss · quic · kcp"| X[Exit]
     X --> T([Targets])
 ```
 
@@ -58,14 +58,14 @@ flowchart LR
 </div>
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Erfan-XRay/Kariz/main/scripts/kariz.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh)
 ```
 
 <div dir="rtl">
 
 اسکریپت CPU سرور را تشخیص می‌دهد (x86_64، aarch64 یا armv7)، آخرین نسخه را می‌گیرد، امضایش را می‌سنجد و یک منو باز می‌کند. **نصب پنل وب** را انتخاب کنید تا نشانی پنل و یک لینک ورود یک‌بارمصرف چاپ شود. از آن به بعد کار در مرورگر است: سرورهای دیگرتان را اضافه کنید (هر کدام یک دستور را با کدی که پنل می‌دهد اجرا می‌کند) و با ویزارد بین هر دو سرور تانل بسازید.
 
-می‌خواهید اول ببینید؟ [دموی زنده](https://erfan-xray.github.io/Kariz/fa/try/) پنل واقعی را با داده‌های نمونه اجرا می‌کند.
+می‌خواهید اول ببینید؟ [دموی زنده](https://soranshop.github.io/SorTUN/fa/try/) پنل واقعی را با داده‌های نمونه اجرا می‌کند.
 
 ## چه چیزی دارد
 
@@ -74,7 +74,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Erfan-XRay/Kariz/main/script
 - **TCP و UDP.** WireGuard، DNS و بازی از آن رد می‌شوند. روی `kcp` و `quic` بستهٔ گم‌شده چیز دیگری را معطل نمی‌کند و برای بازی FEC و تکثیر اختیاری بسته هم هست.
 - **پنلی که اشتباهش را خودش جمع می‌کند.** ویزارد تانل اول هر دو سرور را می‌سنجد و اگر جایی خطا شود هر دو را به حالت قبل برمی‌گرداند. نقشهٔ زنده، نمودار، لاگ، تست سرعت، پشتیبان‌گیری، شبکهٔ خصوصی و به‌روزرسانی هم همان‌جاست.
 - **مصرف واقعی.** هر تانل و هر سرور مصرف امروز، این هفته، این ماه و کل خود را روی نمودار ساعتی، روزانه یا ماهانه (شمسی یا میلادی) نشان می‌دهد؛ از شمارنده‌های خود هسته، با هدرها و بازارسال‌ها، و جدا شده به دادهٔ کاربران و سربار. هر سرور می‌تواند سهمیهٔ ماهانه‌ای داشته باشد که پیش از تمام شدن هشدار می‌دهد.
-- **اعلان در تلگرام.** رباتِ خودتان وقتی سروری آفلاین یا تانلی قطع شود (و وقتی برگردد) خبر می‌دهد و به `/status` با وضعیت همهٔ سرورها و تانل‌ها جواب می‌دهد. جایی که تلگرام بسته است از پروکسی یا از یک تانل رد می‌شود. [راه‌اندازی](https://erfan-xray.github.io/Kariz/fa/docs/telegram/).
+- **اعلان در تلگرام.** رباتِ خودتان وقتی سروری آفلاین یا تانلی قطع شود (و وقتی برگردد) خبر می‌دهد و به `/status` با وضعیت همهٔ سرورها و تانل‌ها جواب می‌دهد. جایی که تلگرام بسته است از پروکسی یا از یک تانل رد می‌شود. [راه‌اندازی](https://soranshop.github.io/SorTUN/fa/docs/telegram/).
 - **انتشار امضاشده.** اسکریپت نصب، پنل و agentها پیش از اجرای هر چیزی از یک نسخه، امضایش را بررسی می‌کنند.
 
 ## مستندات
@@ -83,14 +83,14 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Erfan-XRay/Kariz/main/script
 
 | | |
 |---|---|
-| [شروع کار](https://erfan-xray.github.io/Kariz/fa/docs/getting-started/) | نصب، اولین تانل، systemd |
-| [کار با پنل](https://erfan-xray.github.io/Kariz/fa/docs/using-the-panel/) · [تور راهنما](https://erfan-xray.github.io/Kariz/fa/docs/tour/) · [ویدیوی آموزشی](https://erfan-xray.github.io/Kariz/fa/docs/video/) | پنل، صفحه به صفحه، و در دو دقیقه ویدیو |
-| [اسکریپت مدیر](https://erfan-xray.github.io/Kariz/fa/docs/manager/) | نصب، به‌روزرسانی، منو |
-| [ترنسپورت‌ها](https://erfan-xray.github.io/Kariz/fa/docs/transports/) · [کدام یکی؟](https://erfan-xray.github.io/Kariz/fa/docs/how-it-works/) | انتخاب و تنظیم |
-| [مرجع پیکربندی](https://erfan-xray.github.io/Kariz/fa/docs/configuration/) | همهٔ تنظیم‌ها با مقدار پیش‌فرض و محدوده |
-| [UDP و بازی](https://erfan-xray.github.io/Kariz/fa/docs/udp-and-games/) · [CDN](https://erfan-xray.github.io/Kariz/fa/docs/cdn/) | راه‌اندازی‌های خاص |
-| [عیب‌یابی](https://erfan-xray.github.io/Kariz/fa/docs/troubleshooting/) · [امنیت](https://erfan-xray.github.io/Kariz/fa/docs/security/) | وقتی چیزی درست کار نمی‌کند |
-| [تغییرات](https://erfan-xray.github.io/Kariz/fa/docs/changelog/) | هر نسخه چه چیزی عوض شد |
+| [شروع کار](https://soranshop.github.io/SorTUN/fa/docs/getting-started/) | نصب، اولین تانل، systemd |
+| [کار با پنل](https://soranshop.github.io/SorTUN/fa/docs/using-the-panel/) · [تور راهنما](https://soranshop.github.io/SorTUN/fa/docs/tour/) · [ویدیوی آموزشی](https://soranshop.github.io/SorTUN/fa/docs/video/) | پنل، صفحه به صفحه، و در دو دقیقه ویدیو |
+| [اسکریپت مدیر](https://soranshop.github.io/SorTUN/fa/docs/manager/) | نصب، به‌روزرسانی، منو |
+| [ترنسپورت‌ها](https://soranshop.github.io/SorTUN/fa/docs/transports/) · [کدام یکی؟](https://soranshop.github.io/SorTUN/fa/docs/how-it-works/) | انتخاب و تنظیم |
+| [مرجع پیکربندی](https://soranshop.github.io/SorTUN/fa/docs/configuration/) | همهٔ تنظیم‌ها با مقدار پیش‌فرض و محدوده |
+| [UDP و بازی](https://soranshop.github.io/SorTUN/fa/docs/udp-and-games/) · [CDN](https://soranshop.github.io/SorTUN/fa/docs/cdn/) | راه‌اندازی‌های خاص |
+| [عیب‌یابی](https://soranshop.github.io/SorTUN/fa/docs/troubleshooting/) · [امنیت](https://soranshop.github.io/SorTUN/fa/docs/security/) | وقتی چیزی درست کار نمی‌کند |
+| [تغییرات](https://soranshop.github.io/SorTUN/fa/docs/changelog/) | هر نسخه چه چیزی عوض شد |
 
 همین صفحه‌ها فایل‌های Markdown پوشهٔ [`docs/fa/`](docs/fa/README.md) هستند (نسخهٔ انگلیسی: [`docs/`](docs/README.md)).
 
@@ -110,7 +110,7 @@ cargo build --release --no-default-features   # بدون quic و kcp
 
 ## حمایت
 
-کاریز را یک نفر می‌سازد و اجرایش روی سرورهای خودتان رایگان است. اگر به کارتان آمده و می‌خواهید ادامه پیدا کند، می‌توانید کمک مالی کنید؛ هیچ‌وقت لازم نیست. هر ارز را **فقط روی شبکه‌ای** بفرستید که کنارش نوشته شده: ارزی که روی شبکهٔ دیگری فرستاده شود برگردانده نمی‌شود. (همین مطلب در وب‌سایت هم هست: [فارسی](docs/fa/support.md) و [English](docs/support.md).)
+SorTUN را یک نفر می‌سازد و اجرایش روی سرورهای خودتان رایگان است. اگر به کارتان آمده و می‌خواهید ادامه پیدا کند، می‌توانید کمک مالی کنید؛ هیچ‌وقت لازم نیست. هر ارز را **فقط روی شبکه‌ای** بفرستید که کنارش نوشته شده: ارزی که روی شبکهٔ دیگری فرستاده شود برگردانده نمی‌شود. (همین مطلب در وب‌سایت هم هست: [فارسی](docs/fa/support.md) و [English](docs/support.md).)
 
 </div>
 
@@ -122,11 +122,11 @@ cargo build --release --no-default-features   # بدون quic و kcp
 
 <div dir="rtl">
 
-ستاره دادن به مخزن، گزارش مشکل همراه با لاگ، و گفتن از کاریز به مدیران سرور دیگر هم به همان اندازه کمک می‌کند.
+ستاره دادن به مخزن، گزارش مشکل همراه با لاگ، و گفتن از SorTUN به مدیران سرور دیگر هم به همان اندازه کمک می‌کند.
 
 ## مجوز
 
-کاریز **کدباز نیست، «سورس‌در‌دسترس» است**. می‌توانید کد را بخوانید و نسخه‌های رسمی را روی سرورهای خودتان اجرا کنید؛ استفاده از هسته (یا هر بخشی از آن) در جای دیگر، کپی کردن یا پخش کردنش مجاز نیست. متن کامل شرایط در فایل [LICENSE](LICENSE) است (متن انگلیسی معتبر است).
+SorTUN **کدباز نیست، «سورس‌در‌دسترس» است**. می‌توانید کد را بخوانید و نسخه‌های رسمی را روی سرورهای خودتان اجرا کنید؛ استفاده از هسته (یا هر بخشی از آن) در جای دیگر، کپی کردن یا پخش کردنش مجاز نیست. متن کامل شرایط در فایل [LICENSE](LICENSE) است (متن انگلیسی معتبر است).
 
 <p align="center"><sub>© ErfanXRay</sub></p>
 

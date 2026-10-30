@@ -1,4 +1,4 @@
-# Running Kariz behind a CDN
+# Running SorTUN behind a CDN
 
 A CDN hides the tunnel server behind the CDN's own IP addresses. The DPI only sees a
 TLS connection to a CDN edge, with the SNI of an ordinary website, carrying a
@@ -92,7 +92,7 @@ Setup:
 5. Optional: the origin firewall only accepts Cloudflare's IP ranges.
 6. `kariz check -c <config>` on both sides: `config OK`, no warnings.
 
-Checks (tick each, and note the date and Kariz commit):
+Checks (tick each, and note the date and SorTUN commit):
 
 - [ ] `curl -sI https://tunnel.example.com/` → `404`, `server: cloudflare`.
 - [ ] `curl -s https://tunnel.example.com/api/v1/stream` (no upgrade) → `404`.

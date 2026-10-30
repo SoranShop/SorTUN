@@ -1,8 +1,8 @@
-# Support Kariz
+# Support SorTUN
 
-Kariz is made and maintained by one person, and it is free to run on your own servers. If it
+SorTUN is made and maintained by one person, and it is free to run on your own servers. If it
 saves you time or money and you want to help it go on, a donation is welcome. It is never
-required, and nothing in Kariz depends on it.
+required, and nothing in SorTUN depends on it.
 
 ## Donate
 
@@ -40,10 +40,10 @@ before you send.
 
 Money is not the only thing that keeps a project alive:
 
-- **Star the repository** on [GitHub](https://github.com/Erfan-XRay/Kariz): it is how others find it.
+- **Star the repository** on [GitHub](https://github.com/soranshop/SorTUN): it is how others find it.
 - **Report a problem** with what you did, what you expected and the log
   ([Troubleshooting](troubleshooting.md) says what to collect). A report that can be repeated
   gets fixed fastest.
 - **Join the Telegram channel**, [@Erfan_Xray](https://t.me/Erfan_Xray): news, releases and answers. The panel links to it too.
 - **Tell other server operators** about it.
-- **Support what Kariz stands on**: the projects whose work it uses deserve the same thanks.
+- **Support what SorTUN stands on**: the projects whose work it uses deserve the same thanks.

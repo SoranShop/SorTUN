@@ -11,7 +11,7 @@ in [security.md](security.md).
 | Someone on the internet who finds the panel's port | send any request, open many connections, try passwords and links | learn that it is a panel (any address but the secret path is nginx's plain 404), or try more than 5 wrong secrets per address in 15 minutes |
 | A web page the admin visits while signed in | make the browser send requests | act: the cookie is `SameSite=Strict`, every change needs a header only the app knows, and a page cannot send `application/json` without the browser asking first |
 | A server that has been taken over (an agent) | answer the panel with anything, drop the link | make the panel run anything, or reach other servers: the panel only reads its answers as data |
-| The network between the panel and a server | read and change bytes | read or change anything useful: the link is Kariz's own (encrypted, and both sides prove keys) |
+| The network between the panel and a server | read and change bytes | read or change anything useful: the link is SorTUN's own (encrypted, and both sides prove keys) |
 | A poisoned download | offer a program | have it run: releases are signed, and a file whose signature does not verify is deleted |
 | Someone with a copy of the database | read it | sign in or impersonate a server without more: secrets are stored as hashes (Argon2id, BLAKE3); the agents' keys are in it, so it is kept `0600` in a `0700` folder |
 
@@ -73,7 +73,7 @@ the sign-in is hardened.
 - **The panel says whether a password is set** before sign-in (the login page needs to know).
 - **The agent runs as root** because it manages services and interfaces. Its requests are the fixed
   list above, but a bug in one of them is a bug as root; they are small, validated and tested.
-- **GRE itself is not encrypted;** Kariz encrypts what runs inside it. See [networks.md](networks.md).
+- **GRE itself is not encrypted;** SorTUN encrypts what runs inside it. See [networks.md](networks.md).
 - **Backups hold the agents' keys** (that is what lets a restored panel talk to them); they are
   encrypted with a passphrase you choose. Keep both safe.
 - **The release key is one key.** If it leaks or is lost, releases cannot be trusted or made: a new

@@ -1,17 +1,40 @@
 # Changelog
 
+## 2.8.0 - 2026-10-30
+
+The first release as **SorTUN**, at <https://github.com/soranshop/SorTUN>. The programs, services,
+commands and paths keep their names (`kariz`, `kariz-panel`, `kariz-manager`, `/etc/kariz`), and
+configs, panels and agents of 2.7 carry on as they are.
+
+- **Fallback addresses.** `tunnel.fallback` lists other addresses of the other side: another IP
+  or route of the same server, or another server with the same tunnel. While `remote` is down
+  the dialing side tries them in order and keeps the first that answers; while on one, its
+  sessions are renewed every minute with `remote` tried first, so the tunnel goes back once it is
+  up. For mux tunnels and `quic`; `kariz status` shows the address in use (`peer.remote`). In the
+  panel: *Fallback addresses* on a tunnel's edit page (the dialing server needs 2.8.0).
+- **Prometheus.** *Settings*, *Prometheus* turns on `/metrics` under the panel's secret path,
+  behind a token shown once (only its hash is kept): every server's health and every tunnel's
+  state, sessions, round trip, traffic counters and fallback, with a `prometheus.yml` job to
+  paste. Off, or without the token, the address answers like any unknown one.
+- **A new release key.** Releases are signed with SorTUN's own key, built into this version and
+  `scripts/kariz.sh`. A panel or agent of 2.7 checks updates against the Kariz key and refuses
+  this release, so on each server, panel first, run the new script once:
+  `bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh) update`.
+  It replaces the programs and `kariz-manager` and restarts what runs; the tunnels, settings and
+  the panel's data stay. Later updates come from here, from the panel or `kariz-manager update`.
+
 ## 2.7.1 - 2026-10-27
 
 The stable release after 2.6.1, with everything of the four betas
-([2.7.0-beta.1](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#270-beta1---2026-10-25),
-[2.7.0-beta.2](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#270-beta2---2026-10-26),
-[2.7.0-beta.3](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#270-beta3---2026-10-26) and
-[2.7.0-beta.4](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#270-beta4---2026-10-27)); there is no 2.7.0. Private
+([2.7.0-beta.1](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#270-beta1---2026-10-25),
+[2.7.0-beta.2](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#270-beta2---2026-10-26),
+[2.7.0-beta.3](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#270-beta3---2026-10-26) and
+[2.7.0-beta.4](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#270-beta4---2026-10-27)); there is no 2.7.0. Private
 network links can run **over IPv6**, a link's **MTU fits its path**
-([#92](https://github.com/Erfan-XRay/Kariz/issues/92)), **deletes always work** and a tunnel can be
+([#92](https://github.com/soranshop/SorTUN/issues/92)), **deletes always work** and a tunnel can be
 **moved to other servers**. The panel shows **how much every tunnel and server has used**, with
 **monthly quotas**, its **port and certificate** can be set from the manager
-([#95](https://github.com/Erfan-XRay/Kariz/issues/95)), wss tunnels take **a certificate of your
+([#95](https://github.com/soranshop/SorTUN/issues/95)), wss tunnels take **a certificate of your
 own**, the tunnel wizard is **calmer**, a tunnel that went down **says why**, tunnels can be
 **renamed and arranged** and show **how long they have been up**, servers can be shown **as rows**,
 a **backup brings back the whole panel**, and **open connections no longer pile up** over the day.
@@ -24,7 +47,7 @@ channel; the details of each change are in the beta entries below.
 
 ## 2.7.0-beta.4 - 2026-10-27
 
-A **beta**, like [2.7.0-beta.3](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#270-beta3---2026-10-26):
+A **beta**, like [2.7.0-beta.3](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#270-beta3---2026-10-26):
 only panels on the *Beta* channel are offered it; `kariz-manager update` and the stable channel
 stay on 2.6.1. To try it on a server by hand: `kariz-manager install --version v2.7.0-beta.4`.
 
@@ -73,7 +96,7 @@ servers keep working.
 
 ## 2.7.0-beta.3 - 2026-10-26
 
-A **beta**, like [2.7.0-beta.2](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#270-beta2---2026-10-26):
+A **beta**, like [2.7.0-beta.2](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#270-beta2---2026-10-26):
 only panels on the *Beta* channel are offered it; `kariz-manager update` and the stable channel
 stay on 2.6.1. To try it on a server by hand: `kariz-manager install --version v2.7.0-beta.3`.
 
@@ -109,7 +132,7 @@ servers from the panel; 2.7.0-beta.2 servers keep working.
 
 ## 2.7.0-beta.2 - 2026-10-26
 
-A **beta**, like [2.7.0-beta.1](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#270-beta1---2026-10-25):
+A **beta**, like [2.7.0-beta.1](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#270-beta1---2026-10-25):
 only panels on the *Beta* channel are offered it; `kariz-manager update` and the stable channel
 stay on 2.6.1. To try it on a server by hand: `kariz-manager install --version v2.7.0-beta.2`.
 
@@ -157,7 +180,7 @@ A **beta**: only panels on the *Beta* channel are offered it; `kariz-manager upd
 channel stay on 2.6.1. To try it on a server by hand: `kariz-manager install --version v2.7.0-beta.1`.
 
 Private network links can run **over IPv6** (GRE as `ip6gre`, and VXLAN), a link's **MTU fits its
-header and the path between its servers** ([#92](https://github.com/Erfan-XRay/Kariz/issues/92)),
+header and the path between its servers** ([#92](https://github.com/soranshop/SorTUN/issues/92)),
 **deleting a link or a network always works** whatever state its servers are in, and a tunnel can be
 **moved to other servers** from its edit page.
 
@@ -191,11 +214,11 @@ moving a tunnel need 2.7 on the servers involved; everything that worked before 
   change the port the panel opens on; the agents' port stays, so connected servers need nothing.
   Port 80, the agents' ports and ports something else listens on are refused, and the panel goes
   back to its old port if it does not start. A new panel asks for its port at install (Enter:
-  random). ([#95](https://github.com/Erfan-XRay/Kariz/issues/95))
+  random). ([#95](https://github.com/soranshop/SorTUN/issues/95))
 - **A certificate of your own from the menu:** the installer and `panel cert` offer *with a
   certificate I have already* and ask for the full-chain and key paths; the key is checked against
   the certificate, and the old certificate stays if the panel does not start with the new one.
-  ([#95](https://github.com/Erfan-XRay/Kariz/issues/95))
+  ([#95](https://github.com/soranshop/SorTUN/issues/95))
 - **A wss certificate of your own:** in the wizard and on a tunnel's edit page, *Certificate* has a
   third choice, *Your own*: the full-chain and key paths on the listening server and the domain it
   is for. The server checks that the key is the certificate's before the tunnel is changed; the
@@ -204,7 +227,7 @@ moving a tunnel need 2.7 on the servers involved; everything that worked before 
 ### Changed
 
 - **GRE links get an MTU of 1472, not 1476:** GRE with a key adds 28 bytes, not 24
-  ([#92](https://github.com/Erfan-XRay/Kariz/issues/92)). A 2.7 agent changes its links' MTU in
+  ([#92](https://github.com/soranshop/SorTUN/issues/92)). A 2.7 agent changes its links' MTU in
   place; an older agent keeps 1476 until it is updated, so its links are not made again for this.
 - **Deleting never fails or waits because of a server.** A link or a network goes from the panel at
   once; each server is asked to remove the interface, all at the same time and for at most five
@@ -224,10 +247,10 @@ moving a tunnel need 2.7 on the servers involved; everything that worked before 
 ## 2.6.1 - 2026-10-16
 
 The stable release after 2.5.1, with everything of the four betas
-([2.6.0-beta.1](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#260-beta1---2026-10-15),
-[2.6.0-beta.2](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#260-beta2---2026-10-15),
-[2.6.0-beta.3](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#260-beta3---2026-10-15) and
-[2.6.0-beta.4](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#260-beta4---2026-10-16)); there is no 2.6.0. Private networks
+([2.6.0-beta.1](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#260-beta1---2026-10-15),
+[2.6.0-beta.2](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#260-beta2---2026-10-15),
+[2.6.0-beta.3](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#260-beta3---2026-10-15) and
+[2.6.0-beta.4](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#260-beta4---2026-10-16)); there is no 2.6.0. Private networks
 can be **VXLAN**, not only GRE, for servers where GRE does not get through but UDP does, and an
 agent can be added over either link. A server can have **an agents port of its own**, the servers
 can be **arranged in the order you want**, a tunnel takes **4096 UDP clients per port** by
@@ -240,7 +263,7 @@ each change are in the beta entries below.
 
 ## 2.6.0-beta.4 - 2026-10-16
 
-A **beta**, like [2.6.0-beta.3](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#260-beta3---2026-10-15):
+A **beta**, like [2.6.0-beta.3](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#260-beta3---2026-10-15):
 only panels on the *Beta* channel are offered it; `kariz-manager update` and the stable channel
 stay on 2.5.1. To try it on a server by hand: `kariz-manager install --version v2.6.0-beta.4`.
 
@@ -272,7 +295,7 @@ rest need nothing else.
 
 - **4096 UDP clients per port by default, up from 1024** (`tuning.udp_max_flows`). A busy tunnel
   carrying TCP and UDP kept logging *too many UDP flows* and turned new UDP clients away
-  ([#80](https://github.com/Erfan-XRay/Kariz/issues/80)). 1024 dated from when a tunnel connection
+  ([#80](https://github.com/soranshop/SorTUN/issues/80)). 1024 dated from when a tunnel connection
   took only 512 streams; every UDP flow is one stream, and since 2.4 a connection takes 4096. It
   applies on the entry server, so update that one. The log line now names the setting and says
   that the clients already connected go on.
@@ -284,7 +307,7 @@ rest need nothing else.
 
 ## 2.6.0-beta.3 - 2026-10-15
 
-A **beta**, like [2.6.0-beta.2](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#260-beta2---2026-10-15):
+A **beta**, like [2.6.0-beta.2](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#260-beta2---2026-10-15):
 only panels on the *Beta* channel are offered it; `kariz-manager update` and the stable channel
 stay on 2.5.1. To try it on a server by hand: `kariz-manager install --version v2.6.0-beta.3`.
 
@@ -301,7 +324,7 @@ Only the panel needs this version; the agents do not.
   its agent; another agent on that port is turned away. *Edit* changes or clears it, removing
   the server closes it, a backup keeps it, and a port that the panel's page, its agents ports or
   another server has, or that something else listens on, is refused with the reason. API: `port`
-  in `join-code` and `reconnect`. See [the panel](https://github.com/Erfan-XRay/Kariz/blob/main/docs/panel.md).
+  in `join-code` and `reconnect`. See [the panel](https://github.com/soranshop/SorTUN/blob/main/docs/panel.md).
 
 ### Fixed
 
@@ -310,7 +333,7 @@ Only the panel needs this version; the agents do not.
 
 ## 2.6.0-beta.2 - 2026-10-15
 
-A **beta**, like [2.6.0-beta.1](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#260-beta1---2026-10-15):
+A **beta**, like [2.6.0-beta.1](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#260-beta1---2026-10-15):
 only panels on the *Beta* channel are offered it; `kariz-manager update` and the stable channel
 stay on 2.5.1. To try it on a server by hand: `kariz-manager install --version v2.6.0-beta.2`.
 
@@ -358,7 +381,7 @@ stay as they are.
   checks that both servers can make VXLAN (the `vxlan` module) and run 2.6 or newer, and it pings
   across each link before it keeps it; a UDP port blocked on the way is named, with the iptables
   line that opens it.
-  See [private networks](https://github.com/Erfan-XRay/Kariz/blob/main/docs/networks.md#gre-or-vxlan).
+  See [private networks](https://github.com/soranshop/SorTUN/blob/main/docs/networks.md#gre-or-vxlan).
 
 ### Changed
 
@@ -369,8 +392,8 @@ stay as they are.
 ## 2.5.1 - 2026-10-14
 
 The stable release after 2.3.0, with everything of the two betas
-([2.4.0-beta.1](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#240-beta1---2026-10-14) and
-[2.5.0-beta.1](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#250-beta1---2026-10-14));
+([2.4.0-beta.1](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#240-beta1---2026-10-14) and
+[2.5.0-beta.1](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#250-beta1---2026-10-14));
 there is no 2.5.0. Built for busy evenings: a tunnel takes **4096 streams per connection**
 instead of 512, says so when it is full, a **health probe** tells whether a new connection gets
 through, and Xray behind a tunnel can see **each user's real address** (PROXY protocol), so
@@ -392,7 +415,7 @@ version on both servers. A server on one of the betas is offered 2.5.1 on either
   header**: turn on `acceptProxyProtocol` on the Xray inbound behind those ports (in 3x-ui, the
   inbound's *Proxy Protocol* switch), or every connection through them breaks. Both servers need
   2.5 or newer; the panel refuses the setting while either runs an older version.
-  See [configuration](https://github.com/Erfan-XRay/Kariz/blob/main/docs/configuration.md#real-user-addresses-proxy_protocol).
+  See [configuration](https://github.com/soranshop/SorTUN/blob/main/docs/configuration.md#real-user-addresses-proxy_protocol).
 - **A health probe: does a new connection get through?** A tunnel could be connected, moving
   60-100 Mbit/s for the users already on it, while every new connection failed: a busy evening
   had taken every stream, or the target (Xray) was down. Every 15 seconds the entry side now
@@ -443,7 +466,7 @@ Xray behind a tunnel can now see **each user's real address** (PROXY protocol), 
 limits in 3x-ui or Marzban work behind a tunnel too. It is off unless chosen, and **Xray must be set to
 expect it first** (`acceptProxyProtocol`), or every connection through those ports breaks.
 Both servers need this version: update the panel first, then the agents from the panel. It
-also carries everything of [2.4.0-beta.1](https://github.com/Erfan-XRay/Kariz/blob/main/CHANGELOG.md#240-beta1---2026-10-14) (4096 streams per
+also carries everything of [2.4.0-beta.1](https://github.com/soranshop/SorTUN/blob/main/CHANGELOG.md#240-beta1---2026-10-14) (4096 streams per
 connection, the health probe, the per-address limit).
 
 ### Added
@@ -458,7 +481,7 @@ connection, the health probe, the per-address limit).
   header**: turn on `acceptProxyProtocol` on the Xray inbound behind those ports (in 3x-ui, the
   inbound's *Proxy Protocol* switch), or every connection through them breaks. Both servers need
   2.5 or newer; the panel refuses the setting while either runs an older version.
-  See [configuration](https://github.com/Erfan-XRay/Kariz/blob/main/docs/configuration.md#real-user-addresses-proxy_protocol).
+  See [configuration](https://github.com/soranshop/SorTUN/blob/main/docs/configuration.md#real-user-addresses-proxy_protocol).
 
 ### Fixed
 

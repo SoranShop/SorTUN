@@ -1,5 +1,5 @@
 /*
- * Kariz panel design tokens.
+ * SorTUN panel design tokens.
  * Theme: data-theme="night" (default) or "dawn" on <html>. Direction: dir="rtl" | "ltr".
  * Components use only the semantic tokens (--bg, --text, --accent, ...), never raw colours.
  * Contrast of every text token on --bg / --stratum-1 / --stratum-2 is at least 4.5:1

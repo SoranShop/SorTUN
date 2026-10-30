@@ -1,8 +1,8 @@
 # The web panel
 
-A web panel for Kariz: connect your servers, make and manage tunnels between them, and watch
+A web panel for SorTUN: connect your servers, make and manage tunnels between them, and watch
 their traffic live, from one page. **Everything is done here**; the [manager script](manager.md)
-only installs Kariz and the panel. New to it? Start with [Using the panel](using-the-panel.md),
+only installs SorTUN and the panel. New to it? Start with [Using the panel](using-the-panel.md),
 a walk through the screens in the order you need them.
 
 ## Install
@@ -10,7 +10,7 @@ a walk through the screens in the order you need them.
 On the server that will run the panel, as root:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Erfan-XRay/Kariz/main/scripts/kariz.sh) install
+bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh) install
 kariz-manager panel install
 ```
 
@@ -88,7 +88,7 @@ domain. Add `--email you@example.com` to be told before a certificate expires.
 - **A certificate of your own:** choose *with a certificate I have already* when the installer
   or `panel cert` asks, and give the paths of its full chain and its key (PEM, not in `/tmp`); or
   `kariz-manager panel cert --cert-file F --key-file K`. The manager checks that the key is the
-  certificate's, and if the panel does not start with it, the panel keeps the one it had. Kariz
+  certificate's, and if the panel does not start with it, the panel keeps the one it had. SorTUN
   does not renew it: after you do, send the panel a SIGHUP (`systemctl kill -s HUP kariz-panel`).
 
 ## Connect another server
@@ -101,7 +101,7 @@ command. On the other server, as root:
 kariz-manager --agent kz1_...
 ```
 
-(If Kariz is not installed there yet, this installs it first.) The server appears in the
+(If SorTUN is not installed there yet, this installs it first.) The server appears in the
 panel within seconds.
 
 - **The agent dials the panel**, so the new server opens no port. It needs to reach the
@@ -235,7 +235,7 @@ servers. Good to know:
    or *direct* (the entry dials the exit), the transport (`auto`, `tcp`, `ws`, `wss`, `quic`,
    `kcp`) and the profile (`balanced`, `ultraspeed`, `gaming`). Under **More options**: the
    encryption, mux and its settings, and for `quic` a switch, on by default, to **seal every
-   packet** (`obfs`, see [Transports](transports.md#obfs)); both servers need Kariz 1.7 or newer
+   packet** (`obfs`, see [Transports](transports.md#obfs)); both servers need SorTUN 1.7 or newer
    for it.
 3. **Address:** the port the accepting side listens on and its address as the other side
    reaches it. For `ws`/`wss`, the path and the Host header are under **More options**. In *direct* mode you can tick **Use a private network
@@ -333,8 +333,30 @@ hours. Both servers need this release (`POST /api/bench`, `GET /api/bench?id=`,
 - **Speed test:** on a tunnel's page. The entry server measures download, upload and UDP
   through the tunnel ([Speed test](speedtest.md)); it uses the tunnel for the
   seconds you choose.
+- **Fallback addresses:** on a tunnel's edit page (with mux, or `quic`), other addresses the
+  dialing server tries while the main one is down: another IP or route of the same server, or
+  another server that has the same tunnel. It goes back to the main address once it answers
+  ([`tunnel.fallback`](configuration.md)). The dialing server needs 2.8.0 or newer.
 - **Settings:** the password, one-time login links, the sessions (each device, its address,
-  when it was last used, and *Revoke*), the backup, and the appearance.
+  when it was last used, and *Revoke*), the backup, Prometheus, and the appearance.
+
+## Prometheus
+
+*Settings*, *Prometheus*, *On* makes a token and shows it once, with the address to scrape
+(`https://<panel>/<secret path>/metrics`) and a `prometheus.yml` job to paste. A scrape sends the
+token as `Authorization: Bearer <token>`; without it, or while this is off, the address answers
+like any unknown one. Only the token's hash is kept: lost it, make a new one (the old one stops
+working). It is not in the backup.
+
+Every server has `kariz_server_up`, `kariz_server_cpu_percent`,
+`kariz_server_memory_used_bytes` and `_total_bytes`, `kariz_server_network_receive_bytes_per_second`
+and `_transmit_`, `kariz_server_load1` and `kariz_server_uptime_seconds`, labelled `server` and
+`server_id`. Every side of a tunnel adds `tunnel`, `role` and `transport` to those labels and has
+`kariz_tunnel_active`, `kariz_tunnel_connected`, `kariz_tunnel_sessions`, `kariz_tunnel_rtt_seconds`,
+`kariz_tunnel_streams`, `kariz_tunnel_tcp_connections`, `kariz_tunnel_udp_flows`,
+`kariz_tunnel_uptime_seconds`, the counters `kariz_tunnel_sent_bytes_total`,
+`kariz_tunnel_received_bytes_total` and `kariz_tunnel_handshakes_failed_total` (from the
+tunnel's start: use `rate()`), and, with fallback addresses, `kariz_tunnel_on_fallback`.
 
 Persian and English, Night and Dawn, and a low-power mode (also on when your browser asks for
 less motion) are in the top bar and in *Settings*. `Ctrl+K` opens commands.
@@ -347,7 +369,7 @@ less motion) are in the top bar and in *Settings*. `Ctrl+K` opens commands.
   nothing. The cookie is `__Host-kariz` (`Secure`, `HttpOnly`, `SameSite=Strict`).
 - Five failed tries from one address (wrong password, wrong or spent link) lock it out for
   15 minutes.
-- Agents talk to the panel over Kariz's own link (the tunnels' handshake, encryption and
+- Agents talk to the panel over SorTUN's own link (the tunnels' handshake, encryption and
   mux). A token alone is not enough: each agent also proves a key of its own, made when it
   joined. **Agents answer a fixed list of requests**: who are you, keep this identity, health,
   tunnels, check / write / read / delete a tunnel, start / stop / restart it, listening ports,
@@ -431,7 +453,7 @@ themselves; that is the price of having no service manager.
 
 ## Updating
 
-When a newer release is out, a notice appears in the top bar (*Kariz 0.11.0 is out*), and
+When a newer release is out, a notice appears in the top bar (*SorTUN 0.11.0 is out*), and
 *Settings*, *Updates* shows it with the release notes. **The panel never updates by itself**:
 it looks (once a day, or *Check now*), and updating is your button.
 

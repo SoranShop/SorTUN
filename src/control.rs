@@ -261,7 +261,7 @@ mod unix {
                 io::ErrorKind::NotFound | io::ErrorKind::ConnectionRefused => {
                     ": is this tunnel running?"
                 }
-                io::ErrorKind::PermissionDenied => ": run it as the user that runs Kariz",
+                io::ErrorKind::PermissionDenied => ": run it as the user that runs SorTUN",
                 _ => "",
             };
             io::Error::new(
@@ -301,7 +301,7 @@ mod unix {
         if UnixStream::connect(path).await.is_ok() {
             return Err(io::Error::new(
                 io::ErrorKind::AddrInUse,
-                "another Kariz is answering on this socket",
+                "another SorTUN is answering on this socket",
             ));
         }
         // Made private before it gets its name, so it is never open to others.

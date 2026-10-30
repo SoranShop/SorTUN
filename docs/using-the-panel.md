@@ -3,9 +3,9 @@
 This page walks through the panel in the order you need it, from a new server to a tunnel you
 can trust. You do not need any other tutorial: everything about servers and tunnels is done here,
 in the browser. Try the same screens first, with sample data and nothing to install, in the
-[live demo](https://erfan-xray.github.io/Kariz/try/), take the
-[guided tour](https://erfan-xray.github.io/Kariz/docs/tour/), which opens each screen as it explains it, or
-watch the [video tutorial](https://erfan-xray.github.io/Kariz/docs/video/) (about two minutes, from a bare server to a running tunnel).
+[live demo](https://soranshop.github.io/SorTUN/try/), take the
+[guided tour](https://soranshop.github.io/SorTUN/docs/tour/), which opens each screen as it explains it, or
+watch the [video tutorial](https://soranshop.github.io/SorTUN/docs/video/) (about two minutes, from a bare server to a running tunnel).
 
 ## 1. Sign in
 
@@ -54,7 +54,7 @@ The wizard picks the port for you: 3080 for the first tunnel on a server, then 3
 first one that none of that server's tunnels holds. You can type another.
 
 Not sure what to pick? The default (reverse, `tcpmux`, `balanced`) is right for most paths; the
-[transport chooser](https://erfan-xray.github.io/Kariz/docs/how-it-works/) answers in four questions.
+[transport chooser](https://soranshop.github.io/SorTUN/docs/how-it-works/) answers in four questions.
 
 **If anything fails, both servers are put back as they were**, and the wizard tells you which
 step failed and why. You cannot end with half a tunnel.
@@ -122,7 +122,7 @@ everything that goes with the users' bytes.
 The panel keeps 15-minute sums for 90 days and daily sums for good, a few hundred kilobytes a
 tunnel a year. Every reading is compared with the last one kept, so restarting the panel, a
 tunnel or a server loses nothing and counts nothing twice; only what a tunnel moved in the
-moments before it crashed while the panel could not see it is lost. Exact counts need Kariz
+moments before it crashed while the panel could not see it is lost. Exact counts need SorTUN
 2.7.0-beta.2 on the servers; a tunnel on an older one shows the users' bytes alone, marked as an
 estimate. How it is counted: [Status](status.md#wire-what-the-network-really-carried).
 
@@ -137,7 +137,7 @@ Open the tunnel, then:
   only once both sides connect; a server that is offline removes it when it connects again. If the
   new pair does not connect, nothing changes. A side on a server that is offline can be moved this
   way too, to bring the tunnel back on another server. A move gives both sides a new token, and its
-  new servers need Kariz 2.7 or newer.
+  new servers need SorTUN 2.7 or newer.
 - **Start, stop, restart:** stopping also keeps it stopped at boot.
 - **Speed test:** measures download, upload, latency under load and UDP through the tunnel, for
   the seconds you choose.

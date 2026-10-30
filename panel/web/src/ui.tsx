@@ -368,8 +368,8 @@ export function Copyright() {
         Erfan_Xray
       </a>
       <span aria-hidden="true">·</span>
-      <a href="https://github.com/Erfan-XRay/Kariz" target="_blank" rel="noopener noreferrer">
-        Kariz
+      <a href="https://github.com/soranshop/SorTUN" target="_blank" rel="noopener noreferrer">
+        SorTUN
       </a>
     </p>
   );

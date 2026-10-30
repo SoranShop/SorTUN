@@ -65,7 +65,7 @@ function Boot({ note }: { note: string }) {
           <path className="arrow" d="M190 154 L226 176 L190 198 Z" fill="#7ef0e4" stroke="#7ef0e4" strokeWidth="6" strokeLinejoin="round" />
         </svg>
         <div className="boot-word">
-          Kariz<small>{t("boot.sub")}</small>
+          SorTUN<small>{t("boot.sub")}</small>
         </div>
         <p className="boot-note" aria-live="polite">
           {note}

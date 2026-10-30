@@ -10,9 +10,9 @@ const { lang } = Astro.props as { lang: Lang };
 const T = {
   en: {
     title: "How it works",
-    desc: "The shape of a Kariz tunnel, its layers, which transport to pick and what each profile changes, animated.",
+    desc: "The shape of a SorTUN tunnel, its layers, which transport to pick and what each profile changes, animated.",
     h1: "How it works",
-    intro: "A tunnel joins two servers. Users connect to the entry; Kariz carries their traffic to the exit, which reaches the real targets.",
+    intro: "A tunnel joins two servers. Users connect to the entry; SorTUN carries their traffic to the exit, which reaches the real targets.",
     s1: "The shape",
     p1: "Switch who dials to see the two modes. In direct mode the entry opens the connection to the exit; in reverse mode the exit opens it to the entry, so the entry is the only server that needs a reachable port. Either way many user connections share a few long-lived tunnel connections: each is a stream with its own flow control, opened without a round trip.",
     s2: "The layers",
@@ -30,9 +30,9 @@ const T = {
   },
   fa: {
     title: "چطور کار می‌کند",
-    desc: "شکل یک تانل کاریز، لایه‌هایش، انتخاب ترنسپورت و کاری که هر پروفایل می‌کند، با انیمیشن.",
+    desc: "شکل یک تانل SorTUN، لایه‌هایش، انتخاب ترنسپورت و کاری که هر پروفایل می‌کند، با انیمیشن.",
     h1: "چطور کار می‌کند",
-    intro: "تانل دو سرور را به هم وصل می‌کند. کاربرها به ورودی (entry) وصل می‌شوند؛ کاریز ترافیکشان را به خروجی (exit) می‌رساند و خروجی به مقصدهای واقعی دسترسی دارد.",
+    intro: "تانل دو سرور را به هم وصل می‌کند. کاربرها به ورودی (entry) وصل می‌شوند؛ SorTUN ترافیکشان را به خروجی (exit) می‌رساند و خروجی به مقصدهای واقعی دسترسی دارد.",
     s1: "شکل کار",
     p1: "با کلید بالای نمودار هر دو حالت را ببینید. در حالت direct ورودی اتصال را به خروجی باز می‌کند؛ در حالت reverse خروجی آن را به ورودی باز می‌کند، پس ورودی تنها سروری است که به پورت در دسترس نیاز دارد. در هر دو حالت، اتصال‌های زیادِ کاربرها میان چند اتصال بلندمدت تانل تقسیم می‌شوند: هر کدام یک stream با کنترل جریان خودش است و بدون رفت‌وبرگشت اضافه باز می‌شود.",
     s2: "لایه‌ها",

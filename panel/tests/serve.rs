@@ -82,7 +82,7 @@ async fn the_panel_answers_over_tls_under_its_secret_path_only() {
         .await
         .unwrap();
     assert_eq!(status, 200, "{text}");
-    assert!(text.contains("Kariz"), "{text}");
+    assert!(text.contains("SorTUN"), "{text}");
     assert!(
         text.to_ascii_lowercase()
             .contains("content-security-policy"),

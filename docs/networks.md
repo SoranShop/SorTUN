@@ -7,9 +7,9 @@ and dial those private addresses, so it never uses the servers' public ones.
 
 ## What GRE is, and what it is not
 
-GRE is a feature of the Linux kernel (`ip tunnel ... mode gre`), not a Kariz transport. Kariz's
+GRE is a feature of the Linux kernel (`ip tunnel ... mode gre`), not a SorTUN transport. SorTUN's
 own transports are unchanged; a tunnel simply uses the private addresses. The tunnel's records
-are still encrypted by Kariz (its token and cipher), so what crosses the wire is encrypted even
+are still encrypted by SorTUN (its token and cipher), so what crosses the wire is encrypted even
 though GRE itself is not.
 
 GRE is plain IP protocol 47. It is easy to recognise, and some providers and NATs block it or
@@ -28,11 +28,11 @@ A network is one or the other, chosen when it is made, and all its links are of 
 | Over IPv6 | `ip6gre`: 48 bytes (MTU 1452) | 70 bytes (MTU 1430) |
 | Passes where | protocol 47 is let through | UDP to that port is let through |
 | Kernel module | `ip_gre` (`ip6_gre` over IPv6) | `vxlan` |
-| Needs on both servers | any version | Kariz 2.6 or newer |
+| Needs on both servers | any version | SorTUN 2.6 or newer |
 
 Pick **VXLAN** when GRE does not get through between your two servers (a provider or a NAT that
 drops protocol 47) but UDP does; otherwise GRE is lighter. VXLAN is no harder to recognise than
-GRE: it is plain UDP to a fixed port, and the frames inside are not encrypted by it (the Kariz
+GRE: it is plain UDP to a fixed port, and the frames inside are not encrypted by it (the SorTUN
 tunnels over it still are). If one port is blocked, make a second VXLAN network on another port:
 every network has its own.
 
@@ -56,7 +56,7 @@ packet, which many networks drop, and the link would be made with nothing crossi
 
 Each server needs a public IPv6 address the others reach it at: the panel takes the one its
 agent reports, and under *Server addresses* each server has an IPv6 field to set another (shown
-once a network or a server has IPv6). Both servers of an IPv6 link need Kariz 2.7 or newer and a
+once a network or a server has IPv6). Both servers of an IPv6 link need SorTUN 2.7 or newer and a
 kernel with IPv6 and the module (`ip6_gre`, or `vxlan`); the panel checks before it makes
 anything and names the server that cannot.
 
@@ -149,7 +149,7 @@ IPv6, between it and the panel server's IPv6 address (both need 2.7 or newer).
 **Over a VXLAN link** beside it does the same with a VXLAN link, for when GRE does not pass but
 UDP does: the link's addresses come from the first VXLAN network, or from a new one the panel
 makes (`kariz-vxlan`, UDP 4789, on the first free pool), and then only UDP to that network's
-port has to pass, both ways. The new server needs Kariz 2.6 or newer, which the command installs.
+port has to pass, both ways. The new server needs SorTUN 2.6 or newer, which the command installs.
 *The panel connects to it* and a server's *Edit* (*Across a private link*) have the same choice,
 GRE or VXLAN, for a new link.
 
@@ -157,7 +157,7 @@ GRE or VXLAN, for a new link.
    a `/30` of a network (the first one there is; with none, it makes `kariz`, `10.77.0.0/16` or
    the next free pool), and makes **its own end of the GRE link now**, from its public address
    to the one you typed.
-2. You run the command it shows on the new server, as root (it installs Kariz first if needed).
+2. You run the command it shows on the new server, as root (it installs SorTUN first if needed).
    The join code carries the server's end of the link: the agent makes it, then dials the panel's
    private address across it (such as `10.77.0.2`). The server turns *online*, *via GRE*.
 3. Only GRE (IP protocol 47) has to pass between the two public addresses, or, when the link's
@@ -246,7 +246,7 @@ and links that are no longer wanted are removed.
 
 `tests/gre_ns.sh` (run by CI as root) builds two network namespaces as two servers, makes GRE
 links between them with the agent's code, pings across, makes a second link between the same
-pair, checks that a filtered GRE path fails the test, runs a Kariz tunnel over the private
+pair, checks that a filtered GRE path fails the test, runs a SorTUN tunnel over the private
 addresses end to end, and removes the links. Then it does the same with VXLAN links: one on port
 4789, a second between the same pair (which the kernel refuses with the same VNI, and takes with
 the next), one on port 8472 with VNI 1 again, a filtered port, and the saved list. It also

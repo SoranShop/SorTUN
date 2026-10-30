@@ -483,7 +483,7 @@ mod tests {
         for path in ["/k-7f3a9c/", "/k-7f3a9c/servers"] {
             let (status, body, cache) = get_path(path).await;
             assert_eq!(status, StatusCode::OK, "{path}");
-            assert!(body.contains("Kariz"), "{path}");
+            assert!(body.contains("SorTUN"), "{path}");
             assert_eq!(cache.as_deref(), Some("no-store"), "{path}");
         }
     }

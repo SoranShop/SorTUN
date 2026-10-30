@@ -20,7 +20,7 @@ interface Props {
 }
 const { lang, title, description, path, hasOther = true, flow = false, current = "home" } = Astro.props;
 const t = ui[lang];
-const full = title === "Kariz" ? `Kariz: ${t.tagline}` : `${title} | Kariz`;
+const full = title === "SorTUN" ? `SorTUN: ${t.tagline}` : `${title} | SorTUN`;
 const url = new URL(`${BASE}${lang === "fa" ? "/fa" : ""}${path}`, Astro.site);
 const en = new URL(`${BASE}${path}`, Astro.site);
 const fa = new URL(`${BASE}/fa${path}`, Astro.site);

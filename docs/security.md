@@ -56,7 +56,7 @@ signature does not verify.
 
 ## Running it
 
-- The systemd unit runs Kariz with `NoNewPrivileges` and only the capabilities it needs
+- The systemd unit runs SorTUN with `NoNewPrivileges` and only the capabilities it needs
   (binding ports below 1024).
 - Keep the config file readable by root only (`chmod 600`), since it holds the token.
 - Report security problems privately to the maintainer rather than in a public issue.

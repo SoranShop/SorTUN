@@ -1,5 +1,5 @@
 [Unit]
-Description=Kariz tunnel
+Description=SorTUN tunnel
 After=network-online.target
 Wants=network-online.target
 

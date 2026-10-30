@@ -3,7 +3,7 @@
 export type Lang = "en" | "fa";
 export const LANGS: Lang[] = ["en", "fa"];
 export const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
-export const REPO = "https://github.com/Erfan-XRay/Kariz";
+export const REPO = "https://github.com/soranshop/SorTUN";
 declare const __KARIZ_VERSION__: string;
 export const VERSION: string = __KARIZ_VERSION__;
 
@@ -47,7 +47,7 @@ export const ui = {
     next: "Next",
     previous: "Previous",
     version: "Version",
-    footer: "Kariz is source-available software. The site is built from the repository's docs.",
+    footer: "SorTUN is source-available software. The site is built from the repository's docs.",
     notFound: "This page is not here.",
     notFoundText: "The channel ends before this well. Try the documentation index or the search.",
     backHome: "Back to the front page",
@@ -84,7 +84,7 @@ export const ui = {
     next: "بعدی",
     previous: "قبلی",
     version: "نسخه",
-    footer: "کاریز سورس‌در‌دسترس است. این سایت از مستندات همین مخزن ساخته می‌شود.",
+    footer: "SorTUN سورس‌در‌دسترس است. این سایت از مستندات همین مخزن ساخته می‌شود.",
     notFound: "این صفحه اینجا نیست.",
     notFoundText: "مجرا پیش از این چاه تمام می‌شود. فهرست مستندات یا جستجو را امتحان کنید.",
     backHome: "بازگشت به صفحهٔ اول",
@@ -138,7 +138,7 @@ export const LABELS: Record<string, Record<Lang, string>> = {
   "security-review": { en: "Security review", fa: "بازبینی امنیتی" },
   changelog: { en: "Changelog", fa: "تغییرات" },
   roadmap: { en: "Design and protocol", fa: "طراحی و پروتکل" },
-  support: { en: "Support Kariz", fa: "حمایت از کاریز" },
+  support: { en: "Support SorTUN", fa: "حمایت از SorTUN" },
 };
 
 /** Pages made by the site itself (not a file of docs/): they exist in both languages. */

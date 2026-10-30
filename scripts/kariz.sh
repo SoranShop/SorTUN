@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Kariz manager: installs Kariz and its web panel on a Linux server with systemd, and
+# SorTUN manager: installs SorTUN and its web panel on a Linux server with systemd, and
 # connects the server to a panel. Tunnels, servers, private networks and updates are made
 # in the web panel (docs/panel.md), never here.
 #
 # One line, as root:
-#   bash <(curl -fsSL https://raw.githubusercontent.com/Erfan-XRay/Kariz/main/scripts/kariz.sh)
+#   bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh)
 #
 # Without arguments it opens a menu. The same actions as commands (see `help`):
 #   kariz-manager install [--version vX.Y.Z] [--binary PATH]
@@ -22,7 +22,7 @@
 # If GitHub limits your downloads, set GITHUB_TOKEN to a personal access token: it lifts the limit.
 set -euo pipefail
 
-REPO="Erfan-XRay/Kariz"
+REPO="soranshop/SorTUN"
 BIN=/usr/local/bin/kariz
 MANAGER=/usr/local/bin/kariz-manager
 CONF_DIR=/etc/kariz
@@ -101,7 +101,7 @@ rule() {
 title_box() {
     # The text that sets the width is plain ASCII (the diamond is counted as 1), so the box
     # fits whatever the locale.
-    local w inner title="Kariz manager" tag="tunnel core and web panel" version="" pad
+    local w inner title="SorTUN manager" tag="tunnel core and web panel" version="" pad
     w=$(box_width)
     inner=$((w - 2))
     [[ -x "$BIN" ]] && version="v$(bin_version "$BIN")"
@@ -397,7 +397,7 @@ need_systemd() {
 }
 
 need_kariz() {
-    [[ -x "$BIN" ]] || die "Kariz is not installed yet: run '$(basename "$0") install' first."
+    [[ -x "$BIN" ]] || die "SorTUN is not installed yet: run '$(basename "$0") install' first."
 }
 
 # ---- Download and install ----
@@ -407,14 +407,14 @@ arch() {
         x86_64 | amd64) echo x86_64 ;;
         aarch64 | arm64) echo aarch64 ;;
         armv7l | armv7*) echo armv7 ;;
-        *) die "No Kariz build for this CPU ($(uname -m))." ;;
+        *) die "No SorTUN build for this CPU ($(uname -m))." ;;
     esac
 }
 
 # The key releases are signed with. Only the release workflow has the
 # private half. It is checked with openssl (1.1.1 or later, or 3).
 RELEASE_KEY_PEM='-----BEGIN PUBLIC KEY-----
-MCowBQYDK2VwAyEAWGxcNhmewk/DsktXLy2UgJ5ZOLS0fktw7D2/obNvjTs=
+MCowBQYDK2VwAyEA4GcXeeNm+WCc48ZrS1ac9EhHDBTOQzBUHj99Wgn7QjQ=
 -----END PUBLIC KEY-----'
 # A user can pin a key of their own (a fork, or a test): KARIZ_RELEASE_KEY_PEM.
 RELEASE_KEY_PEM=${KARIZ_RELEASE_KEY_PEM:-$RELEASE_KEY_PEM}
@@ -439,7 +439,7 @@ verify_signature() {
     printf '%s\n' "$RELEASE_KEY_PEM" >"$dir/release-key.pem"
     openssl pkeyutl -verify -pubin -inkey "$dir/release-key.pem" -rawin \
         -in "$file.sha256" -sigfile "$file.sig" >/dev/null 2>&1 ||
-        die "The signature does not match: this download is not from the Kariz release key. Nothing was installed."
+        die "The signature does not match: this download is not from the SorTUN release key. Nothing was installed."
     # The signed checksum file must name this archive, so a signed archive of another CPU
     # cannot be put in its place.
     [[ "$(awk '{print $2}' "$file.sha256" | sed 's/^\*//')" == "$name.tar.gz" ]] ||
@@ -504,8 +504,8 @@ download_asset() {
 install_unit() {
     cat >"$UNIT" <<'EOF'
 [Unit]
-Description=Kariz tunnel %i
-Documentation=https://github.com/Erfan-XRay/Kariz
+Description=SorTUN tunnel %i
+Documentation=https://github.com/soranshop/SorTUN
 After=network-online.target
 Wants=network-online.target
 
@@ -526,8 +526,8 @@ EOF
 install_panel_units() {
     cat >"$PANEL_UNIT" <<'EOF'
 [Unit]
-Description=Kariz web panel
-Documentation=https://github.com/Erfan-XRay/Kariz
+Description=SorTUN web panel
+Documentation=https://github.com/soranshop/SorTUN
 After=network-online.target
 Wants=network-online.target
 
@@ -543,8 +543,8 @@ WantedBy=multi-user.target
 EOF
     cat >"$AGENT_UNIT" <<'EOF'
 [Unit]
-Description=Kariz agent (connects this server to a Kariz panel)
-Documentation=https://github.com/Erfan-XRay/Kariz
+Description=SorTUN agent (connects this server to a SorTUN panel)
+Documentation=https://github.com/soranshop/SorTUN
 After=network-online.target
 Wants=network-online.target
 
@@ -593,7 +593,7 @@ install_manager() {
 }
 
 # A copy of this script run from a file of its own (a new one copied to the server) takes
-# the place of the installed kariz-manager at once. Without this it did so only while Kariz
+# the place of the installed kariz-manager at once. Without this it did so only while SorTUN
 # itself was installed or updated, so with the core up to date the old menu came back from
 # the kariz-manager command.
 sync_manager() {
@@ -632,7 +632,7 @@ cmd_install() {
         a=$(arch)
         [[ -n "$version" ]] || version=$(latest_version)
         [[ -n "$version" ]] || die "Could not find the latest release (GitHub may be limiting you: set GITHUB_TOKEN)."
-        info "Downloading Kariz $version for $a"
+        info "Downloading SorTUN $version for $a"
         local name="kariz-$version-$a-linux"
         tmp=$(mktemp -d)
         download_asset "$version" "$name.tar.gz" "$tmp/$name.tar.gz"
@@ -696,7 +696,7 @@ offer_update() {
     update_available || return 0
     OFFERED=1
     echo
-    warn "Kariz $LATEST is out. Here: $BEHIND."
+    warn "SorTUN $LATEST is out. Here: $BEHIND."
     info "An older agent or panel can refuse what the newer panel sends (an auto tunnel, mux settings)."
     if confirm "Update everything on this server now? (running tunnels restart for a moment)" y; then
         (cmd_update) || warn "The update did not finish: kariz-manager update shows why."
@@ -790,7 +790,7 @@ agent_remove() {
     remove_net_links
 }
 
-# Removes Kariz from this server completely: the tunnels, the agent, the web panel and the
+# Removes SorTUN from this server completely: the tunnels, the agent, the web panel and the
 # programs. It asks once (--yes: no questions, and the configs and the panel's data go too).
 cmd_uninstall() {
     need_root
@@ -798,12 +798,12 @@ cmd_uninstall() {
     tunnels=$(systemctl list-unit-files --plain --no-legend 'kariz@*' 2>/dev/null | grep -vc '@\.service' || true)
     if [[ "$yes" != --yes ]]; then
         echo
-        warn "This removes Kariz from this server completely:"
+        warn "This removes SorTUN from this server completely:"
         info "every tunnel on it ($tunnels) is stopped and removed,"
         has_agent && info "its agent is removed: the server disconnects from its panel (remove it in the panel too),"
         [[ -f "$PANEL_UNIT" || -f "$PANEL_CONF" ]] && info "the web panel on it is removed,"
         info "and the kariz, kariz-panel and kariz-manager programs go."
-        confirm "Remove Kariz completely?" || return 0
+        confirm "Remove SorTUN completely?" || return 0
         confirm "Also delete the tunnel configs and the panel's data (tokens, servers, certificate)?" && purge=1
     else
         purge=1
@@ -826,7 +826,7 @@ cmd_uninstall() {
     if ((purge)); then
         rm -rf "$CONF_DIR" "$PANEL_DIR" "$PANEL_DATA"
     fi
-    ok "Kariz is removed."
+    ok "SorTUN is removed."
     rm -f "$MANAGER"
 }
 
@@ -1084,7 +1084,7 @@ panel_install() {
         cmd_install "${version[@]}"
     fi
     [[ -x "$PANEL_BIN" ]] ||
-        die "This Kariz release has no web panel. Install 0.8 or later: kariz-manager update"
+        die "This SorTUN release has no web panel. Install 0.8 or later: kariz-manager update"
     # What this server is called in the panel: asked (the host name is the default), or given
     # with --name; with --yes the host name stays unless --name says otherwise.
     if [[ -z "$name" ]] && ((!yes)) && [[ ! -f "$PANEL_CONF" ]] && have_terminal; then
@@ -1269,7 +1269,7 @@ check_own_cert() {
 # Asks for the files of a certificate of your own; sets CERT_FILE and KEY_FILE to them.
 ask_own_cert() {
     CERT_FILE="" KEY_FILE=""
-    info "Kariz does not renew a certificate of your own: after you do, run kariz-manager panel cert again."
+    info "SorTUN does not renew a certificate of your own: after you do, run kariz-manager panel cert again."
     ask CERT_FILE "Certificate file (the full chain, PEM, like /etc/ssl/panel/fullchain.pem)"
     ask KEY_FILE "Its private key file (PEM, like /etc/ssl/panel/privkey.pem)"
     check_own_cert "$CERT_FILE" "$KEY_FILE"
@@ -1297,7 +1297,7 @@ use_own_cert() {
         systemctl restart kariz-panel
         die "The panel did not start with that certificate, so it keeps the one it had: journalctl -u kariz-panel -n 50"
     fi
-    ok "The panel uses your certificate now. Kariz does not renew it: send the panel a SIGHUP after you do (systemctl kill -s HUP kariz-panel)."
+    ok "The panel uses your certificate now. SorTUN does not renew it: send the panel a SIGHUP after you do (systemctl kill -s HUP kariz-panel)."
 }
 
 # Whether $1 is a TCP port number.
@@ -1450,7 +1450,7 @@ cert_name() { printf 'kariz-panel-%s' "$(printf '%s' "$1" | tr -c 'a-zA-Z0-9\n' 
 install_renew_timer() {
     cat >"$RENEW_SERVICE" <<EOF
 [Unit]
-Description=Renew the Kariz panel certificate
+Description=Renew the SorTUN panel certificate
 After=network-online.target
 Wants=network-online.target
 
@@ -1460,7 +1460,7 @@ ExecStart=$CERTBOT renew --non-interactive --quiet
 EOF
     cat >"$RENEW_TIMER" <<'EOF'
 [Unit]
-Description=Renew the Kariz panel certificate
+Description=Renew the SorTUN panel certificate
 
 [Timer]
 OnCalendar=*-*-* 00,12:00:00
@@ -1479,7 +1479,7 @@ EOF
 install_heal_timer() {
     cat >"$HEAL_SERVICE" <<EOF
 [Unit]
-Description=Give the Kariz panel a certificate for this server's new IP address
+Description=Give the SorTUN panel a certificate for this server's new IP address
 After=network-online.target
 Wants=network-online.target
 
@@ -1489,7 +1489,7 @@ ExecStart=$MANAGER panel heal
 EOF
     cat >"$HEAL_TIMER" <<'EOF'
 [Unit]
-Description=Give the Kariz panel a certificate for this server's new IP address
+Description=Give the SorTUN panel a certificate for this server's new IP address
 
 [Timer]
 OnBootSec=1min
@@ -1616,7 +1616,7 @@ panel_cert() {
         esac
     done
     if [[ -n "$cert$key" ]]; then
-        # A certificate of your own (not renewed by Kariz).
+        # A certificate of your own (not renewed by SorTUN).
         [[ -n "$cert" && -n "$key" ]] || die "--cert-file and --key-file go together."
         use_own_cert "$cert" "$key"
         return 0
@@ -1859,7 +1859,7 @@ agent_join() {
     [[ "$code" == kz1_* ]] || die "That is not a join code (it starts with kz1_). Copy it whole from the panel: Servers, Add server."
     if has_agent; then
         echo
-        warn "This server already has a Kariz agent (it is connected to a panel)."
+        warn "This server already has a SorTUN agent (it is connected to a panel)."
         info "The new code replaces it: the old agent is removed, and the new one takes its place."
         info "The old panel keeps listing this server as offline until you remove it there."
         if ((!yes)); then
@@ -1874,11 +1874,11 @@ agent_join() {
         cmd_install "${version[@]}"
     elif ((${#version[@]} == 0)) && update_available; then
         # An agent program from an older release may not understand what the panel sends.
-        warn "Kariz $LATEST is out, and this server has an older one ($BEHIND): updating it first."
+        warn "SorTUN $LATEST is out, and this server has an older one ($BEHIND): updating it first."
         cmd_install
     fi
     [[ -x "$PANEL_BIN" ]] ||
-        die "This Kariz release has no agent. Install 0.8 or later: kariz-manager update, then --agent CODE"
+        die "This SorTUN release has no agent. Install 0.8 or later: kariz-manager update, then --agent CODE"
     mkdir -p "$PANEL_DIR"
     chmod 700 "$PANEL_DIR"
     "$PANEL_BIN" agent --join "$code" --no-run -c "$AGENT_CONF"
@@ -1929,7 +1929,7 @@ cmd_status() {
     server_line
     echo
     if [[ ! -x "$BIN" ]]; then
-        warn "Kariz is not installed yet: run kariz-manager install."
+        warn "SorTUN is not installed yet: run kariz-manager install."
         return 0
     fi
     status_rows
@@ -1938,25 +1938,25 @@ cmd_status() {
     fi
     if update_available; then
         echo
-        warn "Kariz $LATEST is out. Here: $BEHIND. Update: kariz-manager update"
+        warn "SorTUN $LATEST is out. Here: $BEHIND. Update: kariz-manager update"
     fi
 }
 
 # ---- Menu ----
 
-# The first time on a server: Kariz itself is installed at once, and what else this server
+# The first time on a server: SorTUN itself is installed at once, and what else this server
 # is for is asked: nothing (tunnels are made from a panel elsewhere), the web panel here, or
 # a connection to a panel that exists.
 first_run() {
     banner
     server_line
     section "Welcome"
-    info "Kariz is not installed on this server yet: installing the core now."
+    info "SorTUN is not installed on this server yet: installing the core now."
     cmd_install
     section "What else should this server do?"
     local what code
     choose what "Pick one (you can add the others later from this menu)" core \
-        "core|only the Kariz core: tunnels are made from a web panel on another server" \
+        "core|only the SorTUN core: tunnels are made from a web panel on another server" \
         "panel|also install the web panel here (servers, tunnels and charts in a browser)" \
         "agent|connect this server to a web panel that exists already (needs its join code)"
     mkdir -p "$CONF_DIR"
@@ -1967,7 +1967,7 @@ first_run() {
             ask code "Join code (starts with kz1_)"
             agent_join "$code"
             ;;
-        *) ok "Done: the Kariz core is installed. Open the menu again with: kariz-manager" ;;
+        *) ok "Done: the SorTUN core is installed. Open the menu again with: kariz-manager" ;;
     esac
 }
 
@@ -1975,7 +1975,7 @@ first_run() {
 # hints are plain ASCII (no "|"), so their length is their width on the screen.
 MENU_ROWS=(
     "#KARIZ"
-    "install|1|Install or update Kariz|Download the newest release, check it and install it."
+    "install|1|Install or update SorTUN|Download the newest release, check it and install it."
     "status|2|Status and addresses|What runs here, this server's addresses and the panel's address."
     ""
     "#WEB PANEL"
@@ -1992,7 +1992,7 @@ MENU_ROWS=(
     ""
     "#SYSTEM"
     "logs|11|Live logs|Follow the panel's or the agent's log. Ctrl+C comes back here."
-    "uninstall|12|Uninstall Kariz|Remove what Kariz installed on this server. Asks first."
+    "uninstall|12|Uninstall SorTUN|Remove what SorTUN installed on this server. Asks first."
     "exit|0|Exit|Close the menu. Run kariz-manager to open it again."
 )
 # The items whose number is drawn in red.
@@ -2327,7 +2327,7 @@ menu_goodbye() {
     if [[ -t 1 ]]; then
         printf '\e[H\e[2J'
     fi
-    printf '\n  %sKariz manager closed. Run %s%skariz-manager%s%s to open the menu again.%s\n\n' \
+    printf '\n  %sSorTUN manager closed. Run %s%skariz-manager%s%s to open the menu again.%s\n\n' \
         "$C_TEAL" "$C_RESET" "$C_BOLD" "$C_RESET" "$C_TEAL" "$C_RESET"
     exit 0
 }
@@ -2450,10 +2450,10 @@ usage() {
   Usage: kariz-manager [command]      (no command: the menu)
 
   Tunnels, servers, private networks and updates of other servers are made in the web
-  panel (docs/panel.md). This script installs Kariz and the panel on a server.
+  panel (docs/panel.md). This script installs SorTUN and the panel on a server.
 
-  install [--version vX.Y.Z] [--binary PATH]   install Kariz (latest release by default)
-  update  [--version vX.Y.Z]                   update Kariz and restart what runs
+  install [--version vX.Y.Z] [--binary PATH]   install SorTUN (latest release by default)
+  update  [--version vX.Y.Z]                   update SorTUN and restart what runs
   uninstall [--yes]                            also deletes the configs with --yes
   panel install [--port N] [--domain D | --ip ADDRESS] [--email E] [--name NAME] [--yes]
                                                [--password-file F: its first line is the admin password]

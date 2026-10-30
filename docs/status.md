@@ -1,6 +1,6 @@
 # Status
 
-A running Kariz answers `status` on its control socket, on both sides: whether the other
+A running SorTUN answers `status` on its control socket, on both sides: whether the other
 side is connected, the round-trip time, the last error, and what goes through each
 forwarded port. `kariz status` shows it on the server; the web panel reads it every
 second.

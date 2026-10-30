@@ -1,6 +1,6 @@
 [Unit]
-Description=Kariz agent (connects this server to a Kariz panel)
-Documentation=https://github.com/Erfan-XRay/Kariz
+Description=SorTUN agent (connects this server to a SorTUN panel)
+Documentation=https://github.com/soranshop/SorTUN
 After=network-online.target
 Wants=network-online.target
 

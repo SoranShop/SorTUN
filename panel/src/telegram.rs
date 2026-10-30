@@ -1127,7 +1127,7 @@ pub mod text {
             )
         } else {
             format!(
-                "📊 <b>Kariz status</b>\nServers: {online} of {} online · Tunnels: {up} of {} up\n",
+                "📊 <b>SorTUN status</b>\nServers: {online} of {} online · Tunnels: {up} of {} up\n",
                 views.len(),
                 rows.len()
             )
@@ -1376,7 +1376,7 @@ pub mod text {
              /unmute — برگرداندن اعلان‌ها"
                 .into()
         } else {
-            "🤖 <b>Kariz bot</b>\n\
+            "🤖 <b>SorTUN bot</b>\n\
              /status — every server and tunnel at a glance\n\
              /servers — the servers\n\
              /server name — one server in detail\n\
@@ -1396,7 +1396,7 @@ pub mod text {
             )
         } else {
             format!(
-                "✅ This chat is connected to the Kariz panel. Alerts will come here.\n\n{}",
+                "✅ This chat is connected to the SorTUN panel. Alerts will come here.\n\n{}",
                 help(fa)
             )
         }
@@ -1406,7 +1406,7 @@ pub mod text {
         if fa {
             "✅ پیام آزمایشی از پنل کاریز".into()
         } else {
-            "✅ A test message from the Kariz panel".into()
+            "✅ A test message from the SorTUN panel".into()
         }
     }
 

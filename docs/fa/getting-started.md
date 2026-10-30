@@ -2,7 +2,7 @@
 
 [English](../getting-started.md) · **فارسی**
 
-کاریز دو سرور را با یک تانل به هم وصل می‌کند:
+SorTUN دو سرور را با یک تانل به هم وصل می‌کند:
 
 - **ورودی** (`entry`) سرور عمومی است و کاربرها به آن وصل می‌شوند. قانون‌های `[[forward]]` مال ورودی‌اند: «هرچه روی این پورت رسید، به آن آدرس بفرست».
 - **خروجی** (`exit`) سروری است که به مقصدهای واقعی دسترسی دارد. به آدرس‌هایی که ورودی بخواهد وصل می‌شود.
@@ -10,7 +10,7 @@
 ```mermaid
 flowchart LR
     U[Users] -->|port 443| E[Entry server]
-    E <==>|Kariz tunnel| X[Exit server]
+    E <==>|SorTUN tunnel| X[Exit server]
     X --> T[Targets]
 ```
 
@@ -28,7 +28,7 @@ flowchart LR
 پنل را با اسکریپت مدیر روی یک سرور نصب کنید، سرورهای دیگر را به آن وصل کنید و تانل‌ها را در مرورگر بسازید. پنل همهٔ مرحله‌های پایین را روی هر دو سرور خودش انجام می‌دهد (کانفیگ‌ها، توکن، سرویس systemd و بررسی این‌که تانل وصل شده) و اگر مرحله‌ای خراب شود همه را به حالت قبل برمی‌گرداند:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Erfan-XRay/Kariz/main/scripts/kariz.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh)
 ```
 
 در منو **۳** (نصب پنل وب) را انتخاب کنید و لینکی را که چاپ می‌شود باز کنید. بعد [کار با پنل](using-the-panel.md) را بخوانید؛ منو هم در [اسکریپت مدیر](manager.md) توضیح داده شده است.
@@ -37,7 +37,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Erfan-XRay/Kariz/main/script
 
 ## ۱. نصب
 
-فایل اجرایی استاتیک لینوکس را برای CPU خودتان از [Releases](https://github.com/Erfan-XRay/Kariz/releases) بگیرید (`x86_64`، `aarch64` یا `armv7`؛ دستور `uname -m` نشانتان می‌دهد کدام)، یا با Rust نسخهٔ ۱٫۸۰ یا جدیدتر خودتان بسازید:
+فایل اجرایی استاتیک لینوکس را برای CPU خودتان از [Releases](https://github.com/soranshop/SorTUN/releases) بگیرید (`x86_64`، `aarch64` یا `armv7`؛ دستور `uname -m` نشانتان می‌دهد کدام)، یا با Rust نسخهٔ ۱٫۸۰ یا جدیدتر خودتان بسازید:
 
 ```bash
 cargo build --release
@@ -117,7 +117,7 @@ sudo systemctl enable --now kariz
 journalctl -u kariz -f
 ```
 
-این unit فایل `/etc/kariz/config.toml` را می‌خواند، اگر کاریز از کار بیفتد دوباره راهش می‌اندازد و برای پورت‌های زیر ۱۰۲۴ دسترسی لازم را می‌دهد.
+این unit فایل `/etc/kariz/config.toml` را می‌خواند، اگر SorTUN از کار بیفتد دوباره راهش می‌اندازد و برای پورت‌های زیر ۱۰۲۴ دسترسی لازم را می‌دهد.
 
 ## بعد از این
 

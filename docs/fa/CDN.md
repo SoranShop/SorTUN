@@ -1,4 +1,4 @@
-# اجرای کاریز پشت CDN
+# اجرای SorTUN پشت CDN
 
 [English](../CDN.md) · **فارسی**
 
@@ -76,7 +76,7 @@ key = "/etc/kariz/origin.key"
 ۵. اختیاری: فایروال origin فقط بازه‌های IP از Cloudflare را بپذیرد.
 ۶. `kariz check -c <config>` روی هر دو سمت: `config OK`، بدون هشدار.
 
-بررسی‌ها (هرکدام را تیک بزنید و تاریخ و commit کاریز را بنویسید):
+بررسی‌ها (هرکدام را تیک بزنید و تاریخ و commit SorTUN را بنویسید):
 
 - [ ] `curl -sI https://tunnel.example.com/` ← `404`، `server: cloudflare`.
 - [ ] `curl -s https://tunnel.example.com/api/v1/stream` (بدون upgrade) ← `404`.

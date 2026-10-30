@@ -1,6 +1,6 @@
 [Unit]
-Description=Kariz web panel
-Documentation=https://github.com/Erfan-XRay/Kariz
+Description=SorTUN web panel
+Documentation=https://github.com/soranshop/SorTUN
 After=network-online.target
 Wants=network-online.target
 

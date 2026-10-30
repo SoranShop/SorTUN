@@ -13,8 +13,8 @@ const T = {
     lead: "A fast, light tunnel between two servers, in Rust. Six transports, TCP and UDP, games and CDNs, and a web panel with a live map. Water finds its way underground.",
     start: "Get started",
     scroll: "scroll: down the well",
-    s1: "What Kariz is",
-    l1: "Kariz (کاریز) is the ancient Persian underground channel: wells dug from the surface, water carried in the dark. It links two servers with an encrypted tunnel. Users connect to the entry; Kariz carries their TCP and UDP traffic to the exit, which reaches the real targets.",
+    s1: "What SorTUN is",
+    l1: "SorTUN (SorTUN) is the ancient Persian underground channel: wells dug from the surface, water carried in the dark. It links two servers with an encrypted tunnel. Users connect to the entry; SorTUN carries their TCP and UDP traffic to the exit, which reaches the real targets.",
     nums: [
       [`~${n(8)} MiB`, "of RAM per side, idle"],
       [`${n(4)} Gbit/s`, "encrypted on one connection, on localhost"],
@@ -38,12 +38,12 @@ const T = {
     l4: "The real panel's screens with sample data, in your browser. The password is kariz; nothing is sent anywhere.",
     try: "Open it full screen",
     s5: "Install in one line",
-    l5: "As root, on each server. It installs Kariz for your CPU (x86_64, aarch64, armv7), checks the signature, and opens a menu you move in with the arrow keys.",
-    cmd: "bash <(curl -fsSL https://raw.githubusercontent.com/Erfan-XRay/Kariz/main/scripts/kariz.sh)",
+    l5: "As root, on each server. It installs SorTUN for your CPU (x86_64, aarch64, armv7), checks the signature, and opens a menu you move in with the arrow keys.",
+    cmd: "bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh)",
     panelCmd: "Then, for the panel, on the server that will hold it:",
     next: "Documentation",
     gh: "Source on GitHub",
-    frameTitle: "Kariz panel demo",
+    frameTitle: "SorTUN panel demo",
     notes: `Version ${VERSION}`,
   },
   fa: {
@@ -51,8 +51,8 @@ const T = {
     lead: "تانلی سریع و سبک بین دو سرور، نوشته‌شده با Rust. شش ترنسپورت، TCP و UDP، بازی و CDN، و یک پنل وب با نقشهٔ زنده. آب، راهش را از زیر زمین پیدا می‌کند.",
     start: "شروع کار",
     scroll: "اسکرول: پایین چاه",
-    s1: "کاریز چیست",
-    l1: "کاریز همان مجرای زیرزمینی آب در ایران قدیم است: چاه‌هایی که از سطح زمین کنده می‌شدند و آبی که در تاریکی راهش را می‌رفت. این برنامه دو سرور را با یک تانل رمزنگاری‌شده به هم وصل می‌کند. کاربرها به ورودی (entry) وصل می‌شوند؛ کاریز ترافیک TCP و UDPشان را به خروجی (exit) می‌رساند و خروجی به مقصدهای واقعی دسترسی دارد.",
+    s1: "SorTUN چیست",
+    l1: "SorTUN همان مجرای زیرزمینی آب در ایران قدیم است: چاه‌هایی که از سطح زمین کنده می‌شدند و آبی که در تاریکی راهش را می‌رفت. این برنامه دو سرور را با یک تانل رمزنگاری‌شده به هم وصل می‌کند. کاربرها به ورودی (entry) وصل می‌شوند؛ SorTUN ترافیک TCP و UDPشان را به خروجی (exit) می‌رساند و خروجی به مقصدهای واقعی دسترسی دارد.",
     nums: [
       [`~${n(8)} MiB`, "حافظه برای هر طرف، در حالت بیکار"],
       [`${n(4)} Gbit/s`, "رمزشده روی یک اتصال، روی localhost"],
@@ -76,25 +76,25 @@ const T = {
     l4: "صفحه‌های پنل واقعی، با داده‌های نمونه، در مرورگر خودتان. رمز ورود kariz است و چیزی جایی فرستاده نمی‌شود.",
     try: "باز کردن تمام‌صفحه",
     s5: "نصب با یک خط",
-    l5: "با دسترسی root، روی هر سرور. کاریز را برای CPU شما نصب می‌کند (x86_64، aarch64، armv7)، امضا را می‌سنجد و منویی باز می‌کند که با کلیدهای جهت در آن جابه‌جا می‌شوید.",
-    cmd: "bash <(curl -fsSL https://raw.githubusercontent.com/Erfan-XRay/Kariz/main/scripts/kariz.sh)",
+    l5: "با دسترسی root، روی هر سرور. SorTUN را برای CPU شما نصب می‌کند (x86_64، aarch64، armv7)، امضا را می‌سنجد و منویی باز می‌کند که با کلیدهای جهت در آن جابه‌جا می‌شوید.",
+    cmd: "bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/kariz.sh)",
     panelCmd: "",
     next: "مستندات",
     gh: "سورس در گیت‌هاب",
-    frameTitle: "دموی پنل کاریز",
+    frameTitle: "دموی پنل SorTUN",
     notes: "",
   },
 }[lang];
 ---
 
-<Base lang={lang} title="Kariz" description={T.lead} path="/" current="home">
+<Base lang={lang} title="SorTUN" description={T.lead} path="/" current="home">
   <section class="hero" data-hero aria-labelledby="hero-title">
     <div class="hero-stick">
       <div class="nojs-sky" aria-hidden="true"></div>
       <canvas data-hero-canvas aria-hidden="true"></canvas>
       <div class="hero-text" data-fade>
         <p class="kicker">{T.kicker}</p>
-        <h1 id="hero-title">Kariz</h1>
+        <h1 id="hero-title">SorTUN</h1>
         <p class="lead">{T.lead}</p>
         <div class="actions">
           <a class="btn primary" href={href(lang, "/docs/getting-started/")}>{T.start}</a>

@@ -57,11 +57,11 @@ export function Shell({
     main.current?.scrollTo({ top: 0 });
   }, [page, route.tunnel]);
 
-  // The tab (and a screen reader) says which page this is: "iran-eu — Tunnels — Kariz".
+  // The tab (and a screen reader) says which page this is: "iran-eu — Tunnels — SorTUN".
   useEffect(() => {
-    document.title = [route.tunnel && (tunnelTitle ?? route.tunnel), t(`page.${page}`), "Kariz"].filter(Boolean).join(" — ");
+    document.title = [route.tunnel && (tunnelTitle ?? route.tunnel), t(`page.${page}`), "SorTUN"].filter(Boolean).join(" — ");
     return () => {
-      document.title = "Kariz";
+      document.title = "SorTUN";
     };
   }, [page, route.tunnel, tunnelTitle, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -110,9 +110,9 @@ export function Shell({
     <section id="app" className={`screen is-on ${rising ? "is-rising" : ""}`} aria-label={t("a11y.panel")}>
       <nav className="rail" aria-label={t("a11y.nav")}>
         <div className="brand">
-          <img src={logo} alt="Kariz" />
+          <img src={logo} alt="SorTUN" />
           <span className="brand-word">
-            Kariz<small>{t("boot.sub")}</small>
+            SorTUN<small>{t("boot.sub")}</small>
           </span>
         </div>
         <div className="rail-group">{PAGES.filter((p) => p !== "settings").map((p) => item(p))}</div>

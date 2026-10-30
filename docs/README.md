@@ -1,16 +1,16 @@
-# Kariz documentation
+# SorTUN documentation
 
-For Kariz **v2.7.1**; what changed in each version is in the [changelog](../CHANGELOG.md). Start with
+For SorTUN **v2.8.0**; what changed in each version is in the [changelog](../CHANGELOG.md). Start with
 [Getting started](getting-started.md) and come back to the reference pages when you need a specific
 setting. The same pages are a website, with search,
 animated diagrams and a live demo of the panel, in English and Persian:
-<https://erfan-xray.github.io/Kariz/> (built from these files; see [`site/`](../site/README.md)).
+<https://soranshop.github.io/SorTUN/> (built from these files; see [`site/`](../site/README.md)).
 
 | Page | What it covers |
 |---|---|
 | [Getting started](getting-started.md) | The quick way (the panel), and by hand: a token, two configs, systemd |
 | [Using the panel](using-the-panel.md) | A walk through the web panel: sign in, add servers, make a tunnel, watch it, keep it safe |
-| [The manager script](manager.md) | One-line install of Kariz and the panel on a server, and connecting a server to a panel |
+| [The manager script](manager.md) | One-line install of SorTUN and the panel on a server, and connecting a server to a panel |
 | [Configuration reference](configuration.md) | Every setting, its default and its limits |
 | [Speed test](speedtest.md) | The panel's button and `kariz speedtest`: speed, latency and UDP through the live tunnel |
 | [Telegram alerts](telegram.md) | A bot that tells you when a server or tunnel goes down, and answers `/status`; if Telegram is blocked |
@@ -28,9 +28,9 @@ animated diagrams and a live demo of the panel, in English and Persian:
 | [Security](security.md) | What the token protects, encryption, what is visible on the wire |
 | [Troubleshooting](troubleshooting.md) | `kariz check` warnings, common errors, logs |
 
-How it is built: [design and protocol](ROADMAP.md). To help the project go on: [Support Kariz](support.md).
+How it is built: [design and protocol](ROADMAP.md). To help the project go on: [Support SorTUN](support.md).
 
-Kariz is source-available under its own [license](../LICENSE): you may read it and run the
+SorTUN is source-available under its own [license](../LICENSE): you may read it and run the
 official releases on your own servers; using the core anywhere else is not allowed.
 
 In Persian: [README_FA.md](../README_FA.md) covers the same ground in short.

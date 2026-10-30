@@ -1,6 +1,6 @@
-# The Kariz site
+# The SorTUN site
 
-The documentation website, at <https://erfan-xray.github.io/Kariz/>. It is built with
+The documentation website, at <https://soranshop.github.io/SorTUN/>. It is built with
 [Astro](https://astro.build) from the files of this repository; nothing of the text lives here.
 
 | What | Where it comes from |
@@ -19,7 +19,7 @@ committed.
 ```bash
 cd site
 npm ci
-npm run dev        # http://localhost:4321/Kariz/ (search needs a build)
+npm run dev        # http://localhost:4321/SorTUN/ (search needs a build)
 npm run build      # the site, then the Pagefind search index, into dist/
 npm run check      # translations and links (needs the build)
 npm test           # Playwright: axe in both themes and languages, search, the diagrams

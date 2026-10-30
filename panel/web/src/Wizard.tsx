@@ -711,7 +711,7 @@ function Picker({ label, servers, value, other, locked, onPick }: { label: strin
               <span>
                 <span className="nm">{s.name}</span>
                 <br />
-                <span className="mt">{s.online ? `${s.arch} · Kariz ${s.version}` : t("wz.offline")}</span>
+                <span className="mt">{s.online ? `${s.arch} · SorTUN ${s.version}` : t("wz.offline")}</span>
               </span>
               <span />
             </button>
