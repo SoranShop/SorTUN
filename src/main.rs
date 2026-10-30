@@ -179,7 +179,10 @@ fn probe(side: ProbeSide) -> Result<()> {
                 }
             };
             if port > u16::MAX - 2 {
-                bail!("--port must leave room for the two after it (at most {})", u16::MAX - 2);
+                bail!(
+                    "--port must leave room for the two after it (at most {})",
+                    u16::MAX - 2
+                );
             }
             let addrs = if host.is_empty() {
                 let found = probe::own_addrs();

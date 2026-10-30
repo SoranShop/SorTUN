@@ -212,7 +212,6 @@ async fn listen_any(
     Ok((acceptor, addr))
 }
 
-
 /// What one transport over one address did.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Outcome {
@@ -326,7 +325,9 @@ pub fn self_signed(dir: &Path) -> io::Result<(PathBuf, PathBuf)> {
 
 #[cfg(not(feature = "quic"))]
 pub fn self_signed(_: &Path) -> io::Result<(PathBuf, PathBuf)> {
-    Err(io::Error::other("this build cannot make a certificate (the `quic` feature is off)"))
+    Err(io::Error::other(
+        "this build cannot make a certificate (the `quic` feature is off)",
+    ))
 }
 
 #[cfg(feature = "quic")]
@@ -356,7 +357,10 @@ mod tests {
         let text = code.encode();
         assert!(text.starts_with("sp1."));
         assert_eq!(Code::decode(&format!("  {text}\n")).unwrap(), code);
-        assert!(Code::decode("kz1_abc").unwrap_err().to_string().contains("sp1."));
+        assert!(Code::decode("kz1_abc")
+            .unwrap_err()
+            .to_string()
+            .contains("sp1."));
         assert!(Code::decode(&text[..text.len() - 6]).is_err());
     }
 
