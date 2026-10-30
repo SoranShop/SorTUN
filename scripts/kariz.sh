@@ -397,7 +397,11 @@ need_systemd() {
 }
 
 need_kariz() {
-    [[ -x "$BIN" ]] || die "SorTUN is not installed yet: run '$(basename "$0") install' first."
+    # Run through `bash <(curl ...)`, $0 is a pipe (/dev/fd/63): name the command instead.
+    local me
+    me=$(basename "$0")
+    [[ "$0" == /dev/fd/* || "$0" == /proc/* ]] && me="bash <(curl -fsSL https://raw.githubusercontent.com/$REPO/main/scripts/kariz.sh)"
+    [[ -x "$BIN" ]] || die "SorTUN is not installed yet: run '$me install' first, or run the script without arguments for the menu."
 }
 
 # ---- Download and install ----
