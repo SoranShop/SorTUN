@@ -1,7 +1,7 @@
 # The manager script
 
 `scripts/sortun.sh` installs SorTUN and its [web panel](panel.md) on a Linux server with systemd,
-and connects a server to a panel. After the first run it is also the `sortun-manager` command.
+and connects a server to a panel. After the first run, type `SorTUN` (or `sortun`, or `sortun-manager`) on the server to open its menu.
 
 **Tunnels are not made here.** Servers, tunnels, private networks, backups and updates of the
 other servers are all done in the web panel. The manager is only the way to get SorTUN onto a

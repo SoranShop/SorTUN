@@ -25,6 +25,8 @@ set -euo pipefail
 REPO="soranshop/SorTUN"
 BIN=/usr/local/bin/sortun
 MANAGER=/usr/local/bin/sortun-manager
+# The same menu, by the name as it is written.
+MENU_CMD=/usr/local/bin/SorTUN
 CONF_DIR=/etc/sortun
 UNIT=/etc/systemd/system/sortun@.service
 # The web panel (docs/panel.md) and its agent.
@@ -420,6 +422,14 @@ install_manager() {
         fi
         rm -f "$tmp"
     fi
+    link_menu_command
+}
+
+# `SorTUN` opens the menu too: the name, typed as it is written.
+link_menu_command() {
+    [[ "$EUID" -eq 0 && -x "$MANAGER" ]] || return 0
+    [[ "$(readlink "$MENU_CMD" 2>/dev/null)" == "$MANAGER" ]] && return 0
+    ln -sfn "$MANAGER" "$MENU_CMD" 2>/dev/null || true
 }
 
 # A copy of this script run from a file of its own (a new one copied to the server) takes
@@ -489,7 +499,7 @@ cmd_install() {
     fi
     install_manager
     ok "Installed: $("$BIN" --version)"
-    info "Manage it any time with: ${C_BOLD}sortun-manager${C_RESET}"
+    info "Open the menu any time with: ${C_BOLD}SorTUN${C_RESET} (or sortun-manager)"
 }
 
 # The version number of an installed program ("sortun 1.4.0" gives 1.4.0), or nothing.
@@ -758,7 +768,7 @@ cmd_uninstall() {
         rm -rf "$CONF_DIR" "$PANEL_DIR" "$PANEL_DATA"
     fi
     ok "SorTUN is removed."
-    rm -f "$MANAGER"
+    rm -f "$MANAGER" "$MENU_CMD"
 }
 
 # ---- Addresses ----
@@ -1898,7 +1908,7 @@ first_run() {
             ask code "Join code (starts with kz1_)"
             agent_join "$code"
             ;;
-        *) ok "Done: the SorTUN core is installed. Open the menu again with: sortun-manager" ;;
+        *) ok "Done: the SorTUN core is installed. Open the menu again with: SorTUN" ;;
     esac
 }
 
@@ -2041,7 +2051,7 @@ menu_select() {
 
 menu_goodbye() {
     ui_restore_terminal
-    printf '\n  Closed. Run %ssortun-manager%s to open the menu again.\n\n' "$C_BOLD" "$C_RESET"
+    printf '\n  Closed. Type %sSorTUN%s to open the menu again.\n\n' "$C_BOLD" "$C_RESET"
     exit 0
 }
 
@@ -2214,6 +2224,7 @@ main() {
                 migrate_old_install "$@"
             fi
             sync_manager
+            link_menu_command
             ;;
     esac
     case ${1:-} in

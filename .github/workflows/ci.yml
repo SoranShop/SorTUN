@@ -112,6 +112,9 @@ jobs:
         run: |
           sudo scripts/sortun.sh install --binary target/release/sortun --panel-binary target/release/sortun-panel
           sortun-manager help >/dev/null
+          # The name, as it is written, opens the same menu.
+          test "$(readlink /usr/local/bin/SorTUN)" = /usr/local/bin/sortun-manager
+          SorTUN help >/dev/null
       - name: Two tunnels by hand, as the agent would write them
         run: |
           python3 -m http.server 18081 --bind 127.0.0.1 >/dev/null 2>&1 &

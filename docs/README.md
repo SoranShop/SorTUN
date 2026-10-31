@@ -1,6 +1,6 @@
 # SorTUN documentation
 
-For SorTUN **v3.1.0**; what changed in each version is in the [changelog](../CHANGELOG.md). Start with
+For SorTUN **v3.1.1**; what changed in each version is in the [changelog](../CHANGELOG.md). Start with
 [Getting started](getting-started.md) and come back to the reference pages when you need a specific
 setting. The same pages are a website, with search,
 animated diagrams and a live demo of the panel, in English and Persian:

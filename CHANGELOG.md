@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.1 - 2026-10-31
+
+- **`SorTUN` opens the menu.** Type `SorTUN` on a server (or `sortun` alone) and the
+  manager's menu opens, as `sortun-manager` does. The install script makes the command, and a
+  server that has the manager already gets it the next time the script runs.
+
 ## 3.1.0 - 2026-10-31
 
 SorTUN's own look, in the same colours (navy, turquoise and gold).

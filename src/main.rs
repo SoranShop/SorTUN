@@ -119,8 +119,20 @@ enum ProbeSide {
     },
 }
 
+/// Where the install script puts the manager.
+#[cfg(unix)]
+const MANAGER: &str = "/usr/local/bin/sortun-manager";
+
 fn main() -> Result<()> {
     sortun::allocator::tune();
+    // `sortun` alone opens the manager's menu, where the manager is installed; without it,
+    // the help comes as before.
+    #[cfg(unix)]
+    if std::env::args_os().len() == 1 && Path::new(MANAGER).is_file() {
+        use std::os::unix::process::CommandExt;
+        let e = std::process::Command::new(MANAGER).exec();
+        bail!("could not run {MANAGER}: {e}");
+    }
     match Cli::parse().command {
         Command::Run { config } => run(Config::load(&config)?),
         Command::Check { config, json } => check(&config, json),

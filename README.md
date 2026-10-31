@@ -55,7 +55,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/script
 The script finds your CPU (x86_64, aarch64 or armv7), downloads the latest release, checks its
 signature and opens a menu. Choose **Install the web panel here**: it prints the panel's address and a
 one-time login link. From then on you work in the browser. Add your other servers (each runs one command
-with a code from the panel), then make a tunnel between any two of them with the wizard.
+with a code from the panel), then make a tunnel between any two of them with the wizard. To open the
+menu again later, type `SorTUN` on the server.
 
 Want to look first? The [live demo](https://soranshop.github.io/SorTUN/try/) runs the real panel on sample data.
 
