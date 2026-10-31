@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.1.2 - 2026-11-01
 
 - **Only SorTUN's name is left.** The Telegram channel link (top bar, sign-in page and command
   palette) is gone, the credit line reads © SorTUN, and the log banner and the license name
