@@ -130,4 +130,4 @@ SorTUN is **source-available, not open source**. You may read the code and run t
 own servers; using the core (or anything in it) anywhere else, copying it or redistributing it is not allowed.
 The full terms are in [LICENSE](LICENSE).
 
-<p align="center"><sub>© ErfanXRay</sub></p>
+<p align="center"><sub>© SorTUN</sub></p>

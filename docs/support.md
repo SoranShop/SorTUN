@@ -44,6 +44,5 @@ Money is not the only thing that keeps a project alive:
 - **Report a problem** with what you did, what you expected and the log
   ([Troubleshooting](troubleshooting.md) says what to collect). A report that can be repeated
   gets fixed fastest.
-- **Join the Telegram channel**, [@Erfan_Xray](https://t.me/Erfan_Xray): news, releases and answers. The panel links to it too.
 - **Tell other server operators** about it.
 - **Support what SorTUN stands on**: the projects whose work it uses deserve the same thanks.

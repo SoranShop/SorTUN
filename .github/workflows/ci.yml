@@ -237,7 +237,7 @@ jobs:
       - name: Banner in the journal, priority prefixes understood
         run: |
           sudo journalctl -u sortun@plain -o cat --no-pager | tee journal.txt | head -20
-          grep -q "developed by ErfanXRay" journal.txt
+          grep -q "SorTUN  github.com/soranshop/SorTUN" journal.txt
           ! grep -q '^<[0-9]>' journal.txt
       - name: Remove and uninstall
         run: |

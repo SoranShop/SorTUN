@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **Only SorTUN's name is left.** The Telegram channel link (top bar, sign-in page and command
+  palette) is gone, the credit line reads © SorTUN, and the log banner and the license name
+  SorTUN alone.
+
 ## 3.1.1 - 2026-10-31
 
 - **`SorTUN` opens the menu.** Type `SorTUN` on a server (or `sortun` alone) and the
@@ -796,14 +802,14 @@ agents from the panel after it.
 
 - **The Telegram channel link is small now.** The card in the side bar and the line above the
   credit line are gone. The top bar has one small Telegram icon beside the language and theme
-  buttons (the sign-in page has it in the same place), and the name in the credit line, now
-  `Erfan_Xray`, opens the channel. The command palette still has "Open the Telegram channel".
+  buttons (the sign-in page has it in the same place), and the name in the credit line opens
+  the channel. The command palette still has "Open the Telegram channel".
 
 ## 1.9.1 - 2026-10-03
 
 ### Added
 
-- **A link to the Telegram channel in the panel.** The channel (@Erfan_Xray) is on a card in the
+- **A link to the Telegram channel in the panel.** The channel is on a card in the
   side bar, above Sign out, and on a line above the credit line at the foot of every page and under
   the sign-in form (which is where a phone, with no side bar, sees it). The command palette has
   "Open the Telegram channel". It opens in a new tab.
@@ -945,7 +951,7 @@ agents from the panel after it.
   else its IPv6), so nothing has to be typed: the *Addresses* card shows it, with a button for
   each address the server has (IPv4 and IPv6) and a field for any other; *Use the default* undoes
   a saved one.
-- **© ErfanXRay** at the foot of every page and under the sign-in form, linking to the project.
+- **A credit line** at the foot of every page and under the sign-in form, linking to the project.
 
 - **You choose the name of the panel's own server.** Installing the panel asks what this server
   should be called in the panel, with its host name as the default (Enter keeps it);

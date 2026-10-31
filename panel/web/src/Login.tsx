@@ -5,7 +5,7 @@ import { paletteNow } from "./draw";
 import { startLoginScene } from "./scene-login";
 import type { LoginScene } from "./scene-login";
 import { useApp } from "./store";
-import { ChannelLink, Copyright, Icon } from "./ui";
+import { Copyright, Icon } from "./ui";
 import logo from "./logo.svg";
 
 /** The token in what the user pasted: a whole link, or just its 64 characters. */
@@ -145,7 +145,6 @@ export function Login({
             <Icon name={theme === "night" ? "sun" : "moon"} size={16} />
             {theme === "night" ? t("theme.dawn") : t("theme.night")}
           </button>
-          <ChannelLink variant="chip" />
         </div>
       </div>
 

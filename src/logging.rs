@@ -18,8 +18,6 @@ use tracing_subscriber::registry::LookupSpan;
 
 use sortun::config::{mode_name, role_name, Config, LogColor};
 
-/// Who made it; shown in the banner.
-const AUTHOR: &str = "ErfanXRay";
 const REPOSITORY: &str = "github.com/soranshop/SorTUN";
 
 pub(crate) const RESET: &str = "\x1b[0m";
@@ -217,9 +215,8 @@ pub fn banner(style: &Style, config: &Config) -> String {
         style.paint(DIM, "fast, light tunnel core"),
     ));
     lines.push(format!(
-        "  {} {}  {}",
-        style.paint(DIM, "developed by"),
-        style.paint(&format!("{BOLD}{SAND}"), AUTHOR),
+        "  {}  {}",
+        style.paint(&format!("{BOLD}{SAND}"), "SorTUN"),
         style.paint(DIM, REPOSITORY),
     ));
     lines.push(String::new());
@@ -353,14 +350,14 @@ mod tests {
     }
 
     #[test]
-    fn banner_names_the_author_version_and_setup() {
+    fn banner_names_the_project_version_and_setup() {
         let text = "role = \"entry\"\nmode = \"reverse\"\n\
             [tunnel]\ntransport = \"tcpmux\"\nlisten = \"0.0.0.0:3080\"\n\
             token = \"test-token-0123456789\"\n\
             [[forward]]\nlisten = \"0.0.0.0:443\"\ntarget = \"127.0.0.1:443\"\n";
         let config = Config::parse(text).unwrap();
         let b = banner(&plain(), &config);
-        assert!(b.contains("developed by ErfanXRay"), "{b}");
+        assert!(b.contains("SorTUN  github.com/soranshop/SorTUN"), "{b}");
         assert!(b.contains(&format!("v{}", env!("CARGO_PKG_VERSION"))));
         assert!(b.contains("entry · reverse mode"));
         assert!(b.contains("tcpmux · profile balanced"));

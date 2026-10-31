@@ -1,7 +1,7 @@
 SORTUN LICENSE
 Version 1.0
 
-Copyright (c) 2026 Erfan-XRay. All rights reserved.
+Copyright (c) 2026 SorTUN. All rights reserved.
 
 SorTUN is source-available, not open source. You may read it, and you may run the official
 releases on your own servers. You may not use the SorTUN core, or anything in it, anywhere
@@ -9,7 +9,7 @@ else. The terms follow.
 
 1. DEFINITIONS
 
-   "SorTUN" means everything in this repository at https://github.com/Erfan-XRay/SorTUN and
+   "SorTUN" means everything in this repository at https://github.com/soranshop/SorTUN and
    the release archives the Licensor publishes on its Releases page: the tunnel core, the
    web panel and its agent, the manager script, the documentation, the website and the
    design files.
@@ -20,7 +20,7 @@ else. The terms follow.
    "Official Release" means a release archive published by the Licensor, with its checksum
    and signature.
 
-   "Licensor" means Erfan-XRay, the owner of SorTUN. "You" means the person or organization
+   "Licensor" means the owner of SorTUN. "You" means the person or organization
    using SorTUN.
 
 2. WHAT YOU MAY DO
@@ -111,4 +111,4 @@ else. The terms follow.
     The Licensor may publish a new version of this license for new versions of SorTUN. A
     version of SorTUN that You received under this license stays under it.
 
-Contact: https://github.com/Erfan-XRay/SorTUN/issues
+Contact: https://github.com/soranshop/SorTUN/issues

@@ -365,27 +365,10 @@ export function Copyright() {
   return (
     <p className="copyright" dir="ltr">
       <span>©</span>
-      <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer">
-        Erfan_Xray
-      </a>
-      <span aria-hidden="true">·</span>
       <a href="https://github.com/soranshop/SorTUN" target="_blank" rel="noopener noreferrer">
         SorTUN
       </a>
     </p>
-  );
-}
-
-export const CHANNEL_URL = "https://t.me/Erfan_Xray";
-export const CHANNEL_HANDLE = "@Erfan_Xray";
-
-/** The link to the author's Telegram channel: a small icon, beside the other top-bar controls. */
-export function ChannelLink({ variant }: { variant: "square" | "chip" }) {
-  const { t } = useApp();
-  return (
-    <a className={variant === "square" ? "square-btn" : "chip"} href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" title={`${t("chan.name")} ${CHANNEL_HANDLE}`} aria-label={t("chan.label")}>
-      <Icon name="telegram" size={variant === "square" ? 20 : 16} />
-    </a>
   );
 }
 

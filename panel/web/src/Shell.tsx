@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { Route } from "./App";
 import { useApp } from "./store";
-import { CHANNEL_URL, ChannelLink, Copyright, Icon, useFocusTrap } from "./ui";
+import { Copyright, Icon, useFocusTrap } from "./ui";
 import logo from "./logo.svg";
 
 export type PageId = "map" | "servers" | "tunnels" | "networks" | "logs" | "settings";
@@ -87,7 +87,6 @@ export function Shell({
       ...PAGES.map((p) => ({ label: `${t("pal.goto")} ${t(`page.${p}`)}`, icon: p, run: () => navigate({ page: p }) })),
       ...items,
       { label: t("pal.link"), icon: "key", run: () => navigate({ page: "settings" }) },
-      { label: t("pal.channel"), icon: "telegram", run: () => window.open(CHANNEL_URL, "_blank", "noopener,noreferrer") },
       { label: t("pal.theme"), icon: theme === "night" ? "sun" : "moon", run: () => setTheme(theme === "night" ? "dawn" : "night") },
       { label: t("pal.lang"), icon: "palette", run: () => setLang(lang === "fa" ? "en" : "fa") },
       { label: t("pal.low"), icon: "leaf", hint: low ? "✓" : "", run: () => setLow(!low, true) },
@@ -157,7 +156,6 @@ export function Shell({
           <button className="square-btn" type="button" onClick={() => setTheme(theme === "night" ? "dawn" : "night")} aria-label={t("a11y.theme", { theme: theme === "night" ? t("theme.dawn") : t("theme.night") })} title={t("a11y.theme", { theme: theme === "night" ? t("theme.dawn") : t("theme.night") })}>
             <Icon name={theme === "night" ? "sun" : "moon"} />
           </button>
-          <ChannelLink variant="square" />
         </div>
       </header>
 
