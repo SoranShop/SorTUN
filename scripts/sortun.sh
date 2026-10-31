@@ -563,7 +563,7 @@ refresh_manager() {
 }
 
 # The checksum of the installed script: to see that an update replaced it under this menu.
-manager_sum() { cksum <"$MANAGER" 2>/dev/null || true; }
+manager_sum() { { cksum <"$MANAGER"; } 2>/dev/null || true; }
 
 # The menu that is open is the old script even after an update has written the new one to
 # disk (bash has read the old file already). When the installed script is not what runs
@@ -1349,7 +1349,16 @@ ensure_certbot() {
     if ! { command -v python3 >/dev/null && rm -rf "$CERTBOT_VENV" && python3 -m venv "$CERTBOT_VENV"; }; then
         info "Installing python with venv and pip."
         if command -v apt-get >/dev/null; then
-            apt-get install -y --no-install-recommends python3 python3-venv
+            # The versioned package (python3.10-venv) is what venv needs; python3-venv only
+            # points at it. A mirror missing one of them fails the whole install, so each is
+            # tried on its own, and again after an apt-get update.
+            local ver
+            ver=$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null || true)
+            apt_venv() {
+                apt-get install -y --no-install-recommends python3 ${ver:+"python$ver-venv"} ||
+                    apt-get install -y --no-install-recommends python3 python3-venv
+            }
+            apt_venv || { apt-get update && apt_venv; } || true
         elif command -v dnf >/dev/null; then
             dnf install -y --setopt=install_weak_deps=False python3 python3-pip
         elif command -v yum >/dev/null; then
