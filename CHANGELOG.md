@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.1.3 - 2026-11-01
 
 - **The disguise (“spoof”) option is easier to find.** The tunnel wizard and the edit page now label the SNI and Host fields (for `ws`/`wss`) as a disguise: the domain the tunnel pretends to talk to, while the link still goes to the exit’s real address. It can keep a tunnel up where an undisguised one is filtered. The suggested value is an allowed site such as snapp.ir. Nothing in the core changed — this was already there, only hard to find.
 
