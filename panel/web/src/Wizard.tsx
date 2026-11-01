@@ -544,14 +544,14 @@ export function Wizard({ servers, onClose }: { servers: ServerInfo[]; onClose: (
                       {isWs && (
                         <div className="field">
                           <label htmlFor="wz-wshost">{t("wz.wsHost")}</label>
-                          <input className="text mono" id="wz-wshost" dir="ltr" value={wsHost} placeholder="cdn.example.com" onChange={(e) => setWsHost(e.target.value.trim())} />
+                          <input className="text mono" id="wz-wshost" dir="ltr" value={wsHost} placeholder="snapp.ir" onChange={(e) => setWsHost(e.target.value.trim())} />
                           <span className="help">{t("wz.wsHostHelp")}</span>
                         </div>
                       )}
                       {transport === "wss" && tls.mode === "self" && (
                         <div className="field">
                           <label htmlFor="wz-sni">{t("wz.sni")}</label>
-                          <input className="text mono" id="wz-sni" dir="ltr" value={sni} placeholder="www.example.com" onChange={(e) => setSni(e.target.value.trim())} />
+                          <input className="text mono" id="wz-sni" dir="ltr" value={sni} placeholder="snapp.ir" onChange={(e) => setSni(e.target.value.trim())} />
                           <span className="help">{t("wz.sniHelp")}</span>
                         </div>
                       )}
