@@ -118,9 +118,8 @@ another network cannot be recovered. (The same, in [English](docs/support.md) an
 
 | Coin | Network | Address |
 |---|---|---|
-| USDT | TRON (TRC20) | `TKM87mEXhUpEBzqvNxs1qjM4EddX6VMXmw` |
-| Gram | TON | `UQDfjT-h4ENIrt_Sq5-zBy9TvhckniwSLCkS7zIVX4fVSaFw` |
-| Bitcoin (BTC) | Bitcoin | `bc1qc4cgy5etuwj2375c5zqma7xmjtk59s5s49rfp5` |
+| USDT | TRON (TRC20) | `TRG3kCKgrFcHgDdNiopFgFPBng8v8S4SeC` |
+| Gram | TON | `UQDun-U8N88YSifv2RjZcvKe_Q-sWCEOdqp9LFXRpC2szdI5` |
 
 A star on the repository, a report of a problem with its log, and a word to other server operators help just as much.
 
