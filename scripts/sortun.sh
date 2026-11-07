@@ -46,7 +46,6 @@ AGENT_UNIT=/etc/systemd/system/sortun-agent.service
 HEAL_SERVICE=/etc/systemd/system/sortun-panel-heal.service
 HEAL_TIMER=/etc/systemd/system/sortun-panel-heal.timer
 HEAL_FAILED=$PANEL_DATA/heal-failed
-RAW_URL="https://raw.githubusercontent.com/$REPO/main/scripts/sortun.sh"
 
 # ---- Looks ----
 
@@ -397,13 +396,26 @@ EOF
 # matches the programs (the panel and the agent put that same one in place when they start),
 # else the newest one, from main (a release before the tag existed, or none installed yet).
 fetch_manager() {
-    local v
+    local v ref
     v=$(bin_version "$BIN" 2>/dev/null || true)
-    if [[ -n "$v" ]] && fetch "https://raw.githubusercontent.com/$REPO/v$v/scripts/sortun.sh" "$1" 2>/dev/null &&
-        bash -n "$1" 2>/dev/null; then
-        return 0
-    fi
-    fetch "$RAW_URL" "$1" && bash -n "$1" 2>/dev/null
+    # The version's tag first (the script that matches the binary), then main. Each is tried on
+    # raw.githubusercontent.com and then a mirror: some networks (Iran) reach github.com releases
+    # but not raw.githubusercontent.com. SORTUN_RAW_MIRROR overrides the mirror, "" turns it off.
+    local mirror=${SORTUN_RAW_MIRROR-https://cdn.jsdelivr.net/gh/$REPO}
+    local refs=()
+    [[ -n "$v" ]] && refs+=("v$v")
+    refs+=(main)
+    for ref in "${refs[@]}"; do
+        if fetch "https://raw.githubusercontent.com/$REPO/$ref/scripts/sortun.sh" "$1" 2>/dev/null &&
+            bash -n "$1" 2>/dev/null; then
+            return 0
+        fi
+        if [[ -n "$mirror" ]] &&
+            fetch "$mirror@$ref/scripts/sortun.sh" "$1" 2>/dev/null && bash -n "$1" 2>/dev/null; then
+            return 0
+        fi
+    done
+    return 1
 }
 
 # Puts this script in place as sortun-manager: from its own file when it is one, else
