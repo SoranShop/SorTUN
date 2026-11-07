@@ -403,7 +403,10 @@ fetch_manager() {
     # raw.githubusercontent.com and then a mirror: some networks (Iran) reach github.com releases
     # but not raw.githubusercontent.com. SORTUN_RAW_MIRROR overrides the mirror, "" turns it off.
     local mirror=${SORTUN_RAW_MIRROR-https://cdn.jsdelivr.net/gh/$REPO}
-    for ref in ${v:+"v$v"} main; do
+    local refs=()
+    [[ -n "$v" ]] && refs+=("v$v")
+    refs+=(main)
+    for ref in "${refs[@]}"; do
         if fetch "https://raw.githubusercontent.com/$REPO/$ref/scripts/sortun.sh" "$1" 2>/dev/null &&
             bash -n "$1" 2>/dev/null; then
             return 0
