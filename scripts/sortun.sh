@@ -46,7 +46,6 @@ AGENT_UNIT=/etc/systemd/system/sortun-agent.service
 HEAL_SERVICE=/etc/systemd/system/sortun-panel-heal.service
 HEAL_TIMER=/etc/systemd/system/sortun-panel-heal.timer
 HEAL_FAILED=$PANEL_DATA/heal-failed
-RAW_URL="https://raw.githubusercontent.com/$REPO/main/scripts/sortun.sh"
 
 # ---- Looks ----
 
