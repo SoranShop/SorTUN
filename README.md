@@ -52,6 +52,13 @@ On the server that will hold the panel, as root:
 bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh)
 ```
 
+On a server where GitHub is filtered (for example in Iran), `raw.githubusercontent.com` may be
+unreachable while the release downloads still work. Fetch the same script through a CDN instead:
+
+```bash
+bash <(curl -fsSL https://cdn.jsdelivr.net/gh/soranshop/SorTUN@main/scripts/sortun.sh)
+```
+
 The script finds your CPU (x86_64, aarch64 or armv7), downloads the latest release, checks its
 signature and opens a menu. Choose **Install the web panel here**: it prints the panel's address and a
 one-time login link. From then on you work in the browser. Add your other servers (each runs one command
