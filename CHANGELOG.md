@@ -1,11 +1,8 @@
 # Changelog
 
-## Unreleased
+## 3.1.4 - 2026-11-08
 
 - **The panel offers a GitHub-filtered install line.** Add server and the server-fix screen now show, under the normal command, a second line that fetches the same script through the jsDelivr CDN — for servers (e.g. in Iran) that cannot reach raw.githubusercontent.com. The README documents it too.
-
-## Unreleased
-
 - **The installer survives a blocked `raw.githubusercontent.com`.** Some networks reach github.com releases but not raw.githubusercontent.com, so installing the core worked but fetching the `sortun-manager` script timed out. The script now falls back to a jsDelivr mirror for the manager script (set `SORTUN_RAW_MIRROR` to change or empty it to disable).
 
 ## 3.1.3 - 2026-11-01
