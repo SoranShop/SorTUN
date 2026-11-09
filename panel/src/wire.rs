@@ -300,6 +300,9 @@ pub struct Spec {
     pub token: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pool: Option<u32>,
+    /// Restart the tunnel this often (`tunnel.restart_after_secs`); None or 0: never.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub restart_after_secs: Option<u64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ws_path: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]

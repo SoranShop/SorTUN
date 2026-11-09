@@ -74,6 +74,12 @@ pub fn render(spec: &Spec, token: &str, cert_files: Option<(&Path, &Path)>) -> R
     if let Some(pool) = spec.pool {
         tunnel.insert("pool".into(), Value::Integer(i64::from(pool)));
     }
+    if let Some(secs) = spec.restart_after_secs.filter(|s| *s > 0) {
+        tunnel.insert(
+            "restart_after_secs".into(),
+            Value::Integer(i64::try_from(secs).unwrap_or(i64::MAX)),
+        );
+    }
     if spec.ws_path.is_some() || spec.ws_host.is_some() {
         let mut ws = Table::new();
         if let Some(path) = &spec.ws_path {
@@ -412,6 +418,7 @@ pub fn get(dir: &Path, name: &str) -> Result<Spec> {
         fallback: c.tunnel.fallback.clone(),
         token: None,
         pool: Some(u32::try_from(c.tunnel.pool).unwrap_or(8)),
+        restart_after_secs: c.tunnel.restart_after_secs.filter(|s| *s > 0),
         ws_path: c.tunnel.ws.as_ref().map(|w| w.path.clone()),
         ws_host: c.tunnel.ws.as_ref().and_then(|w| w.host.clone()),
         encryption: (c.tunnel.encryption != sortun::config::Encryption::Auto)

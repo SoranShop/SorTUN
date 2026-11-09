@@ -66,6 +66,7 @@ export function TunnelEdit({ tunnel, servers, preset, onBack }: { tunnel: Tunnel
   const [wsHost, setWsHost] = useState("");
   const [sni, setSni] = useState("");
   const [pool, setPool] = useState<number | undefined>();
+  const [restartHours, setRestartHours] = useState<number | undefined>();
   const [ports, setPorts] = useState("");
   const [protocol, setProtocol] = useState("tcp");
   const [target, setTarget] = useState("127.0.0.1");
@@ -148,6 +149,10 @@ export function TunnelEdit({ tunnel, servers, preset, onBack }: { tunnel: Tunnel
         // With a real certificate the server name is the certificate's own (not one to edit).
         setSni(real ? "" : (dia.tls_sni ?? ""));
         setPool(a.pool ?? b.pool);
+        {
+          const secs = a.restart_after_secs ?? b.restart_after_secs ?? 0;
+          setRestartHours(secs > 0 ? Math.round((secs / 3600) * 10) / 10 : undefined);
+        }
         const list = a.forwards;
         setPorts(list.map((f) => (portOf(f.listen) === portOf(f.target) ? portOf(f.listen) : `${portOf(f.listen)}=${portOf(f.target)}`)).join(", "));
         setProtocol(list[0]?.protocol ?? "tcp");
@@ -239,6 +244,7 @@ export function TunnelEdit({ tunnel, servers, preset, onBack }: { tunnel: Tunnel
     network: netId || undefined,
     fallback: canFallback && !netId ? fallbackOf(fallback).list : undefined,
     pool,
+    restart_every_secs: restartHours && restartHours > 0 ? Math.max(300, Math.round(restartHours * 3600)) : undefined,
     ws_path: isWs ? wsPath : undefined,
     ws_host: isWs && wsHost.trim() ? wsHost.trim() : undefined,
     tls_sni: transport === "wss" && tls.mode === "self" && sni.trim() ? sni.trim() : undefined,
@@ -568,6 +574,19 @@ export function TunnelEdit({ tunnel, servers, preset, onBack }: { tunnel: Tunnel
                 <PerIpLimit id="te-perip" value={perIp} onChange={setPerIp} />
                 <UdpFlows id="te-udpflows" value={udpFlows} onChange={setUdpFlows} protocol={protocol} />
                 <ProxyProtocol value={proxy} onChange={setProxy} protocol={protocol} />
+                <div className="field">
+                  <label htmlFor="te-restart">{t("wz.restart")}</label>
+                  <input
+                    className="text mono"
+                    id="te-restart"
+                    dir="ltr"
+                    inputMode="numeric"
+                    value={restartHours ?? ""}
+                    placeholder="0"
+                    onChange={(e) => setRestartHours(/^\d{1,4}$/.test(e.target.value.trim()) ? +e.target.value.trim() : undefined)}
+                  />
+                  <span className="help">{t("wz.restartHelp")}</span>
+                </div>
               </div>
               <div className="more-group">
                 <h4 className="more-h">{t("te.security")}</h4>

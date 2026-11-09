@@ -425,6 +425,8 @@ export interface PairRequest {
   fallback?: string[];
   /** Direct mode: run over this private GRE network (its id). */
   network?: string;
+  /** Restart each side this often, in seconds; left out or 0: never. Minimum 300. */
+  restart_every_secs?: number;
 }
 
 /** One side of a tunnel as an agent keeps it (never with its token). */
@@ -439,6 +441,8 @@ export interface Spec {
   /** The dialing side: `tunnel.fallback`. */
   fallback?: string[];
   pool?: number;
+  /** `tunnel.restart_after_secs`: restart this often; 0/absent: never. */
+  restart_after_secs?: number;
   ws_path?: string;
   ws_host?: string;
   tls_sni?: string;

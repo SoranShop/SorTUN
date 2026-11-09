@@ -85,6 +85,10 @@ pub struct PairRequest {
     /// order while `dial` is down.
     #[serde(default)]
     pub fallback: Vec<String>,
+    /// Restart each side of the tunnel this often, in seconds (`tunnel.restart_after_secs`):
+    /// the process exits and systemd starts a fresh one. Left out or 0: never. Minimum 300.
+    #[serde(default)]
+    pub restart_every_secs: Option<u64>,
 }
 
 impl PairRequest {
@@ -107,6 +111,7 @@ impl PairRequest {
             },
             token: token.map(str::to_owned),
             pool: self.pool,
+            restart_after_secs: self.restart_every_secs.filter(|s| *s > 0),
             ws_path: self.ws_path.clone(),
             ws_host: self.ws_host.clone(),
             mux: self.mux.clone().filter(|m| !m.is_empty()),

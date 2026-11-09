@@ -206,6 +206,9 @@ pub struct TunnelConfig {
     /// They only produce, consume and echo data; they dial nothing.
     #[serde(default = "default_true")]
     pub speedtest: bool,
+    /// Restart the tunnel this often: after this many seconds the process exits cleanly and
+    /// systemd (`Restart=always`) starts a fresh one. None or 0: never. Minimum 300 s.
+    pub restart_after_secs: Option<u64>,
 }
 
 /// `[control]`: the entry side's local control socket, through which `sortun speedtest`
@@ -1025,6 +1028,9 @@ impl Config {
         }
         if self.tunnel.token.contains("CHANGE-ME") {
             bail!("tunnel.token still has the sample value; generate one with `sortun token`");
+        }
+        if matches!(self.tunnel.restart_after_secs, Some(s) if 0 < s && s < 300) {
+            bail!("tunnel.restart_after_secs must be at least 300 (5 minutes), or 0 to turn it off");
         }
 
         if self.is_acceptor() {

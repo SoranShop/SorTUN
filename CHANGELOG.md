@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Scheduled auto-restart for a tunnel.** A tunnel can restart itself every N hours (set in the new-tunnel wizard and the tunnel edit page, under More options). The core exits on the schedule and systemd starts a fresh process in ~2s, clearing stale state; both ends reconnect. Off by default; minimum 5 minutes (`tunnel.restart_after_secs`).
+
 ## 3.1.4 - 2026-11-08
 
 - **The panel offers a GitHub-filtered install line.** Add server and the server-fix screen now show, under the normal command, a second line that fetches the same script through the jsDelivr CDN — for servers (e.g. in Iran) that cannot reach raw.githubusercontent.com. The README documents it too.

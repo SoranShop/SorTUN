@@ -118,6 +118,7 @@ export function Wizard({ servers, onClose }: { servers: ServerInfo[]; onClose: (
   const [udpFlows, setUdpFlows] = useState("");
   const [proxy, setProxy] = useState<ProxyChoice>("off");
   const [pool, setPool] = useState<number | undefined>();
+  const [restartHours, setRestartHours] = useState<number | undefined>();
   const [check, setCheck] = useState<{ entry: CheckReply; exit: CheckReply } | null>(null);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState("");
@@ -206,6 +207,7 @@ export function Wizard({ servers, onClose }: { servers: ServerInfo[]; onClose: (
     network: netId || undefined,
     fallback: canFallback && !netId ? fallbackList(fallback, listenPort).list : undefined,
     pool,
+    restart_every_secs: restartHours && restartHours > 0 ? Math.max(300, Math.round(restartHours * 3600)) : undefined,
     ws_path: isWs ? wsPath : undefined,
     ws_host: isWs && wsHost.trim() ? wsHost.trim() : undefined,
     // A server name typed for a self-signed certificate is not sent with a real one: the
@@ -610,6 +612,19 @@ export function Wizard({ servers, onClose }: { servers: ServerInfo[]; onClose: (
                     <PerIpLimit id="wz-perip" value={perIp} onChange={setPerIp} />
                     <UdpFlows id="wz-udpflows" value={udpFlows} onChange={setUdpFlows} protocol={protocol} />
                     <ProxyProtocol value={proxy} onChange={setProxy} protocol={protocol} />
+                    <div className="field">
+                      <label htmlFor="wz-restart">{t("wz.restart")}</label>
+                      <input
+                        className="text mono"
+                        id="wz-restart"
+                        dir="ltr"
+                        inputMode="numeric"
+                        value={restartHours ?? ""}
+                        placeholder="0"
+                        onChange={(e) => setRestartHours(/^\d{1,4}$/.test(e.target.value.trim()) ? +e.target.value.trim() : undefined)}
+                      />
+                      <span className="help">{t("wz.restartHelp")}</span>
+                    </div>
                   </div>
                 </More>
               </>
