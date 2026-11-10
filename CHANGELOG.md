@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.1.5 - 2026-11-10
 
 - **Scheduled auto-restart for a tunnel.** A tunnel can restart itself every N hours (set in the new-tunnel wizard and the tunnel edit page, under More options). The core exits on the schedule and systemd starts a fresh process in ~2s, clearing stale state; both ends reconnect. Off by default; minimum 5 minutes (`tunnel.restart_after_secs`).
 
