@@ -1030,7 +1030,9 @@ impl Config {
             bail!("tunnel.token still has the sample value; generate one with `sortun token`");
         }
         if matches!(self.tunnel.restart_after_secs, Some(s) if 0 < s && s < 300) {
-            bail!("tunnel.restart_after_secs must be at least 300 (5 minutes), or 0 to turn it off");
+            bail!(
+                "tunnel.restart_after_secs must be at least 300 (5 minutes), or 0 to turn it off"
+            );
         }
 
         if self.is_acceptor() {

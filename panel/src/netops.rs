@@ -847,6 +847,7 @@ mod tests {
             rotate: false,
             fallback: Vec::new(),
             network: Some("n".into()),
+            restart_every_secs: None,
         };
         let at = |mode: &str| {
             let r = req(mode);
