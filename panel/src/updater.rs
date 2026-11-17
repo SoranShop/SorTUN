@@ -254,7 +254,7 @@ pub type Files = Vec<(String, Vec<u8>)>;
 /// This panel's release (the archive, its checksum and its signature): the ones kept by the
 /// update that brought the panel to this version, or, if they are gone, downloaded again
 /// (and checked as always).
-async fn release_files(s: &UpdateSettings) -> Result<Files> {
+pub async fn release_files(s: &UpdateSettings) -> Result<Files> {
     let version = crate::version();
     let arch = update::arch_name().ok_or_else(|| anyhow!("no_build_for_this_cpu"))?;
     let names = update::asset_names(&format!("v{version}"), arch);

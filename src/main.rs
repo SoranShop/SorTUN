@@ -536,7 +536,6 @@ fn run(config: Config) -> Result<()> {
     }
     let runtime = builder.enable_all().build()?;
 
-    let restart_after = config.tunnel.restart_after_secs;
     runtime.block_on(async move {
         tokio::select! {
             result = sortun::run(config) => result,
@@ -544,23 +543,10 @@ fn run(config: Config) -> Result<()> {
                 tracing::info!("shutting down");
                 Ok(())
             }
-            _ = restart_timer(restart_after) => {
-                tracing::info!("scheduled restart: exiting so systemd starts a fresh process");
-                Ok(())
-            }
         }
     })
 }
 
-/// Completes after `secs` (the scheduled restart), or never when it is None or 0.
-async fn restart_timer(secs: Option<u64>) {
-    match secs {
-        Some(s) if s > 0 => tokio::time::sleep(std::time::Duration::from_secs(s)).await,
-        _ => std::future::pending::<()>().await,
-    }
-}
-
-async fn shutdown_signal() {
     #[cfg(unix)]
     {
         use tokio::signal::unix::{signal, SignalKind};

@@ -14,7 +14,7 @@
 
 use std::net::SocketAddr;
 
-use axum::extract::{ConnectInfo, DefaultBodyLimit, Extension, Query, State};
+use axum::extract::{ConnectInfo, DefaultBodyLimit, Extension, OriginalUri, Path, Query, State};
 use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
@@ -88,6 +88,8 @@ pub fn routes() -> Router<AppState> {
         .route("/api/servers/address", post(server_address))
         .route("/api/metrics", get(metrics_status).post(metrics_settings))
         .route("/metrics", get(metrics_scrape))
+        .route("/setup.sh", get(setup_script))
+        .route("/setup/{name}", get(setup_asset))
         .route("/api/update", get(update_status))
         .route("/api/update/check", post(update_check))
         .route("/api/update/settings", post(update_settings))
@@ -2374,6 +2376,74 @@ async fn metrics_settings(
 }
 
 /// A Prometheus scrape: the metrics for the right token, the plain 404 for anything else.
+/// The install script the panel serves itself, so a server where GitHub is filtered (raw and
+/// releases, as in Iran) can still install an agent: the script and the signed release files
+/// come straight from the panel over its own address. The signature is still checked on the
+/// server, so a tampered panel cannot plant a bad binary. Unauthenticated: a new server has no
+/// credentials yet, and only the public install script and signed release files are served.
+async fn setup_script(headers: HeaderMap, OriginalUri(uri): OriginalUri) -> Response {
+    let host = match headers.get(header::HOST).and_then(|h| h.to_str().ok()) {
+        Some(h) if !h.is_empty() => h,
+        _ => return crate::http::not_found(),
+    };
+    // `OriginalUri` keeps the secret path prefix that `nest` strips, so downloads point back here.
+    let base = match uri.path().strip_suffix("/setup.sh") {
+        Some(prefix) => format!("https://{host}{prefix}"),
+        None => return crate::http::not_found(),
+    };
+    let body = format!(
+        "#!/usr/bin/env bash\n\
+         export SORTUN_VERSION={version}\n\
+         export SORTUN_ASSET_BASE=\"{base}/setup\"\n\
+         export SORTUN_SCRIPT_URL=\"{base}/setup.sh\"\n\
+         export SORTUN_RAW_MIRROR=\n\
+         {script}",
+        version = crate::version(),
+        script = include_str!("../../scripts/sortun.sh"),
+    );
+    (
+        StatusCode::OK,
+        [
+            (header::CONTENT_TYPE, "text/x-shellscript; charset=utf-8"),
+            (header::CACHE_CONTROL, "no-store"),
+        ],
+        body,
+    )
+        .into_response()
+}
+
+/// One of the panel's own signed release files (the archive, its checksum or its signature),
+/// for the agent install the panel serves. Only the exact asset names of the panel's version
+/// and CPU are served; anything else is the nginx 404. A server of another CPU installs the
+/// usual way (from GitHub) instead.
+async fn setup_asset(State(state): State<AppState>, Path(name): Path<String>) -> Response {
+    let Some(arch) = crate::update::arch_name() else {
+        return crate::http::not_found();
+    };
+    let names = crate::update::asset_names(&format!("v{}", crate::version()), arch);
+    if !names.contains(&name) {
+        return crate::http::not_found();
+    }
+    let Some(settings) = state.hub.update_settings.get() else {
+        return crate::http::not_found();
+    };
+    match crate::updater::release_files(settings).await {
+        Ok(files) => match files.into_iter().find(|(n, _)| *n == name) {
+            Some((_, data)) => (
+                StatusCode::OK,
+                [
+                    (header::CONTENT_TYPE, "application/octet-stream"),
+                    (header::CACHE_CONTROL, "no-store"),
+                ],
+                data,
+            )
+                .into_response(),
+            None => crate::http::not_found(),
+        },
+        Err(e) => internal(e),
+    }
+}
+
 async fn metrics_scrape(State(state): State<AppState>, headers: HeaderMap) -> Response {
     if !crate::metrics::allowed(&state.db, &headers) {
         return crate::http::not_found();

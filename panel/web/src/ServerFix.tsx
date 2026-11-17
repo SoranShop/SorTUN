@@ -378,9 +378,10 @@ export function ServerFixDialog({ server, servers, agentsOn, onChanged, onClose 
             <span className="label" style={{ marginTop: "var(--sp-3)" }}>
               {t("fix.runFresh")}
             </span>
-            <CodeBlock text={`bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh) --agent ${code}`} />
+            <CodeBlock text={`bash <(curl -fsSL ${location.origin}${location.pathname.replace(/\/+$/, "")}/setup.sh) --agent ${code}`} />
+            <span className="help">{t("add.runPanel")}</span>
             <span className="label" style={{ marginTop: "var(--sp-3)" }}>{t("add.runBlocked")}</span>
-            <CodeBlock text={`bash <(curl -fsSL https://cdn.jsdelivr.net/gh/soranshop/SorTUN@main/scripts/sortun.sh) --agent ${code}`} />
+            <CodeBlock text={`bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh) --agent ${code}`} />
             {transport !== "auto" && <span className="help">{t("add.via", { t: t(`add.x.${transport}`) })}</span>}
             <span className="countdown">{back ? "" : t("add.valid", { m: digitsOf(mmss) })}</span>
           </div>

@@ -308,6 +308,12 @@ fetch() {
 }
 
 latest_version() {
+    # A panel-served install pins the version the panel serves, so no GitHub lookup is needed
+    # (a server that cannot reach api.github.com still installs).
+    if [[ -n "${SORTUN_VERSION:-}" ]]; then
+        printf 'v%s\n' "${SORTUN_VERSION#v}"
+        return
+    fi
     fetch "https://api.github.com/repos/$REPO/releases/latest" - |
         sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n 1
 }
@@ -316,6 +322,12 @@ latest_version() {
 # API, otherwise the public download link.
 download_asset() {
     local version=$1 name=$2 out=$3
+    # A panel serves the signed release files itself (SORTUN_ASSET_BASE is its /setup path),
+    # so a server where GitHub is filtered still installs; the signature is still checked after.
+    if [[ -n "${SORTUN_ASSET_BASE:-}" ]]; then
+        fetch "$SORTUN_ASSET_BASE/$name" "$out"
+        return
+    fi
     if [[ -z "${GITHUB_TOKEN:-}" ]]; then
         fetch "https://github.com/$REPO/releases/download/$version/$name" "$out"
         return
@@ -398,6 +410,12 @@ EOF
 fetch_manager() {
     local v ref
     v=$(bin_version "$BIN" 2>/dev/null || true)
+    # A panel serves the matching script at SORTUN_SCRIPT_URL, so a GitHub-filtered server
+    # gets the manager from the panel. Tried first; the GitHub/mirror routes stay as fallbacks.
+    if [[ -n "${SORTUN_SCRIPT_URL:-}" ]] &&
+        fetch "$SORTUN_SCRIPT_URL" "$1" 2>/dev/null && bash -n "$1" 2>/dev/null; then
+        return 0
+    fi
     # The version's tag first (the script that matches the binary), then main. Each is tried on
     # raw.githubusercontent.com and then a mirror: some networks (Iran) reach github.com releases
     # but not raw.githubusercontent.com. SORTUN_RAW_MIRROR overrides the mirror, "" turns it off.
