@@ -85,10 +85,6 @@ pub struct PairRequest {
     /// order while `dial` is down.
     #[serde(default)]
     pub fallback: Vec<String>,
-    /// Restart each side of the tunnel this often, in seconds (`tunnel.restart_after_secs`):
-    /// the process exits and systemd starts a fresh one. Left out or 0: never. Minimum 300.
-    #[serde(default)]
-    pub restart_every_secs: Option<u64>,
 }
 
 impl PairRequest {
@@ -111,7 +107,6 @@ impl PairRequest {
             },
             token: token.map(str::to_owned),
             pool: self.pool,
-            restart_after_secs: self.restart_every_secs.filter(|s| *s > 0),
             ws_path: self.ws_path.clone(),
             ws_host: self.ws_host.clone(),
             mux: self.mux.clone().filter(|m| !m.is_empty()),
@@ -1473,7 +1468,6 @@ mod tests {
             rotate: false,
             fallback: Vec::new(),
             network: None,
-            restart_every_secs: None,
         };
         let now = [side("a", "entry"), side("b", "exit")];
         let (left, moved) = moves(&now, &to("a", "b"));
@@ -1531,7 +1525,6 @@ mod tests {
             rotate: false,
             fallback: Vec::new(),
             network: None,
-            restart_every_secs: None,
         };
         for ok in ["auto", "aes-256-gcm", "chacha20-poly1305", "none"] {
             assert!(req("tcpmux", Some(ok)).validate().is_ok(), "{ok}");
@@ -1596,7 +1589,6 @@ mod tests {
             rotate: false,
             fallback: Vec::new(),
             network: None,
-            restart_every_secs: None,
         };
         // Both sides get it over quic, and nobody over another transport.
         let (entry, exit) = req("quic", true).specs(None, None);
@@ -1643,7 +1635,6 @@ mod tests {
             rotate: false,
             fallback: Vec::new(),
             network: None,
-            restart_every_secs: None,
         };
         let (entry, exit) = req(Some(300), None).specs(None, None);
         assert_eq!(
@@ -1691,7 +1682,6 @@ mod tests {
             rotate: false,
             fallback: Vec::new(),
             network: None,
-            restart_every_secs: None,
         };
         let (entry, exit) = req(Some(8192)).specs(None, None);
         assert_eq!(
@@ -1775,7 +1765,6 @@ mod tests {
             rotate: false,
             fallback: Vec::new(),
             network: None,
-            restart_every_secs: None,
         };
         let (entry, exit) = req(Some("v1")).specs(None, None);
         assert_eq!(
@@ -1838,7 +1827,6 @@ mod tests {
             rotate: false,
             fallback: Vec::new(),
             network: None,
-            restart_every_secs: None,
         };
         assert!(req("auto", None).needs_new_servers());
         let tuned = crate::wire::MuxSpec {
@@ -1883,7 +1871,6 @@ mod tests {
             rotate: false,
             fallback: Vec::new(),
             network: None,
-            restart_every_secs: None,
         };
         // Reverse: the entry listens, the exit dials.
         let dialer = |r: PairRequest| r.specs(None, None).1;
