@@ -793,10 +793,10 @@ function AddServer({ servers, agentsOn, onClose }: { servers: ServerInfo[]; agen
           )}
           <div className="field">
             <span className="label">{t("add.run")}</span>
-            <CodeBlock text={`bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh) --agent ${code}`} />
-            <span className="help">{t(gre && rev ? "add.rev.gre.runHelp" : gre ? "add.gre.runHelp" : rev ? "add.rev.runHelp" : "add.runHelp", { kind: kindLabel(gre?.kind) })}</span>
+            <CodeBlock text={`bash <(curl -fsSL ${location.origin}${location.pathname.replace(/\/+$/, "")}/setup.sh) --agent ${code}`} />
+            <span className="help">{t("add.runPanel")} {t(gre && rev ? "add.rev.gre.runHelp" : gre ? "add.gre.runHelp" : rev ? "add.rev.runHelp" : "add.runHelp", { kind: kindLabel(gre?.kind) })}</span>
             <span className="label" style={{ marginTop: "var(--sp-3)" }}>{t("add.runBlocked")}</span>
-            <CodeBlock text={`bash <(curl -fsSL https://cdn.jsdelivr.net/gh/soranshop/SorTUN@main/scripts/sortun.sh) --agent ${code}`} />
+            <CodeBlock text={`bash <(curl -fsSL https://raw.githubusercontent.com/soranshop/SorTUN/main/scripts/sortun.sh) --agent ${code}`} />
             <span className="label" style={{ marginTop: "var(--sp-3)" }}>
               {t("add.runInstalled")}
             </span>

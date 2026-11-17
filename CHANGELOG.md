@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **The panel can install an agent where GitHub is blocked.** The panel now serves the install script and its own signed release files over its own address; the Add-server command fetches from the panel (`/setup.sh`) instead of GitHub, so a server that cannot reach github.com or a CDN (as in Iran) still installs — the Ed25519 signature is still checked on the server. The agent must be able to reach the panel (which it must anyway) and share its CPU type.
+
 - **Removed the redundant per-tunnel restart option added in 3.1.5.** The panel already has a full scheduled Auto restart (per tunnel and per whole server, every N minutes/hours/days or daily at a time); the extra `tunnel.restart_after_secs` field duplicated it and is gone. Use **Auto restart** on a server (the clock icon) or a tunnel's **Schedule** tab.
 
 ## 3.1.5 - 2026-11-10
